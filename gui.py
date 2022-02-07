@@ -1,6 +1,8 @@
 # Mini gui
 # (c) Port. Prerogative Club 2022
 
+import copy
+
 SCREEN_WIDTH = 80
 COLUMNS = 4
 
@@ -8,32 +10,48 @@ column_width = SCREEN_WIDTH / COLUMNS
 print ("Column width: ", column_width)
 
 PADDING = 2
+PADDING_CHAR = " "
 BORDER_CHAR = "*"
 
+HEADLINE = "headline"
+BRAND = "brand"
+
 event_width = column_width - (2 * PADDING)
-print("Border width: ", border_width)
+print("Event width: ", event_width)
 content_width = event_width - 2 * (len(BORDER_CHAR) + 1)
 # + to account for the space, multiplied on each side 
+content_width = int(content_width)
 
-def make_boundary():
-    string = BORDER_CHAR * event_width
+def make_border():
+    string = BORDER_CHAR * int(event_width)
     return string
-    
+
+def clean(string):
+    result = string.strip()
+    chars = "\n"
+    result = result.replace(chars, "")
+    return result
+
 def render(event):
     """
     render(event) -> string
 
     Does not include new line chars for now
     """
+    headline = clean(event[HEADLINE])
+    brand = clean(event[BRAND])
+
     strings = list()
-    first_row = make_boundary()
+    first_row = make_border()
     strings.append(first_row)
     
     max_length = event_width - 4
+    max_length = int(max_length)
     # on each side: one char of border, one char of padding
 
-    headline_1 = event.headline[: max_length]
-    headline_2 = event.headline[max_length : (max_length * 2)]
+    
+    headline_1 = headline[: max_length]
+    headline_2 = headline[max_length : (max_length * 2)]
 
     left_pad = BORDER_CHAR + " "
     right_pad = " " + BORDER_CHAR
@@ -49,11 +67,21 @@ def render(event):
     # blank row
     strings.append(fourth_row)
 
-    fifth_row = third_row.copy()
+    # Fifth row
+
+    start = left_pad + brand[:max_length]
+    rem = event_width - len(start) - len(right_pad)
+    rem = int(rem)
+    start = start + rem * " "
+    start = start + right_pad
+    fifth_row = start
     strings.append(fifth_row)
 
-    sixth_row = make_boundary()
-    strings.append(sixth_row)
+    sixth_row = copy.copy(fourth_row)
+    strings.append(fourth_row)
+
+    seventh_row = make_border()
+    strings.append(seventh_row)
 
     return strings
     
@@ -94,22 +122,88 @@ def make_row(*events):
     # need to have a list with all the strings for each event
     # build from start to accomodate blank events
 
-      
-        
+def make_row2(events):
+    # first column = generate a set of strings, 1+; left padded
+    # last column = generate a set of strings, 1+, right padded
+    # I know that rows are max height of certain number (8?)
+    # middle rows = generate strings, padded on both sides
 
+    # assemble the strings
+    # for each line in the row: take the first, the middle, and the last
+    # return row
+
+    row = events[:COLUMNS]
+    first_event = row.pop(0)
+    first_column = make_first(first_event)
+    # need to define make_first()
+    last_event = row.pop()
+    last_column = make_last(last_event)
+    # need to make function
+    
+    strings_by_column = [first_column]
+       
+    for event in row:
+        column = make_middle(event)
+        strings_by_column.append(column)
+
+    strings_by_column.append(last_column)
+    # list now contains formatted strings
+
+    concat = []
+    while i < ROW_HEIGHT:
+        # row height
+        combined_line = line
+        for column in strings_by_column:
+            combined_line += column[i]
+        concat.append(combined_line)
+        i = i + 1
+
+    if len(contact) != ROW_HEIGHT:
+        raise Exception("problem")
+    
+    return concat
+
+def make_first(event):
+    """
+    -> list()
+    
+    Returns list of strings was if the event appeared in the left-most column
+    """
+    event_strings = render_event(event)
+    result = []
+    pad = PADDING * PADDING_CHAR
+    for string in event_strings:
+        with_padding = pad + string + pad
+        result.attach(with_padding)
+    return result
+
+make_last = make_first
+
+
+def render_screen():
+    # make rows
+    # result = [] 
+    # for each row:
+    #   result.append(render_row(row))
+    # for each row in result:
+    #   print(row)
+    pass
+    
 event1 = {
-    "headline" : """
-    The volcano erupted in Tonga and people are
-    not paying attention.
-    """,
-    "brand" : "Tonga"
+    HEADLINE : """The volcano erupted in Tonga and people
+    are not paying attention.""",
+    BRAND : "Tonga"
     }
 
-event2 = "headline" : """
+event2 = {
+    HEADLINE : """
     Meanwhile, Zoom is melting, with its stock price down 80% YTD.
     """,
-    "brand" : "Zoom"
+    BRAND : "Zoom"
     }
+
+
+
 
 
     
