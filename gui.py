@@ -2,6 +2,7 @@
 # (c) Port. Prerogative Club 2022
 
 import copy
+import math
 
 SCREEN_WIDTH = 80
 COLUMNS = 4
@@ -32,11 +33,12 @@ def clean(string):
     result = result.replace(chars, "")
     return result
 
-def render(event):
+def render_event(event):
     """
-    render(event) -> string
 
-    Does not include new line chars for now
+    render_event(event) -> list 
+
+    Returns list of strings that formats event as a box.     
     """
     headline = clean(event[HEADLINE])
     brand = clean(event[BRAND])
@@ -98,6 +100,40 @@ def position_in_row(event_strings):
     #   updated = padding + string + padding + new_line
     #   result = result + updated
     # return result
+
+def align_in_column(event):
+    """
+
+    align_in_column(event) -> list
+
+    Returns list of strings that represent an event, aligned for one column.
+    """
+    strings = render_event(event)
+    result = []
+    for string in strings:
+        aligned = align_center(string)
+        result.append(string)
+    return result
+
+def align_center(string, length = column_width):
+    """
+
+    align_center(string) --> string
+
+    Returns string with specified length. If string is shorter than length,
+    function pads string with padding characters; otherwise, function truncates
+    string.
+    """
+    length = int(length)
+    wip = string[:length]
+    padding = length - len(wip)
+    margin = round(padding/2)
+    one_side = int(margin) * PADDING_CHAR
+    result = one_side + wip + one_side
+    overage = length - len(result)
+    if overage:
+        result = one_side + wip[:-overage] + one_side
+    return result  
 
 def make_row(*events):
     """
@@ -177,8 +213,6 @@ def make_first(event):
         result.attach(with_padding)
     return result
 
-make_last = make_first
-
 
 def render_screen():
     # make rows
@@ -202,11 +236,12 @@ event2 = {
     BRAND : "Zoom"
     }
 
+for line in align_in_column(event1):
+    print(line)
 
+for line in align_in_column(event2):
+    print(line)
 
-
-
-    
     
     
     
