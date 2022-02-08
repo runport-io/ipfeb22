@@ -4,8 +4,8 @@
 import copy
 import math
 
-SCREEN_WIDTH = 80
-COLUMNS = 4
+SCREEN_WIDTH = int(80)
+COLUMNS = int(4)
 
 column_width = SCREEN_WIDTH / COLUMNS
 print ("Column width: ", column_width)
@@ -19,12 +19,9 @@ BRAND = "brand"
 
 event_width = column_width - (2 * PADDING)
 print("Event width: ", event_width)
-content_width = event_width - 2 * (len(BORDER_CHAR) + 1)
-# + to account for the space, multiplied on each side 
-content_width = int(content_width)
 
-def make_border():
-    string = BORDER_CHAR * int(event_width)
+def make_border(border_char=BORDER_CHAR):
+    string = border_char * int(event_width)
     return string
 
 def clean(string):
@@ -33,50 +30,43 @@ def clean(string):
     result = result.replace(chars, "")
     return result
 
-def render_event(event):
+def render_event(event, border_char=BORDER_CHAR):
     """
 
     render_event(event) -> list 
 
     Returns list of strings that formats event as a box.     
-    """
-    headline = clean(event[HEADLINE])
+    """  
+    left_pad = border_char + " "
+    right_pad = " " + border_char
+
+    max_length = event_width - len(left_pad) - len(right_pad)
+    max_length = int(max_length)
+    
     brand = clean(event[BRAND])
+    headline = clean(event[HEADLINE])
+    if not headline:
+        headline = PADDING_CHAR * max_length
+
+    headline_1 = headline[: max_length]
+    headline_2 = headline[max_length : (max_length * 2)]
 
     strings = list()
     first_row = make_border()
     strings.append(first_row)
     
-    max_length = event_width - 4
-    max_length = int(max_length)
-    # on each side: one char of border, one char of padding
-
-    
-    headline_1 = headline[: max_length]
-    headline_2 = headline[max_length : (max_length * 2)]
-
-    left_pad = BORDER_CHAR + " "
-    right_pad = " " + BORDER_CHAR
-    
-    second_row = left_pad + headline_1 + right_pad
-    # can refactor into method make_row(content) -> string
+    second_row = render_line(headline_1)
     strings.append(second_row)
 
-    third_row = left_pad + headline_2 + right_pad
+    third_row = render_line(headline_2)
     strings.append(third_row)
 
-    fourth_row = left_pad + (" " * content_width) + right_pad
+    fourth_row = render_line("")
     # blank row
     strings.append(fourth_row)
 
     # Fifth row
-
-    start = left_pad + brand[:max_length]
-    rem = event_width - len(start) - len(right_pad)
-    rem = int(rem)
-    start = start + rem * " "
-    start = start + right_pad
-    fifth_row = start
+    fifth_row = render_line(brand)
     strings.append(fifth_row)
 
     sixth_row = copy.copy(fourth_row)
@@ -86,36 +76,30 @@ def render_event(event):
     strings.append(seventh_row)
 
     return strings
-    
-def position_in_row(event_strings):
+
+def render_line(content, length=event_width, border_char=BORDER_CHAR,
+                padding_char=PADDING_CHAR):
     """
-    position_in_row(event_strings) -> string
-
-    returns one string with new lines and padding
-    
     """
-    pass
-    # result = ""
-    # for string in event_strings:
-    #   updated = padding + string + padding + new_line
-    #   result = result + updated
-    # return result
+    margin_left = border_char + padding_char
+    margin_right = padding_char + border_char
+    content_length = length - len(margin_left + margin_right)
+    content_length = int(content_length)
 
-def align_in_column(event):
-    """
+    adj_content = content
+    if len(adj_content) < content_length:
+        filler_width = content_length - len(content)
+        filler_width = int(filler_width)
+        adj_content = content + filler_width * padding_char
+    elif len(adj_content) >= content_length:
+        adj_content = adj_content[:content_length]
 
-    align_in_column(event) -> list
+    result = margin_left + adj_content + margin_right
+    # can modify to return remainder of what's not shown
+            
+    return result    
 
-    Returns list of strings that represent an event, aligned for one column.
-    """
-    strings = render_event(event)
-    result = []
-    for string in strings:
-        aligned = align_center(string)
-        result.append(string)
-    return result
-
-def align_center(string, length = column_width):
+def align_center(string, length=column_width):
     """
 
     align_center(string) --> string
@@ -135,93 +119,79 @@ def align_center(string, length = column_width):
         result = one_side + wip[:-overage] + one_side
     return result  
 
-def make_row(*events):
+def align_in_column(event):
     """
-    --> string
-    makes one [or more rows?]
+
+    align_in_column(event) -> list
+
+    Returns list of strings that represent an event, aligned for one column.
     """
-    row = events[:COLUMNS]
-    result = ""
-    component_strings = []
-    for event in row:
-        event_string = render(event)
-        component_strings.append(event_string)
-
-    line_1 = ""
-    line_2 = ""
-    line_3 = ""
-    
-    for event in event_strings:
-        line_1 = line_1 + PADDING + PADDING + event[0]
-        # add events in a row
-    # logic different for last event, first event, middle
-    # need to have a list with all the strings for each event
-    # build from start to accomodate blank events
-
-def make_row2(events):
-    # first column = generate a set of strings, 1+; left padded
-    # last column = generate a set of strings, 1+, right padded
-    # I know that rows are max height of certain number (8?)
-    # middle rows = generate strings, padded on both sides
-
-    # assemble the strings
-    # for each line in the row: take the first, the middle, and the last
-    # return row
-
-    row = events[:COLUMNS]
-    first_event = row.pop(0)
-    first_column = make_first(first_event)
-    # need to define make_first()
-    last_event = row.pop()
-    last_column = make_last(last_event)
-    # need to make function
-    
-    strings_by_column = [first_column]
-       
-    for event in row:
-        column = make_middle(event)
-        strings_by_column.append(column)
-
-    strings_by_column.append(last_column)
-    # list now contains formatted strings
-
-    concat = []
-    while i < ROW_HEIGHT:
-        # row height
-        combined_line = line
-        for column in strings_by_column:
-            combined_line += column[i]
-        concat.append(combined_line)
-        i = i + 1
-
-    if len(contact) != ROW_HEIGHT:
-        raise Exception("problem")
-    
-    return concat
-
-def make_first(event):
-    """
-    -> list()
-    
-    Returns list of strings was if the event appeared in the left-most column
-    """
-    event_strings = render_event(event)
+    strings = render_event(event)
     result = []
-    pad = PADDING * PADDING_CHAR
-    for string in event_strings:
-        with_padding = pad + string + pad
-        result.attach(with_padding)
+    for string in strings:
+        aligned = align_center(string)
+        result.append(aligned)
     return result
 
+def align_in_row(strings):
+    """
 
-def render_screen():
-    # make rows
-    # result = [] 
-    # for each row:
-    #   result.append(render_row(row))
-    # for each row in result:
-    #   print(row)
-    pass
+    align_in_row(list_of_strings) -> list
+
+    Adds line break before and after the strings.
+    """
+    line_break = "\n"
+    result = strings.copy()
+    result.insert(0, line_break)
+    result.append(line_break)
+    
+    return result
+
+def render_column(*events):
+    """
+
+    render_column(*events) -> list
+
+    Returns list of strings that represents each event.
+    """
+    result = list()
+    for event in events:
+        prepped = align_in_column(event)
+        prepped = align_in_row(prepped)
+        result.append(prepped)
+
+    return result
+    
+def render_row(*events):
+    """
+
+    render_row(*events) -> list
+
+    Renders events, aligns in column, joins columns, returns list of strings.
+    """
+    aligned_events = list()
+    for event in events[ :COLUMNS]:
+        prepped = align_in_column(event)
+        aligned_events.append(prepped)
+
+    # join
+    row_height = len(aligned_events[0])
+    i = 0
+    joined_columns = list()
+    while i < row_height:
+        line = ""
+        for column in aligned_events:
+            line = line + column[i]
+        joined_columns.append(line)
+        i = i + 1
+
+    if len(joined_columns) != row_height:
+        raise Exception("Problem detected.")
+
+    # add top and bottom margins
+    result = align_in_row(joined_columns)
+    
+    return result
     
 event1 = {
     HEADLINE : """The volcano erupted in Tonga and people
@@ -236,12 +206,63 @@ event2 = {
     BRAND : "Zoom"
     }
 
+event3 = {
+    HEADLINE : """
+    Meet Rockets of Awesome Founder Rachel Blumenthal!
+    """,
+    BRAND : "Rockets of Awesome"
+    }
+
+event4 = {
+    HEADLINE : """
+    The trendy kids' brand Rockets of Awesome is the latest DTC to stumble.
+    """,
+    BRAND : "Rockets of Awesome"
+    }
+
 for line in align_in_column(event1):
     print(line)
 
 for line in align_in_column(event2):
     print(line)
 
+for line in render_row(event1, event2):
+    print(line)
     
-    
-    
+events = [event1, event2, event3, event4]
+
+for line in render_row(*events):
+    print(line)
+
+blank1 = {
+    HEADLINE : "",
+    BRAND : "Rockets of Awesome"
+    }
+
+blank2 = {
+    HEADLINE : "",
+    BRAND : ""
+    }
+
+for line in align_in_column(blank1):
+    print(line)
+
+for line in align_in_column(blank2):
+    print(line)
+
+spacer = render_event(blank2, border_char=" ")
+
+# TODO
+# 1) unpack column
+# 2) align signatures
+# 3) consider making border an event attribute
+# 4) add a mini:
+# 5) add a zoom
+# 6) add a refresh logic
+# 7) add numbering of events
+# 8) move to oop in CLI gui? take JSON event, turn them into objects, then make
+#    it easier to do stuff like keep track of read or not, hide, save.
+# 9) some kind of filter (by brand? bigger boxes?)
+# 10) some kind of filter by channel
+
+
