@@ -7,6 +7,8 @@
 
 from . import observer
 
+import time
+
 # launch observers
 marketing = observer.GmailObserver("marketing")
 # add marketing login
@@ -16,6 +18,9 @@ personal = observer.GmailObserver("personal")
 
 # set up storage, one file per co?
 # set up delivery interface
+
+memory = dict()
+MOST_RECENT = "Most recent"
 
 def do_smtg(x):
 	pass
@@ -29,6 +34,135 @@ def do_smtg(x):
 def get_events(offset=0, batch=None):
 	pass
 	# returns batch of events starting at offset
+
+# for observer in observers:
+#       events = observer.check()
+#       events = normalize(events) #? is this right? should i be normalizing
+#       # at the edge
+#       storage.record(events)
+#       parser.parse(events) # this figures out the brands that are on there,
+#       ## may be also a score for significance
+
+def start(offset=None):
+        pass
+        # launch observers
+        # print "Observers launched"
+        # launch storage
+        # print "Storage launched"
+        
+        # return offset of most recent event
+
+def get_events(brands, batch=BATCH):
+        """
+        get_events() -> dict
+        
+        takes a dictionary of brands:offsets and returns brands:events
+        """
+        result = dict()
+
+        # first, check cache
+        check_storage = set()
+        for brand, offset in brands.items:
+                if brand in cache:
+                        events = cache[brand][offset:(offset+batch)]
+                else:
+                        check_storage.add(brand)
+                result[brand] = events
+
+        # second, check storage?
+        for brand in check_storage:
+                storage.get_events(brand, offset, batch)
+
+        return result
+
+def monitor(seconds=300):
+        """
+        monitor() -> None
+
+        Checks VCRs, records, checks trends, prints to stout. Wait, repeat.
+        """
+
+        # should give guest interrupt
+        timeout = something(seconds)
+        while True:
+                tapes = list()
+                cache = set()
+                
+                for vcr in vcrs:
+                        tape = vcr.retrieve_tape()
+                        print(time.time, "collected tape from", vcr)
+                        tapes.append(tape)
+
+                for tape in tapes:
+                        events = parser.read(tape)
+                        print(time.time, "parsed %events from %vcr")
+                        # format of events should be: list? probably. not keyed.
+                        cache.add(events)
+
+                storage.record(events)
+                print(time.time, "recorded x events")
+
+                update_cache()
+                # should load the 100 most recent events into cache, plus x by brands
+
+                measure_trends()
+                # checks stuff
+
+                comment = input("pause or continue?")
+                if comment times out
+                timeout.wait()
+
+
+def measure_trends():
+        measure_volume()
+        measure_identity()
+
+def measure_volume():
+        for brand in watchlist:
+                events = library.get_events(start, end)
+                if events > trailing_avg * (1+ margin):
+                        print "something going on with brand"
+                elif events < trailing_avg * (1 - margin):
+                        print "something going on with brand"
+                else:
+                        continue
+
+def update_cache(memory, events):
+        """
+
+        Takes processed events, tagged with names and timestamps? Puts them into
+        memory. 
+        """
+        # get 100 most recent
+        memory[MOST_RECENT] = library.get_most_recent(DEPTH)
+        
+        # get for each brand in watchlist
+        for brand in watchlist:
+                # assumes flat?
+                memory[brand] = library.get_brand(brand)
+
+        return memory
+        
+
+                
+                        
+
+        
+        
+
+        
+
+        
+        
+        
+
+
+
+
+
+
+
+
 	
 
 
