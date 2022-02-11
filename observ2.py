@@ -3,21 +3,56 @@
 
 import imaplib
 import email
+import json
 
 GMAIL = "imap.gmail.com"
 USER = "put@runport.io"
+
+# IMAP commands and strings
 INBOX = "INBOX"
 UID = "UID"
 FETCH = "FETCH"
 SUBJECT = "BODY[HEADER.FIELDS (SUBJECT)]"
+RFC822 = "(RFC822)"
+
+# Email fields
+EMAIL_LIB_SUBJECT = "Subject"
+EMAIL_LIB_DATE = "Date"
+
+# Ops
+BATCH_SIZE = 10
+
+# Parsing
+SPACE = " "
+
+# Credentials
+file_name = "credentials.json"
+GUEST = "guest"
+TOKEN = "token"
+
+
+def load_credentials():
+    """
+    Reads credentials from file
+
+    """
+    # should expand this to non-managed dir
+    # step up one level in folder, then make credentials
+    file = open(file_name, "r")
+    creds = json.load(file)
+    guest = creds[GUEST]
+    token = creds[TOKEN]
+    
+    return guest, token
 
 def establish_session(service=GMAIL):
     session = imaplib.IMAP4_SSL(service)
     return session
 
-def authenticate(session, user=USER):
-    password = input("Password: ")
-    session.login(user, password)
+def authenticate(session, guest, token=None):
+    if not token:
+        token = input("Token: ")
+    session.login(guest, token)
     return session
 
 def check_mail(session, folder=INBOX):
@@ -25,13 +60,21 @@ def check_mail(session, folder=INBOX):
     print(resp_code, mail_count)
     return (resp_code, mail_count)
 
-def get_ids(session, length=10):
+def get_ids(session, length=None):
+    """
+    returns list
+    """
+    result = None
     resp_code, mails = session.search(None, "ALL")
-    print(resp_code, mails)
     # mails comes back as len-1 list [<bytes>], where <bytes> consists of 
     # integers separated by spaces.
-    ids = mails[0].split()
-    result = ids[:(length - 1)]
+    
+    result = mails[0].split()
+    # truncate if necessary
+    if length:
+        result = result[:(length - 1)]
+
+    print(result)
     return result
 
 def get_UIDs(session, serial_ids):
@@ -106,7 +149,16 @@ def get_subject_by_UID(session, uid):
     result = subject.decode()
     
     return result
-    
+
+def get_message_by_UID(session, uid):
+    msg = None
+    code, data = session.uid(FETCH, uid, RFC822)
+    response = data[0]
+    command = response[0]
+    content = response[1]
+    msg = email.message_from_bytes(content)
+    return msg
+
 def get_subjects(session, uids):
     """
 
@@ -119,20 +171,126 @@ def get_subjects(session, uids):
 
     return result
 
+#
+def unpack_response(response):
+    pass
+    # deliver the content
+
+def get_subject2(session, uid):
+    subject = ""
+    msg = get_message_by_UID(session, uid)
+    # msg is in email format
+    subject = msg.get(EMAIL_LIB_SUBJECT)
+    return subject
+
+def clean_subject(string):
+    result = ""
+    wip = ""
+    wip = string.strip()
+    # strip whitespace
+    wip = wip.strip("=?")
+    wip = wip.strip("?=")
+    # strip the utf8 encoding =s
+    wip = wip.strip("utf-8?")
+    wip = wip.strip("UTF-8?")
+    # remove the charset
+    wip = wip.strip("Q?")
+    # strip the encoding
+
+    ## pretify
+    wip = wip.strip("\r")
+    wip = wip.strip("\n")
+    # remove embedded newlines. why are these in subjects?
+        
+    wip = wip.replace("=2C", ",")
+    wip = wip.replace("=20"," ")
+    # use commas in ASCII
+    wip = wip.replace("=E2=80=99","'")
+
+    #if no spaces, then replace underscores
+    if SPACE not in wip:
+        wip = wip.replace("_", SPACE)
+    
+    result = wip
+    return result
+
+def get_first(session, number=BATCH_SIZE):
+    result = list()
+    ids = get_ids(session)
+    ids = ids[:BATCH_SIZE]
+    uids = get_UIDs(session, ids)
+    for uid in uids:
+        msg = get_message_by_UID(session, uid)
+        result.append(msg)
+
+    return result
+
+def get_last(session, number=BATCH_SIZE):
+    # should really run on slice syntax
+    result = list()
+    ids = get_ids(session)
+    ids = ids[-BATCH_SIZE:]
+    uids = get_UIDs(session, ids)
+    for uid in uids:
+        msg = get_message_by_UID(session, uid)
+        result.append(msg)
+
+    return result
+
+def print_timestamp_and_subject(messages, clean=True):
+    for message in messages:
+        timestamp = message.get(EMAIL_LIB_DATE)
+        print("Date:         ", timestamp)
+        subject = message.get(EMAIL_LIB_SUBJECT)
+        print("Subject (R):  ", subject)
+        if clean:
+            cleaned = clean_subject(subject)
+            print("Subject (C):  ", cleaned)
+
+# what about capitalization of titles?
+# what happens if I pass in wrong uid?
 
 session = establish_session()
-authed = authenticate(session)
+guest, token = load_credentials()
+authed = authenticate(session, guest, token)
 results = check_mail(authed)
-ids = get_ids(authed, length=4)
-print(ids)
+ids = get_ids(authed)
+first_four = ids[:4]
+print(first_four)
 
-uniques = get_UIDs(session, ids)
+last_four = ids[-4:]
+print(last_four)
+uniques = get_UIDs(session, last_four)
 print(uniques)
 
 headlines = get_subjects(session, uniques)
 for item in headlines.items(): print(item)
 
+messages = list()
+for uid in uniques:
+    msg = get_message_by_UID(session, uid)
+    messages.append(msg)
+
+cleaned_subjects = list()
+for msg in messages:
+    subject = msg.get(EMAIL_LIB_SUBJECT)
+    print("Raw:     ", subject)
+    cleaned = clean_subject(subject)
+    print("Cleaned: ", cleaned)
+    cleaned_subjects.append(cleaned)
+
+first_msgs = get_first(session, number=5)
+print("******first******")
+print_timestamp_and_subject(first_msgs)
+
+last_msgs = get_last(session, number=5)
+print("******last******")
+print_timestamp_and_subject(last_msgs)
+
+
 # figure out what "=20" means, how to get rid of the unicode thingamajig.
+# flow: keep the first 100 messages, and dim x watchlist?
+## works only for each pull
 
 # write the full email method
 # wrap this in a class
@@ -140,3 +298,5 @@ for item in headlines.items(): print(item)
 # get last emails instead of first?
 # figure out speed
 # figure out storage: any? discard messages not in watchlist? or in top 100
+
+## on class: store creds. 
