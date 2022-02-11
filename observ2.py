@@ -5,6 +5,8 @@ import imaplib
 import email
 import json
 
+import parser2
+
 GMAIL = "imap.gmail.com"
 USER = "put@runport.io"
 
@@ -16,8 +18,9 @@ SUBJECT = "BODY[HEADER.FIELDS (SUBJECT)]"
 RFC822 = "(RFC822)"
 
 # Email fields
-EMAIL_LIB_SUBJECT = "Subject"
+EMAIL_LIB_FROM = "From"
 EMAIL_LIB_DATE = "Date"
+EMAIL_LIB_SUBJECT = "Subject"
 
 # Ops
 BATCH_SIZE = 10
@@ -91,44 +94,10 @@ def get_UIDs(session, serial_ids):
        # data is a list of one bytestring
        content = data[0].decode()
        # turns bytestring into regular string
-       content = parse_parens(content)
+       content = parser2.parse_parens(content)
        # processes content into a dictionary      
        result.append(content[UID])
 
-    return result
-
-def parse_parens(string, trace=False):
-    """
-
-    function expects string in format (x y)
-    """
-    result = dict()
-    wip = ""
-    start = False
-    end = False
-    for char in string:
-        if trace:
-            print(char)
-            print("Start: ", start)
-            print("End:   ", end)
-        
-        if char == "(":
-            start = True
-            if trace:
-                print("Starting transcription")
-                
-            continue
-        elif char == ")":
-            end = True
-            break
-        if start and not end:
-            wip = wip + char
-            if trace:
-                print("WIP:  ", wip)
-            
-    tokens = wip.split()
-    result[tokens[0]] = tokens[1]
-    
     return result
 
 def get_subject_by_UID(session, uid):
@@ -183,37 +152,6 @@ def get_subject2(session, uid):
     subject = msg.get(EMAIL_LIB_SUBJECT)
     return subject
 
-def clean_subject(string):
-    result = ""
-    wip = ""
-    wip = string.strip()
-    # strip whitespace
-    wip = wip.strip("=?")
-    wip = wip.strip("?=")
-    # strip the utf8 encoding =s
-    wip = wip.strip("utf-8?")
-    wip = wip.strip("UTF-8?")
-    # remove the charset
-    wip = wip.strip("Q?")
-    # strip the encoding
-
-    ## pretify
-    wip = wip.strip("\r")
-    wip = wip.strip("\n")
-    # remove embedded newlines. why are these in subjects?
-        
-    wip = wip.replace("=2C", ",")
-    wip = wip.replace("=20"," ")
-    # use commas in ASCII
-    wip = wip.replace("=E2=80=99","'")
-
-    #if no spaces, then replace underscores
-    if SPACE not in wip:
-        wip = wip.replace("_", SPACE)
-    
-    result = wip
-    return result
-
 def get_first(session, number=BATCH_SIZE):
     result = list()
     ids = get_ids(session)
@@ -239,12 +177,18 @@ def get_last(session, number=BATCH_SIZE):
 
 def print_timestamp_and_subject(messages, clean=True):
     for message in messages:
+
         timestamp = message.get(EMAIL_LIB_DATE)
         print("Date:         ", timestamp)
+
+        sender = message.get(EMAIL_LIB_FROM)
+        print("From:         ", sender)
+        
         subject = message.get(EMAIL_LIB_SUBJECT)
         print("Subject (R):  ", subject)
+
         if clean:
-            cleaned = clean_subject(subject)
+            cleaned = parser2.clean_string(subject)
             print("Subject (C):  ", cleaned)
 
 # what about capitalization of titles?
@@ -275,7 +219,7 @@ cleaned_subjects = list()
 for msg in messages:
     subject = msg.get(EMAIL_LIB_SUBJECT)
     print("Raw:     ", subject)
-    cleaned = clean_subject(subject)
+    cleaned = parser2.clean_string(subject)
     print("Cleaned: ", cleaned)
     cleaned_subjects.append(cleaned)
 
