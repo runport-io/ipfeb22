@@ -142,8 +142,31 @@ def update_cache(memory, events):
                 memory[brand] = library.get_brand(brand)
 
         return memory
-        
 
+# storage management
+# I want cache to always have the last 100 events, + up to [20] events by brand,
+# up to [200] events, or [x] bytes
+
+# cycle:
+# if monitor:
+#       for each observer:
+#               events = check observer
+#               ## returns a bunch of events; now i should map then against the
+#               ## watch list and organize them by time.
+#               ## to map events against a watchlist, i take the watchlist,
+#               ## flatten it, that's set a. Take the event, turn it into one
+#               ## string and check what brands are in the string. I can do
+#               ## slow: loop through each brand in the watchlist, use
+#               ## string.find(x) or something similar. Faster is tokenize the
+#               ## event, namely, return a list of strings that represent
+#               ## every word. Can also do both: tokenize, check, then check
+#               ## against search.
+
+#               # organize the events by time:
+#               # use the built in sort function. but really this operation
+#               # should take place after I can pull from each of the observers.
+#               # or should it? may be i should sort each time i pull
+#               #       
                 
                         
 

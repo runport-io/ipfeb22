@@ -25,6 +25,35 @@ QUESTION_MARK = "?"
 SPACE = " "
 UNDER = "_"
 
+def detect_encoding(string):
+    result = (None, None)
+    encoding = None
+    wip = string
+    if wip.startswith(START_ENCODING):
+        wip = wip[2:-2]
+        encoding, wip = extract_encoding(wip)
+
+    result = (encoding, wip)
+    return result
+
+def extract_encoding(string):
+    """
+    takes out the encoding prefix
+    """
+    result = (None, None)
+    prefix = ""
+    wip = ""
+    i = 0
+    while i <= len(string):
+        if string[i] == QUESTION_MARK:
+            wip = string[(i + 1): ]
+            break
+        else:
+            prefix = prefix + string[i]
+            i = i + 1
+
+    result = (prefix, wip)
+    return result        
 
 def parse_parens(string, trace=False):
     """
