@@ -166,9 +166,6 @@ def update_cache(memory, events):
 #               # use the built in sort function. but really this operation
 #               # should take place after I can pull from each of the observers.
 #               # or should it? may be i should sort each time i pull
-#               #       
-                
-                        
 
         
         

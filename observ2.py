@@ -21,12 +21,14 @@ RFC822 = "(RFC822)"
 EMAIL_LIB_FROM = "From"
 EMAIL_LIB_DATE = "Date"
 EMAIL_LIB_SUBJECT = "Subject"
+PLAIN_TEXT = "text/plain"
 
 # Ops
 BATCH_SIZE = 10
 
 # Parsing
 SPACE = " "
+NEW_LINE = "\n"
 
 # Credentials
 file_name = "credentials.json"
@@ -164,6 +166,9 @@ def get_first(session, number=BATCH_SIZE):
     return result
 
 def get_last(session, number=BATCH_SIZE):
+    """
+    returns email objects
+    """
     # should really run on slice syntax
     result = list()
     ids = get_ids(session)
@@ -193,6 +198,27 @@ def print_timestamp_and_subject(messages, clean=True):
 
 # what about capitalization of titles?
 # what happens if I pass in wrong uid?
+
+def get_body(msg, trace=False):
+    """
+    As described at https://coderzcolumn.com/tutorials/python/imaplib-simple-guide-to-manage-mailboxes-using-python
+    """
+    result = ""
+    wip = list()
+    for part in msg.walk():
+        if trace:
+            print("Part:          \n")
+            print(part)
+        content_type = part.get_content_type()
+        if trace:
+            print("Content type:  \n")
+            print(content_type)
+        if content_type == PLAIN_TEXT:
+            body_lines = part.as_string().split(NEW_LINE)
+            wip.append(body_lines)
+
+    result = NEW_LINE.join(*wip)
+    return result
 
 session = establish_session()
 guest, token = load_credentials()
@@ -231,6 +257,14 @@ last_msgs = get_last(session, number=5)
 print("******last******")
 print_timestamp_and_subject(last_msgs)
 
+body1 = get_body(last_msgs[0])
+print("Body of first most-recent email:  \n")
+print(body1)
+
+body2 = get_body(last_msgs[1])
+print("Body of second most-recent email:  \n")
+print(body2)
+
 
 # figure out what "=20" means, how to get rid of the unicode thingamajig.
 # flow: keep the first 100 messages, and dim x watchlist?
@@ -243,4 +277,7 @@ print_timestamp_and_subject(last_msgs)
 # figure out speed
 # figure out storage: any? discard messages not in watchlist? or in top 100
 
-## on class: store creds. 
+## on class: store creds.
+
+# need to parse out the html and links somehow.
+# put the strings through cleaner.
