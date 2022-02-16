@@ -56,8 +56,27 @@ class Event:
     ------------------  --------------------------------------------------------
     """
     ATTRS = list()
+
+    @classmethod
+    def from_email(cls, email):
+        new = cls()
+
+        #
+        headline = email.get(HEADLINE)
+        new.set_headline(headline)
+
+        return new
+
+    @classmethod
+    def from_flat(cls):
+        pass
     
-    
+    def __init__(self, headline=None, body=None):
+        self._headline = TextField(headline)
+        self._body = TextField(body)
+        self.timestamp = TimeStamp()
+        # self.id = ID()    
+        
     def get_fields(self, decouple=False):
         """
         event.get_fields() --> list

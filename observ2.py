@@ -199,11 +199,13 @@ def print_timestamp_and_subject(messages, clean=True):
 # what about capitalization of titles?
 # what happens if I pass in wrong uid?
 
-def get_body(msg, trace=False):
+def get_body_lines(msg, limit=None, trace=False):
     """
+
+    
     As described at https://coderzcolumn.com/tutorials/python/imaplib-simple-guide-to-manage-mailboxes-using-python
     """
-    result = ""
+    result = list()
     wip = list()
     for part in msg.walk():
         if trace:
@@ -217,8 +219,22 @@ def get_body(msg, trace=False):
             body_lines = part.as_string().split(NEW_LINE)
             wip.append(body_lines)
 
-    result = NEW_LINE.join(*wip)
+    #truncate
+    if limit:
+        wip = wip[:limit]
+
+    result = wip
     return result
+
+def get_body(msg, glue=NEW_LINE, trace=false):
+    """
+
+    get_body(msg, glue, trace) -> string
+
+    Returns a string connected by glue that represents the body of a message.
+    """
+    result = ""
+    body_lines = get_body_lines(msg, trace=trace)
 
 session = establish_session()
 guest, token = load_credentials()

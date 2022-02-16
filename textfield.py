@@ -19,6 +19,13 @@ TextField           Container for storing text and information about the text.
 ------------------  ------------------------------------------------------------
 """
 
+# Built-ins
+
+# P2
+
+# Constants
+
+# Classes
 class TextField:
     """
     
@@ -30,14 +37,9 @@ class TextField:
     Attribute           Description
     ------------------  --------------------------------------------------------
     DATA:
-    
-    content             formatted
-    language            placeholder, if "" then American English
-    raw                 placeholder
-    encoding            placeholder
-    in_observer
-    in_source
-    hook                instance of a Hoo.k, to go one level up in the hierarchy
+
+    language            placeholder, if None then American English
+    [hook                instance of a Hook, to go one level up in the hierarchy]
     
     FUNCTIONS:
     copy                returns deep copy of event
@@ -48,20 +50,60 @@ class TextField:
     check_similarity    placeholder for fuzzy match
     ------------------  --------------------------------------------------------
     """
-    pass
+    SKIP_ATTRIBUTES = ["hook"]
 
-# tests:
-# pass in a headline
-# get the version without newlines, get the version with nrewlines
-# to json and from json should return the same thing, more or less.
-# should eventually build the EQ thing? if content == then same?
-# most likely to break: assign permanent (should clear out the temp id?);
-# ## i get this thing from the observer, does the observer number it? yes.
-# ## do i keep the observer-level id? I should probably. I should also record the UID
-# ## within the observer's topic, here the UID. What happens if I reshare this?
-# ## i think then the sender sends me their thing with their own numbering?
-# hook works only when the whole thing is built
+    @classmethod
+    def from_flat(cls, data):
+        new = cls()
+        new.__dict__.update(data)
+        # connect hook? new.hook.establish(parent)
+        return new
+        
+    def __init__(self, string=""):
+        self._content = string
+        self.language = None
+        
+    def copy(self):
+        new = TextField()
+        new.language = self.language
+        content = self.get_content()
+        new.set_content(content)
 
+        return new
+        
+    def get_content(self):
+        return self._content
+
+    def set_content(self, content, overwrite=False):
+        if overwrite:
+            self._content = content
+        else:
+            if self._content:
+                raise Exception("Implicit overwrite.")
+            else:
+                self._content = content
+
+    def print(self):
+        content = self.get_content()
+        print(content)
+
+f1 = TextField("Something happened somewhere and no one knows.")
+print("Field 1:    ")
+f1.print()
+
+f2 = f1.copy()
+print("Field 2:    ")
+f2.print()
+
+try:
+    f2.set_content("blah blah")
+except Exception:
+    # fix this block
+    print(Exception)
+
+f2.set_content("blah blah", overwrite=True)
+print("Field 2, mod:")
+f2.print()
 
 
 
