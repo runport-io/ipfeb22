@@ -48,8 +48,8 @@ class Event:
     copy                returns deep copy of event
     print_contents      returns a string that looks nice when you print it
     email_from          (cls) generates an instance of the class from an email
-    json_to             returns a JSON object 
-    json_from           (cls) generates an instance of the class from JSON
+    [json_to             returns a JSON object 
+    json_from           (cls) generates an instance of the class from JSON]
     get_fields          returns list of fields for instance
     get_field_names     returns list of field names for instance
    
@@ -75,7 +75,16 @@ class Event:
         self._headline = TextField(headline)
         self._body = TextField(body)
         self.timestamp = TimeStamp()
-        # self.id = ID()    
+        # self.id = ID()
+
+        # when creating an instance:
+        # if headline:
+        #   that's the name for the number
+        #   assign number on that basis
+        #   namespace should be the source
+        #   the source's namespace should be the observer
+        #   ## can also assign id based on full body
+        
         
     def get_fields(self, decouple=False):
         """
@@ -84,17 +93,28 @@ class Event:
         Returns list of fields. Items in list link to contents on the event
         unless "Decouple" is True. 
         """
-        
-        
+        pass
 
     def get_field_names(self):
         """
         Returns list of field names
         """
+        pass
         
     def walk_content():
         pass
 
+    def get_card():
+        pass
+        # returns: event name
+        # event headline
+        # event number
+        # event namespace
+        # event source
+        # event date
+        # first couple lines of event body?
+        # how is this different than just print() or print_short()?
+    
 # tests
 # make event
 # send to json
