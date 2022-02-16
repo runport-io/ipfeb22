@@ -72,10 +72,13 @@ class Event:
         pass
     
     def __init__(self, headline=None, body=None):
-        self._headline = TextField(headline)
-        self._body = TextField(body)
+        self.body = TextField(body)
+        self.headline = TextField(headline)
+        self.source = Source()
         self.timestamp = TimeStamp()
-        # self.id = ID()
+
+        # self.number.assign()
+        # # or something like that
 
         # when creating an instance:
         # if headline:
@@ -84,7 +87,6 @@ class Event:
         #   namespace should be the source
         #   the source's namespace should be the observer
         #   ## can also assign id based on full body
-        
         
     def get_fields(self, decouple=False):
         """
