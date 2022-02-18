@@ -24,8 +24,11 @@ Event               Organizes information detected by observers or created
 
 # 2) Port.
 import utilities as up
+
+from source import Source
 from textfield import TextField
 
+# Functions
 class Event:
     """
     

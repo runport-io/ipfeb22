@@ -45,14 +45,16 @@ class Number:
     def get_name(self):
         return self._name
 
-    def set_number(namespace=None, name=None):
+    def set_number(self, namespace=None, name=None):
         if namespace:
             self.set_namespace(namespace)
         else:
             namespace = self.get_namespace()
         
-        if not name:
-            self.get_name()
+        if name:
+            self.set_name(name)
+        else:
+            name = self.get_name()
             
         number = generate_number(namespace, name)
         up.set_with_force(self, "_number", number)
@@ -96,12 +98,22 @@ def generate_number(namespace, name):
 skip = list()
 setattr(Number, constants.SKIP_ATTRIBUTES, skip)
 
-# to do:
-# start with the regular way namespace
-# make the exceptions module
-# make the pretty print function
+# Testing
+random = uuid.uuid4()
+print("Random: ")
+print(random)
 
+a = Number()
+print("a: ", a)
+a.set_namespace(random)
+a.set_name("eggplant")
+print(a)
+a.set_number()
+print(a)
 
-
+b = Number()
+print("b: ", b)
+b.set_number(random, "grapefruit")
+print(b)
 
 
