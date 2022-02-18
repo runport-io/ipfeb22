@@ -80,6 +80,8 @@ def get_body(msg, glue=NEW_LINE, trace=False):
     """
     result = ""
     body_lines = get_body_lines(msg, trace=trace)
+    result = glue.join(body_lines)
+    return result
 
 def get_body_lines(msg, limit=None, trace=False):
     """
@@ -99,7 +101,7 @@ def get_body_lines(msg, limit=None, trace=False):
             print(content_type)
         if content_type == PLAIN_TEXT:
             body_lines = part.as_string().split(NEW_LINE)
-            wip.append(body_lines)
+            wip.extend(body_lines)
 
     #truncate
     if limit:
@@ -107,6 +109,8 @@ def get_body_lines(msg, limit=None, trace=False):
 
     result = wip
     return result
+
+    # only works when body is in plain text
 
 def get_first(session, number=BATCH_SIZE):
     """
