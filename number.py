@@ -1,9 +1,13 @@
 # number
 # (c) Port. Prerogative Club
 
+# Imports
+# 1) Built-ins
 import uuid
 
-import utilities as u
+# 2) Port.
+import constants
+import utilities as up
 
 class Number:
     """
@@ -29,19 +33,19 @@ class Number:
         self._namespace = None
 
     def set_namespace(self, namespace, force=False):
-        u.set_with_force(self, "_namespace", namespace, override=force)
+        up.set_with_force(self, "_namespace", namespace, override=force)
 
     def get_namespace(self):
         result = self._namespace
         return result
 
     def set_name(self, name, force=False):
-        u.set_with_force(self, "_name", name, override=force)
+        up.set_with_force(self, "_name", name, override=force)
 
     def get_name(self):
         return self._name
 
-    def set_number(namespace=None, name=None)'
+    def set_number(namespace=None, name=None):
         if namespace:
             self.set_namespace(namespace)
         else:
@@ -51,7 +55,7 @@ class Number:
             self.get_name()
             
         number = generate_number(namespace, name)
-        u.set_with_force(self, "_number", number)
+        up.set_with_force(self, "_number", number)
 
         return number
     
@@ -75,8 +79,8 @@ class Number:
             result = True
         return result
 
-    def get_lines(self, header=True):
-        lines = up.get_lines(self, header=header)
+    def get_lines(self, include_header=True):
+        lines = up.get_lines(self, include_header=include_header)
         return lines
 
     def __str__(self):

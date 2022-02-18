@@ -18,10 +18,15 @@ TextField           Container for storing text and information about the text.
 ------------------  ------------------------------------------------------------
 """
 
-# Built-ins
+# Imports
+# 1) Built-ins
+# n/a
 
-# P2
+# 2) Port.
+import constants
 import utilities as up
+
+from number import Number
 
 # Constants
 
@@ -45,7 +50,7 @@ class TextField:
     SKIP_ATTRIBUTES = []
 
     @classmethod
-    def make(cls, data=None):
+    def from_flat(cls, data=None):
         new = cls()
         new.__dict__.update(data)
         # should skip attributes?

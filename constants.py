@@ -28,6 +28,7 @@ BATCH_SIZE = 10
 # Parsing
 SPACE = " "
 NEW_LINE = "\n"
+TAB = "\t"
 
 # Credentials
 file_name = "credentials.json"

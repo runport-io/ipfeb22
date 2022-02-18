@@ -58,8 +58,8 @@ def get_lines(obj, include_header=True, width=None, indent=None):
     target_width = width
     
     if include_header:
-        wip = str(type(obj))
-        list.append(wip)
+        header = str(type(obj))
+        lines.append(header)
     
     skip = getattr(obj, constants.SKIP_ATTRIBUTES, [])
     
@@ -109,7 +109,7 @@ def deepcopy(obj, recur=False):
                 pass
             data[k] = v
     
-    new = obj.new(data=data)
+    new = obj.from_flat(data=data)
     return new
     
     
