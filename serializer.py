@@ -32,18 +32,18 @@ import constants
 def flatten(obj):
     """
 
-    flatten() -> dict()
+    flatten(obj) -> dict()
 
     Function returns a copy of the object's attribute dictionary. Function
     ignores attributes listed at obj.SKIP_ATTRIBUTES.
     """
     result = dict()
-    wip = dict()
-    attrs = obj.__dict__.keys()
-    wip = attrs.copy()
-    skip = getattr(obj, constants.SKIP_ATTRIBUTES)
-    for item in skip:
-        wip.pop(item)
+    wip = obj.__dict__.copy()    
+
+    skip = getattr(obj, constants.SKIP_ATTRIBUTES, None)
+    if skip:
+        for attr in skip:
+            wip.pop(attr)
 
     result = wip
     return result

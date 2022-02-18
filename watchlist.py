@@ -1,9 +1,15 @@
 # Watchlist
 # (c) Port. Prerogative Club 2022
 
-import group
-import brand
 
+# Imports
+# 1) Built-ins
+# N/a
+
+# 2) Port.
+import constants
+import serializer
+import utilities as up
 
 class Watchlist:
     """
@@ -12,10 +18,16 @@ class Watchlist:
     Attribute           Description
     ------------------  --------------------------------------------------------
     DATA:
-    
+    N/a
     
     FUNCTIONS:
-    
+    add_brand           adds a brand to a group
+    add_group           adds a group of brands
+    get_group           retrieves a group of brands
+    get_lines           gets a list of strings for printing the instance
+    get_uniques         returns a set of brands in instance
+    from_flat           constructs instance from dictionary
+    update              updates instance from dictionary
     ------------------  --------------------------------------------------------
     """
     
@@ -30,6 +42,12 @@ class Watchlist:
         # None: [1, 2]
         # blah: [2, 3]  
 
+    def __str__(self):
+        lines = self.get_lines()
+        glue = constants.NEW_LINE
+        string = glue.join(lines)
+        return string
+        
     def add_brand(self, brand, group_name=None):
         """
 
@@ -60,9 +78,34 @@ class Watchlist:
         
         return group
 
-    def get_group(self, group_name):
+    def get_group(self, group_name=None):
+        """
+
+        Watchlist.get_group() -> group
+
+        Method returns the group (a list) you specify. If you don't specify a
+        name, method returns the group "None".
+        """
         group = self._groups[group_name]
         return group
+
+    def get_lines(self, include_header=True):
+        """
+
+        Watchlist.get_lines() -> list
+
+        Method returns list of strings that represent the instance. Shows only
+        the groups.
+        """
+        data = self._groups
+        lines = up.get_lines(data, include_header=False)
+
+        # We will add a header on our own"
+        if include_header:
+            header = str(type(self))
+            lines.insert(0, header)
+
+        return lines
 
     def get_uniques(self):
         """
@@ -77,26 +120,51 @@ class Watchlist:
             result.update(uniques)
 
         return result
-
-    def flatten(self):
-        pass
-        # result = dict()
-        # groups = dict()
-        # for k, v in self._groups.items():
-        #   groups[k] = v.flatten()
-        # index = dict()
-        # for k, v in self._index:
-        #   index[k] = v.flatten()
-        # result["groups"] = groups
-        # result["index"] = index
-        #
-        # return result
         
-    def update(self, remove=False):
-        pass
-        # ops: if items were removed? if items were added
-        # start with index:
-        #
-    
-        # takes a flat repr and enriches accordingly
+    @classmethod
+    def from_flat(cls, data):
+        """
+
+        Watchlist.from_flat() -> Watchlist
+
+        This is a class method. Constructs instance, fills it with data.
+        """
+        new = cls()
+        new.update(data)
+        return new
+
+    def update(self, data):
+        """
+
+        Watchlist.update() -> None
+
+        Method updates instance with data. 
+        """
+        self._groups.update(data)
+
+# "Testing"
+w = Watchlist()
+print(w)
+
+w.add_brand("Birch Coffee")
+print(w)
+
+w.add_brand("S'well")
+w.add_brand("Piccolina Kids")
+print(w)
+
+coffee = w.add_group("coffee", "Starbucks", "Birch Coffee", "Variety")
+print(coffee)
+print(w)
+
+uniques = w.get_uniques()
+print(uniques)
+
+data = serializer.flatten(w)
+print(data)
+
+new = w.from_flat(data)
+print(new)
+
+# adjust pretty print to show the group name in line, or something
 

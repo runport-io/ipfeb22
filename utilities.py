@@ -45,7 +45,7 @@ def add_attributes_to_skip(obj, name=None, value=None, override=False):
         value = list()
     set_with_override(obj, name=name, value=value, override=override)
 
-def get_lines(obj, include_header=True, width=None):
+def get_lines(obj, include_header=True, width=None, indent=None):
     """
 
     get_lines() -> list
@@ -57,29 +57,43 @@ def get_lines(obj, include_header=True, width=None):
         width = constants.STANDARD_WIDTH
     target_width = width
     
-    if header:
+    if include_header:
         wip = str(type(obj))
         list.append(wip)
     
     skip = getattr(obj, constants.SKIP_ATTRIBUTES, [])
-    for k, v in obj.__dict__.items():
+    
+    items = None
+    try:
+        items = obj.__dict__.items()
+        # Built-ins don't have a "__dict__" attribute
+    except AttributeError:
+        items = obj.items()
+        # works for printing dictionaries
+
+    if not items:
+        line = str(obj)
+        lines.append(line)
         
-        if k in skip:
-            continue
+    else:
+        for k, v in items:
+            
+            if k in skip:
+                continue
 
-        else:
-            label = ""
-            start = str(k)
-            current_width = len(start)
-            gap = target_width - current_width
-            if gap > 0:
-                start = start + constants.SPACE * gap
-            label = start
-            lines.append(label)
+            else:
+                label = ""
+                start = str(k)
+                current_width = len(start)
+                gap = target_width - current_width
+                if gap > 0:
+                    start = start + constants.SPACE * gap
+                label = start
+                lines.append(label)
 
-            value = str(v)
-            lines.append(value)
-
+                value = str(v)
+                lines.append(value)
+        
     return lines
 
 def deepcopy(obj, recur=False):
