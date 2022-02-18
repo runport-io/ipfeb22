@@ -30,8 +30,13 @@ def set_with_override(obj, name, value, override=False):
         safe = True
     if safe or override:
         setattr(obj, name, value)
+        # may be explicitly delete on override?
     else:
         raise exceptions.OverrideError
+
+def set_with_force(*pargs, **kwargs):
+    result = set_with_override(*pargs, **kwargs)
+    return result
 
 def add_attributes_to_skip(obj, name=None, value=None, override=False):
     if not name:
@@ -40,12 +45,59 @@ def add_attributes_to_skip(obj, name=None, value=None, override=False):
         value = list()
     set_with_override(obj, name=name, value=value, override=override)
 
-# def print_smartly(obj):
-#   lines = list()
-#   skip = getattr(obj, constants.SKIP_ATTRIBUTES)
-#   for attr, value in obj.__dict__:
-#       if attr not in skip:
-#           make a line, add to lines
-#           # could use the pretty printing library
+def get_lines(obj, include_header=True, width=None):
+    """
+
+    get_lines() -> list
+    
+    Returns list of strings that represent the object.
+    """
+    lines = list()
+    if not width:
+        width = constants.STANDARD_WIDTH
+    target_width = width
+    
+    if header:
+        wip = str(type(obj))
+        list.append(wip)
+    
+    skip = getattr(obj, constants.SKIP_ATTRIBUTES, [])
+    for k, v in obj.__dict__.items():
+        
+        if k in skip:
+            continue
+
+        else:
+            label = ""
+            start = str(k)
+            current_width = len(start)
+            gap = target_width - current_width
+            if gap > 0:
+                start = start + constants.SPACE * gap
+            label = start
+            lines.append(label)
+
+            value = str(v)
+            lines.append(value)
+
+    return lines
+
+def deepcopy(obj, recur=False):
+    wip = obj.__dict__.copy()
+    data = dict()
+    # need recursion to deal with attributes that are themselves objects
+    if recur:
+        for k, v in wip:
+            replacement = v
+            try:
+                replacement = v.copy()
+            except AttributeError:
+                pass
+            data[k] = v
+    
+    new = obj.new(data=data)
+    return new
+    
+    
     
 

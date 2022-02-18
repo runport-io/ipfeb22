@@ -1,73 +1,102 @@
-# observer 2
-# (c) Port. Prerogative Club 2
+# Observer 2
+# (c) Port. Prerogative Club 2022
 
+"""
+
+Module includes logic for monitoring a source of events.
+------------------  ------------------------------------------------------------
+Attribute           Description
+------------------  ------------------------------------------------------------
+
+DATA:
+GMAIL               URL for gmail's IMAP gateway
+USER                id for the marketing inbox
+
+FUNCTIONS:
+
+CLASSES:
+N/a
+------------------  ------------------------------------------------------------
+"""
+
+# Imports
+# 1) Built-ins
 import imaplib
 import email
 import json
 
+# 2) Port. objects
 import parser2
 
+from constants import *
+
+# 3) Constants
 GMAIL = "imap.gmail.com"
 USER = "put@runport.io"
 
-# IMAP commands and strings
-INBOX = "INBOX"
-UID = "UID"
-FETCH = "FETCH"
-SUBJECT = "BODY[HEADER.FIELDS (SUBJECT)]"
-RFC822 = "(RFC822)"
-
-# Email fields
-EMAIL_LIB_FROM = "From"
-EMAIL_LIB_DATE = "Date"
-EMAIL_LIB_SUBJECT = "Subject"
-PLAIN_TEXT = "text/plain"
-
-# Ops
-BATCH_SIZE = 10
-
-# Parsing
-SPACE = " "
-NEW_LINE = "\n"
-
-# Credentials
-file_name = "credentials.json"
-GUEST = "guest"
-TOKEN = "token"
-
-
-def load_credentials():
-    """
-    Reads credentials from file
-
-    """
-    # should expand this to non-managed dir
-    # step up one level in folder, then make credentials
-    file = open(file_name, "r")
-    creds = json.load(file)
-    guest = creds[GUEST]
-    token = creds[TOKEN]
-    
-    return guest, token
-
-def establish_session(service=GMAIL):
-    session = imaplib.IMAP4_SSL(service)
-    return session
-
+# 4) Functions
 def authenticate(session, guest, token=None):
+    """
+
+    authenticate() -> session
+
+    Function authenticates session using the credentials you provide in the
+    signature. If you don't specify a password, function will prompt you for it.
+    """
     if not token:
         token = input("Token: ")
     session.login(guest, token)
     return session
 
 def check_mail(session, folder=INBOX):
+    """
+
+    check_mail() -> tuple
+
+    Function checks mail, returns (response code, mail count) in the folder you
+    specify. You should provide a session that you have authenticated.
+    """
     resp_code, mail_count = session.select(folder, readonly=True)
     print(resp_code, mail_count)
     return (resp_code, mail_count)
 
-def get_ids(session, length=None):
+def establish_session(service=GMAIL):
     """
-    returns list
+
+    establish_session() -> session
+
+    Returns istance of IMAP4_SSL object. This function does not perform
+    authentication.
+    """
+    session = imaplib.IMAP4_SSL(service)
+    return session
+
+def get_first(session, number=BATCH_SIZE):
+    """
+
+    get_first() -> list
+
+    Function returns a list of "email" objects of size "number", or BATCH_SIZE
+    by default. The emails will be the oldest in the mailbox.
+    """
+    result = list()
+    ids = get_ids(session)
+    ids = ids[:BATCH_SIZE]
+    uids = get_UIDs(session, ids)
+    for uid in uids:
+        msg = get_message_by_UID(session, uid)
+        result.append(msg)
+
+    return result
+
+def get_ids(session, length=None, trace=False):
+    """
+
+    get_ids() -> list()
+
+    Function returns list of strings of ids. Function retrieves serial ids that
+    change over time. If you specify "length", function truncates the list of
+    ids. Function prints the result if "trace" is True.  
     """
     result = None
     resp_code, mails = session.search(None, "ALL")
@@ -79,33 +108,54 @@ def get_ids(session, length=None):
     if length:
         result = result[:(length - 1)]
 
-    print(result)
-    return result
-
-def get_UIDs(session, serial_ids):
-    """
-
-    Returns list of strings
-    """
+    if trace:
+        print(result)
     
-    # serial ids takes a list of bytestrings in UTF, returns same
+    return result
+
+def get_last(session, number=BATCH_SIZE):
+    """
+
+    get_first() -> list
+
+    Function returns a list of "email" objects of size "number", or BATCH_SIZE
+    by default. The emails will be the newest in the mailbox.
+    """
+    # should really run on slice syntax
     result = list()
-    for serial_id in serial_ids:
-       resp_code, data = session.fetch(serial_id, '(UID)')
-       print(resp_code, data)
-       # data is a list of one bytestring
-       content = data[0].decode()
-       # turns bytestring into regular string
-       content = parser2.parse_parens(content)
-       # processes content into a dictionary      
-       result.append(content[UID])
+    ids = get_ids(session)
+    ids = ids[-BATCH_SIZE:]
+    uids = get_UIDs(session, ids)
+    for uid in uids:
+        msg = get_message_by_UID(session, uid)
+        result.append(msg)
 
     return result
+
+def get_message_by_UID(session, uid):
+    """
+
+    get_message_by_UID() -> email
+
+    Function expects a string for UID. Function returns an "email" object from
+    the built-in library. 
+    """
+    msg = None
+    code, data = session.uid(FETCH, uid, RFC822)
+    response = data[0]
+    command = response[0]
+    content = response[1]
+    msg = email.message_from_bytes(content)
+    return msg
+
 
 def get_subject_by_UID(session, uid):
     """
 
-    returns string
+    get_subject_by_UID() -> string
+
+    Function expects the UID to be a string. Function collects the subject
+    through IMAP.
     """
     result = ""
     # uid command requires UID to be passed in as string, not integer?
@@ -121,19 +171,29 @@ def get_subject_by_UID(session, uid):
     
     return result
 
-def get_message_by_UID(session, uid):
-    msg = None
-    code, data = session.uid(FETCH, uid, RFC822)
-    response = data[0]
-    command = response[0]
-    content = response[1]
-    msg = email.message_from_bytes(content)
-    return msg
+def get_subject2(session, uid):
+    """
+
+    get_subject() -> string
+
+    Function retrieves the message and uses the "email" object to extract the
+    subject. You should use a string for UID.  
+    """
+    subject = ""
+    
+    msg = get_message_by_UID(session, uid)
+    # msg is in email format
+    subject = msg.get(EMAIL_LIB_SUBJECT)
+
+    return subject
 
 def get_subjects(session, uids):
     """
 
-    returns dictionary 
+    get_subjects() -> dict
+
+    Function expects a list of strings of UIDs. Function returns a dictionary
+    keyed by UID, with raw strings as values. 
     """
     result = dict()
     for uid in uids:
@@ -142,43 +202,50 @@ def get_subjects(session, uids):
 
     return result
 
-#
+
+def get_UIDs(session, serial_ids):
+    """
+
+    get_UIDs() -> list()
+
+    Function expects an authenticated session and a list of bytestrings.
+    Function returns a list of bytestrings.
+    """
+    
+    # serial ids takes a list of bytestrings in UTF, returns same
+    result = list()
+    for serial_id in serial_ids:
+       resp_code, data = session.fetch(serial_id, '(UID)')
+       print(resp_code, data)
+       # data is a list of one bytestring
+       content = data[0].decode()
+       # turns bytestring into regular string
+       content = parser2.parse_parens(content)
+       # processes content into a dictionary      
+       result.append(content[UID])
+
+    return result
+    # <-----------------------------------------------------review routine
+
+def load_credentials():
+    """
+
+    load_credentials() -> tuple
+    
+    Reads credentials from file. Returns a (guest, token).
+    """
+    # should expand this to non-managed dir
+    # step up one level in folder, then make credentials
+    file = open(file_name, "r")
+    creds = json.load(file)
+    guest = creds[GUEST]
+    token = creds[TOKEN]
+    
+    return guest, token
+
 def unpack_response(response):
     pass
     # deliver the content
-
-def get_subject2(session, uid):
-    subject = ""
-    msg = get_message_by_UID(session, uid)
-    # msg is in email format
-    subject = msg.get(EMAIL_LIB_SUBJECT)
-    return subject
-
-def get_first(session, number=BATCH_SIZE):
-    result = list()
-    ids = get_ids(session)
-    ids = ids[:BATCH_SIZE]
-    uids = get_UIDs(session, ids)
-    for uid in uids:
-        msg = get_message_by_UID(session, uid)
-        result.append(msg)
-
-    return result
-
-def get_last(session, number=BATCH_SIZE):
-    """
-    returns email objects
-    """
-    # should really run on slice syntax
-    result = list()
-    ids = get_ids(session)
-    ids = ids[-BATCH_SIZE:]
-    uids = get_UIDs(session, ids)
-    for uid in uids:
-        msg = get_message_by_UID(session, uid)
-        result.append(msg)
-
-    return result
 
 def print_timestamp_and_subject(messages, clean=True):
     for message in messages:
@@ -297,3 +364,10 @@ print(body2)
 
 # need to parse out the html and links somehow.
 # put the strings through cleaner.
+
+## operation:
+# construct event
+# return events
+# move offset
+# clear memory
+

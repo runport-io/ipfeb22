@@ -3,8 +3,7 @@
 
 """
 
-Module defines the TextField class. A TextField holds a string and information
-about that string.
+Module defines the TextField class. A TextField holds a string.
 
 ------------------  ------------------------------------------------------------
 Attribute           Description
@@ -22,6 +21,7 @@ TextField           Container for storing text and information about the text.
 # Built-ins
 
 # P2
+import utilities as up
 
 # Constants
 
@@ -29,71 +29,75 @@ TextField           Container for storing text and information about the text.
 class TextField:
     """
     
-    A TextField stores a string and information about its language. The idea is
-    to simplify reading in the future. 
-
+    A TextField stores a string and information about that string.
     ------------------  --------------------------------------------------------
     ------------------  --------------------------------------------------------
     Attribute           Description
     ------------------  --------------------------------------------------------
     DATA:
-
-    language            placeholder, if None then American English
-    [hook                instance of a Hook, to go one level up in the hierarchy]
+    number              an instance of Number
     
     FUNCTIONS:
-    copy                returns deep copy of event
-    print_contents      returns a string that looks nice when you print it
-    json_to             returns a JSON object 
-    json_from           (cls) generates an instance of the class from JSON
-    check_equivalence   placeholder for exact match
-    check_similarity    placeholder for fuzzy match
+    get_content         returns content from instance
+    set_content         sets content for instance, can force overwrite.
     ------------------  --------------------------------------------------------
     """
-    SKIP_ATTRIBUTES = ["hook"]
+    SKIP_ATTRIBUTES = []
 
     @classmethod
-    def from_flat(cls, data):
+    def make(cls, data=None):
         new = cls()
         new.__dict__.update(data)
-        # connect hook? new.hook.establish(parent)
+        # should skip attributes?
         return new
         
-    def __init__(self, string=""):
-        self._content = string
-        self.language = None
-        
-    def copy(self):
-        new = TextField()
-        new.language = self.language
-        content = self.get_content()
-        new.set_content(content)
-
-        return new
-        
+    def __init__(self, content=None):
+        self._content = content
+        self.number = Number()
+    
     def get_content(self):
         return self._content
 
-    def set_content(self, content, overwrite=False):
-        if overwrite:
-            self._content = content
-        else:
-            if self._content:
-                raise Exception("Implicit overwrite.")
-            else:
-                self._content = content
+    def set_content(self, content, force=False):
+        up.set_with_override(self, "_content", content, override=force)
 
-    def print(self):
-        content = self.get_content()
-        print(content)
+    def get_lines(self, header=True):
+        lines = list()
+        if header:
+            line0 = "TextField: "
+            lines.append(line0)
+        line1 = "Content: "
+        lines.append(line1)
+        line2 = str(self.get_content())
+        lines.append(line2)
+        
+        number_lines = self.number.get_lines()
+        for line in number_lines:
+            line = constants.TAB + line
+            lines.append(line)
 
+        return lines
+
+    def copy(self):
+        new = up.deepcopy(self)
+        return new
+
+    def __str__(self):
+        lines = self.get_lines()
+        glue = constants.NEW_LINE
+        string = glue.join(lines)
+        return string
+    
+    # consider adding a log attribute
+    # every time i make a change, i log it. append only. requires a 
+    # signature. probably don't need it right now? could run some logic or
+    # something that prints the command
+    
 f1 = TextField("Something happened somewhere and no one knows.")
-print("Field 1:    ")
-f1.print()
+print(f1)
 
 f2 = f1.copy()
-print("Field 2:    ")
-f2.print()
+print(f2)
 
 try:
     f2.set_content("blah blah")
@@ -101,9 +105,9 @@ except Exception:
     # fix this block
     print(Exception)
 
-f2.set_content("blah blah", overwrite=True)
+f2.set_content("blah blah", force=True)
 print("Field 2, mod:")
-f2.print()
+print(f2)
 
 
 
