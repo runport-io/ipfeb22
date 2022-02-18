@@ -71,6 +71,43 @@ def establish_session(service=GMAIL):
     session = imaplib.IMAP4_SSL(service)
     return session
 
+def get_body(msg, glue=NEW_LINE, trace=False):
+    """
+
+    get_body(msg, glue, trace) -> string
+
+    Returns a string connected by glue that represents the body of a message.
+    """
+    result = ""
+    body_lines = get_body_lines(msg, trace=trace)
+
+def get_body_lines(msg, limit=None, trace=False):
+    """
+    
+    As described at https://coderzcolumn.com/tutorials/python/imaplib-simple-guide-to-manage-mailboxes-using-python
+
+    """
+    result = list()
+    wip = list()
+    for part in msg.walk():
+        if trace:
+            print("Part:          \n")
+            print(part)
+        content_type = part.get_content_type()
+        if trace:
+            print("Content type:  \n")
+            print(content_type)
+        if content_type == PLAIN_TEXT:
+            body_lines = part.as_string().split(NEW_LINE)
+            wip.append(body_lines)
+
+    #truncate
+    if limit:
+        wip = wip[:limit]
+
+    result = wip
+    return result
+
 def get_first(session, number=BATCH_SIZE):
     """
 
@@ -202,7 +239,6 @@ def get_subjects(session, uids):
 
     return result
 
-
 def get_UIDs(session, serial_ids):
     """
 
@@ -243,10 +279,6 @@ def load_credentials():
     
     return guest, token
 
-def unpack_response(response):
-    pass
-    # deliver the content
-
 def print_timestamp_and_subject(messages, clean=True):
     for message in messages:
 
@@ -266,42 +298,11 @@ def print_timestamp_and_subject(messages, clean=True):
 # what about capitalization of titles?
 # what happens if I pass in wrong uid?
 
-def get_body_lines(msg, limit=None, trace=False):
-    """
+def unpack_response(response):
+    pass
+    # deliver the content
 
-    
-    As described at https://coderzcolumn.com/tutorials/python/imaplib-simple-guide-to-manage-mailboxes-using-python
-    """
-    result = list()
-    wip = list()
-    for part in msg.walk():
-        if trace:
-            print("Part:          \n")
-            print(part)
-        content_type = part.get_content_type()
-        if trace:
-            print("Content type:  \n")
-            print(content_type)
-        if content_type == PLAIN_TEXT:
-            body_lines = part.as_string().split(NEW_LINE)
-            wip.append(body_lines)
-
-    #truncate
-    if limit:
-        wip = wip[:limit]
-
-    result = wip
-    return result
-
-def get_body(msg, glue=NEW_LINE, trace=false):
-    """
-
-    get_body(msg, glue, trace) -> string
-
-    Returns a string connected by glue that represents the body of a message.
-    """
-    result = ""
-    body_lines = get_body_lines(msg, trace=trace)
+# Testing
 
 session = establish_session()
 guest, token = load_credentials()

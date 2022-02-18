@@ -36,6 +36,24 @@ def detect_encoding(string):
     result = (encoding, wip)
     return result
 
+def extract_domain(email_address):
+    """
+
+    extract_domain(email_address) -> string
+
+    Returns the contents of the email address after the "@". 
+    """
+    domain = ""
+    at = email_address.find(constants.AT)
+    if at == -1:
+        memo = constants.AT + " not in " + email_address
+        raise exceptions.ParsingError(memo)
+    else:
+        start = at + 1
+        domain = email_address[start:]
+        
+    return domain
+
 def extract_encoding(string):
     """
     takes out the encoding prefix
@@ -179,3 +197,5 @@ def parse_base64(string):
     # turns bytestring into regular string
 
     return result
+
+
