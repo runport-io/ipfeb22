@@ -20,8 +20,9 @@ class Watchlist:
     """
     
     def __init__(self):
-        self._index = dict()
-        self._groups = dict()     
+        self._groups = dict()
+
+        # self._index = dict()
         # two structures: index, and filters
         # index: brand, keyed by string
         # groups:
@@ -29,30 +30,52 @@ class Watchlist:
         # None: [1, 2]
         # blah: [2, 3]  
 
-    def add_brand(self, name, group_name=None):
-        if group_name not in self._groups.keys():
-            group = self.add_group(group_name)
-        else:
-            group = self.get_group(group_name)
+    def add_brand(self, brand, group_name=None):
+        """
 
-        new = brand.Brand(name)
-        group.add(new)
+        Watchlist.add_brand() -> None
+
+        Method adds brand to the group you name. Delegates to add_group and
+        creates the group if it does not exist. 
+        """
+        group = self.add_group(group_name, brand)
+        print(group)
         
         # register brand in the index
         # num = len(self._index)
         #   self._index[brand] = num
         ## what if it is already there?
 
-    def add_group(self, group_name):
+    def add_group(self, group_name, *brands):
         """
 
+        Watchlist.add_group() -> list
+
+        Adds brands to the group you name in the call. If the group already
+        exists, appends brands to the group. 
         """
-        new = group.Group()
-        place = self._groups.setdefault(group_name, new)
-        return new
+        new = list()
+        group = self._groups.setdefault(group_name, new)
+        group.extend(brands)
+        
+        return group
 
     def get_group(self, group_name):
-        result = self._groups[group_name]
+        group = self._groups[group_name]
+        return group
+
+    def get_uniques(self):
+        """
+ 
+        Watchlist.get_uniques() -> set
+
+        Method returns a set of the entries in all of the groups.
+        """
+        result = set()
+        for group, brands in self._groups.items():
+            uniques = set(brands)
+            result.update(uniques)
+
         return result
 
     def flatten(self):
