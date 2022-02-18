@@ -24,6 +24,7 @@ Event               Organizes information detected by observers or created
 
 # 2) Port.
 import utilities as up
+from textfield import TextField
 
 class Event:
     """
@@ -57,7 +58,7 @@ class Event:
     def from_flat(cls):
         pass
 
-    def __init__(self, headline=None, body=None)
+    def __init__(self, headline=None, body=None):
         self.body = TextField(body)
         self.headline = TextField(headline)
         self.source = Source()

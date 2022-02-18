@@ -1,5 +1,5 @@
 
-import Event
+import event as e
 
 class Welder:
     def __init__(self):
@@ -12,7 +12,7 @@ class Welder:
 
         Returns an Event that's blank.
         """
-        event = Event()
+        event = e.Event()
         return event
     
         # consider adding headline here.
@@ -61,3 +61,12 @@ class Welder:
         # event.assign_id()
         # add timestamp, original
         # return
+
+import pickle
+file_name = "emails.pkl"
+f = open(file_name, "rb")
+results = pickle.load(f)
+email0 = results[0]
+w = Welder()
+event = w.make_event_from_msg(email0)
+
