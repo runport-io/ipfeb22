@@ -1,3 +1,22 @@
+# welder
+# (c) Port. Prerogative Club 2022 ("the Club")
+# Port. 2
+# License: GPL 3.0, unless agreed to in writing with the Club
+
+"""
+
+Module defines a class for packaging emails into events
+------------------  ------------------------------------------------------------
+Attribute           Description
+------------------  ------------------------------------------------------------
+
+DATA:
+N/a
+
+FUNCTIONS:
+class Welder        What do you say when you turn an email into an event?*
+------------------  ------------------------------------------------------------
+"""
 
 # Imports
 # 1) Built-ins
@@ -108,7 +127,8 @@ class Welder:
         event = self.add_body(msg, event)
         # event.assign_id()
         # add timestamp, original
-        # return
+        
+        return event
     
     def record_receipt(self, msg, event, overwrite=False):
         """
@@ -124,11 +144,18 @@ class Welder:
         return event
 
 # Testing
+def run_test():    
+    import pickle
+    file_name = "emails.pkl"
+    f = open(file_name, "rb")
+    results = pickle.load(f)
+    email0 = results[0]
+    w = Welder()
+    event = w.make_event_from_msg(email0)
+    result = (results, email0, event)
+    return result
 
-import pickle
-file_name = "emails.pkl"
-f = open(file_name, "rb")
-results = pickle.load(f)
-email0 = results[0]
-w = Welder()
-event = w.make_event_from_msg(email0)
+if __name__ == "__main__":
+    run_test()
+
+#*"Well done."

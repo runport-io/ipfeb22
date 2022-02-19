@@ -1,5 +1,7 @@
 # Observer 2
-# (c) Port. Prerogative Club 2022
+# (c) Port. Prerogative Club 2022 ("the Club")
+# Port. 2
+# License: GPL 3.0, unless agreed to in writing with the Club
 
 """
 
@@ -13,6 +15,23 @@ GMAIL               URL for gmail's IMAP gateway
 USER                id for the marketing inbox
 
 FUNCTIONS:
+authenticate        signs into a session
+check_mail          get how many messages there are in an account
+establish_session   connect to a server via IMAP
+get_body            extract the body of the message as a string           
+get_body_lines      get a line by line list of the contents of a message
+get_first           get oldest messages on the server
+get_ids             returns serial ids for messages on the server
+get_last            get newest messages on the server
+get_message_by_UID  read message based on identifier
+get_subject_by_UID  [OBS] read subject based on identifier
+get_subject2        read subject based on identifier        
+get_subjects        [OBS] get subjects for a batch of identifiers
+get_UIDs            returns identifiers that correspond to positions in folder           
+load_credentials    read credentials from file
+print_timestamp_and_subject     
+unpack_response     placeholder for unpacking IMAP responses
+run_tests           runs retrieval and processing
 
 CLASSES:
 N/a
@@ -25,7 +44,7 @@ import imaplib
 import email
 import json
 
-# 2) Port. objects
+# 2) Port.
 import parser2
 
 from constants import *
@@ -267,7 +286,7 @@ def get_UIDs(session, serial_ids):
     return result
     # <-----------------------------------------------------review routine
 
-def load_credentials():
+def load_credentials(location=file_name):
     """
 
     load_credentials() -> tuple
@@ -276,7 +295,7 @@ def load_credentials():
     """
     # should expand this to non-managed dir
     # step up one level in folder, then make credentials
-    file = open(file_name, "r")
+    file = open(location, "r")
     creds = json.load(file)
     guest = creds[GUEST]
     token = creds[TOKEN]
@@ -308,7 +327,13 @@ def unpack_response(response):
 
 # Testing
 def run_tests():
-    
+    """
+
+    run_tests() -> tuple
+
+    Function establishes connection and loads messages. Returns a tuple that
+    contains the ten most recent and ten oldest messages in the inbox.
+    """
     session = establish_session()
     guest, token = load_credentials()
     authed = authenticate(session, guest, token)
@@ -353,6 +378,8 @@ def run_tests():
     body2 = get_body(last_msgs[1])
     print("Body of second most-recent email:  \n")
     print(body2)
+
+    return (first_msgs, last_msgs)
 
 if __name__ == "__main__":
     run_tests()
