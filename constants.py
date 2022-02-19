@@ -29,6 +29,7 @@ BATCH_SIZE = 10
 SPACE = " "
 NEW_LINE = "\n"
 TAB = "\t"
+AT = "@"
 
 # Credentials
 file_name = "credentials.json"

@@ -307,52 +307,55 @@ def unpack_response(response):
     # deliver the content
 
 # Testing
+def run_tests():
+    
+    session = establish_session()
+    guest, token = load_credentials()
+    authed = authenticate(session, guest, token)
+    results = check_mail(authed)
+    ids = get_ids(authed)
+    first_four = ids[:4]
+    print(first_four)
 
-session = establish_session()
-guest, token = load_credentials()
-authed = authenticate(session, guest, token)
-results = check_mail(authed)
-ids = get_ids(authed)
-first_four = ids[:4]
-print(first_four)
+    last_four = ids[-4:]
+    print(last_four)
+    uniques = get_UIDs(session, last_four)
+    print(uniques)
 
-last_four = ids[-4:]
-print(last_four)
-uniques = get_UIDs(session, last_four)
-print(uniques)
+    headlines = get_subjects(session, uniques)
+    for item in headlines.items(): print(item)
 
-headlines = get_subjects(session, uniques)
-for item in headlines.items(): print(item)
+    messages = list()
+    for uid in uniques:
+        msg = get_message_by_UID(session, uid)
+        messages.append(msg)
 
-messages = list()
-for uid in uniques:
-    msg = get_message_by_UID(session, uid)
-    messages.append(msg)
+    cleaned_subjects = list()
+    for msg in messages:
+        subject = msg.get(EMAIL_LIB_SUBJECT)
+        print("Raw:     ", subject)
+        cleaned = parser2.clean_string(subject)
+        print("Cleaned: ", cleaned)
+        cleaned_subjects.append(cleaned)
 
-cleaned_subjects = list()
-for msg in messages:
-    subject = msg.get(EMAIL_LIB_SUBJECT)
-    print("Raw:     ", subject)
-    cleaned = parser2.clean_string(subject)
-    print("Cleaned: ", cleaned)
-    cleaned_subjects.append(cleaned)
+    first_msgs = get_first(session, number=5)
+    print("******first******")
+    print_timestamp_and_subject(first_msgs)
 
-first_msgs = get_first(session, number=5)
-print("******first******")
-print_timestamp_and_subject(first_msgs)
+    last_msgs = get_last(session, number=5)
+    print("******last******")
+    print_timestamp_and_subject(last_msgs)
 
-last_msgs = get_last(session, number=5)
-print("******last******")
-print_timestamp_and_subject(last_msgs)
+    body1 = get_body(last_msgs[0])
+    print("Body of first most-recent email:  \n")
+    print(body1)
 
-body1 = get_body(last_msgs[0])
-print("Body of first most-recent email:  \n")
-print(body1)
+    body2 = get_body(last_msgs[1])
+    print("Body of second most-recent email:  \n")
+    print(body2)
 
-body2 = get_body(last_msgs[1])
-print("Body of second most-recent email:  \n")
-print(body2)
-
+if __name__ == "__main__":
+    run_tests()
 
 # figure out what "=20" means, how to get rid of the unicode thingamajig.
 # flow: keep the first 100 messages, and dim x watchlist?
