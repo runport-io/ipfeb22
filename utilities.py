@@ -4,46 +4,28 @@
 import constants
 import exceptions
 
-
-def pretty_print(obj, glue=None):
-    if not glue:
-        glue = constants.NEW_LINE
-        
-    view = ""
-    lines = list()
-    try:
-        lines = obj.get_lines()
-        # ideally would try through getattr
-    except AttributeError:
-        pass
-    if lines:
-        view = glue.join(lines)
-        print(view)
-    else:
-        # print system default
-        print(obj)
-
-def set_with_override(obj, name, value, override=False):
-    safe = False
-    if not getattr(obj, name, None):
-        # attribute not defined
-        safe = True
-    if safe or override:
-        setattr(obj, name, value)
-        # may be explicitly delete on override?
-    else:
-        raise exceptions.OverrideError
-
-def set_with_force(*pargs, **kwargs):
-    result = set_with_override(*pargs, **kwargs)
-    return result
-
 def add_attributes_to_skip(obj, name=None, value=None, override=False):
     if not name:
         name = constants.SKIP_ATTRIBUTES
     if not value:
         value = list()
     set_with_override(obj, name=name, value=value, override=override)
+
+def deepcopy(obj, recur=False):
+    wip = obj.__dict__.copy()
+    data = dict()
+    # need recursion to deal with attributes that are themselves objects
+    if recur:
+        for k, v in wip:
+            replacement = v
+            try:
+                replacement = v.copy()
+            except AttributeError:
+                pass
+            data[k] = v
+    
+    new = obj.from_flat(data=data)
+    return new
 
 def get_lines(obj, include_header=True, width=None, indent=None):
     """
@@ -96,21 +78,75 @@ def get_lines(obj, include_header=True, width=None, indent=None):
         
     return lines
 
-def deepcopy(obj, recur=False):
-    wip = obj.__dict__.copy()
-    data = dict()
-    # need recursion to deal with attributes that are themselves objects
-    if recur:
-        for k, v in wip:
-            replacement = v
-            try:
-                replacement = v.copy()
-            except AttributeError:
-                pass
-            data[k] = v
+def make_string(obj, glue=None):
+    """
+
+    make_string(obj) -> string
+
+    Function returns a view of the object. Function attempts to call
+    obj.get_lines() and falls back on str if the object does not define that
+    routine.
+    """
+    result = ""
+    lines = list()
+
+    # attempt to retrieve the view defined by the object
+    try:
+        lines = obj.get_lines()
+    except AttributeError:
+        pass
+
+    # if we got lines, put them together, otherwise, return the system view
+    if lines:
+        if not glue:
+            glue = constants.NEW_LINE
+        result = glue.join(lines)
+    else:
+        result = str(obj)
+        
+    return result
     
-    new = obj.from_flat(data=data)
-    return new
+def pretty_print(obj, glue=None):
+    if not glue:
+        glue = constants.NEW_LINE
+        
+    view = ""
+    lines = list()
+    try:
+        lines = obj.get_lines()
+        # ideally would try through getattr
+    except AttributeError:
+        pass
+    if lines:
+        view = glue.join(lines)
+        print(view)
+    else:
+        # print system default
+        print(obj)
+
+def set_with_force(*pargs, **kwargs):
+    """
+
+    set_with_force(*pargs, **kwargs) -> obj
+
+    Wrapper for set_with_override. Returns result from that function.
+    """
+    result = set_with_override(*pargs, **kwargs)
+    return result
+
+def set_with_override(obj, name, value, override=False):
+    safe = False
+    if not getattr(obj, name, None):
+        # attribute not defined
+        safe = True
+    if safe or override:
+        setattr(obj, name, value)
+        # may be explicitly delete on override?
+    else:
+        raise exceptions.OverrideError
+
+
+
     
     
     

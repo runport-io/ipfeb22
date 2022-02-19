@@ -30,10 +30,11 @@ class Source:
     set_sender()        Takes string for now.
     ------------------  --------------------------------------------------------
     """
-    def __init__(self, name):
+    def __init__(self, name=None):
         self.number = number.Number()
         self._sender = None
-        self.set_sender(name)
+        if name:
+            self.set_sender(name)
 
     def get_sender(self):
         """
