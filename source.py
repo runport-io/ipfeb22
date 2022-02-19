@@ -7,6 +7,7 @@
 # Port.
 import constants
 import exceptions
+import number
 import utilities
 
 # Constants
@@ -22,7 +23,7 @@ class Source:
     Attribute           Description
     ------------------  --------------------------------------------------------
     DATA:
-    N/a
+    number              instance of Number
     
     FUNCTIONS:
     get_sender()        
@@ -30,6 +31,7 @@ class Source:
     ------------------  --------------------------------------------------------
     """
     def __init__(self, name):
+        self.number = number.Number()
         self._sender = None
         self.set_sender(name)
 
@@ -75,6 +77,11 @@ class Source:
 
         return lines
 
+    def set_number(self, namespace):
+        name = self.get_sender()
+        self.number.set_number(namespace, name)
+        
+
     #**************************************************************************
     #*                             Non-public                                 *
     #**************************************************************************
@@ -87,8 +94,14 @@ class Source:
 # add wrap in skip_attrs
 # add attributes to print
 
+# Tests
+import uuid
+test_namespace = uuid.UUID(constants.TEST_STRING)
+
 s1 = Source("ilya")
 print(s1)
+s1.set_number(test_namespace)
 
 s2 = Source("somebody")
 print(s2)
+s2.set_number(test_namespace)

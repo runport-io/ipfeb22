@@ -119,7 +119,6 @@ class Event:
         lines = up.get_lines(alt)
         return lines
 
-
     def __str__(self):
         string = up.make_string(self)
         return string   
@@ -128,7 +127,6 @@ class Event:
         return self.number.get_number()
         
     def set_number(self):
-        
         namespace = self.source.number.get_number()
         # source should get its number from observer + string
         name = self.headline.get_content()

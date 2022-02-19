@@ -36,3 +36,7 @@ GUEST = "guest"
 TOKEN = "token"
 
 STANDARD_WIDTH = 18
+
+# UUIDs
+TEST_STRING = "4be0643f-1d98-573b-97cd-ca98a65347dd"
+
