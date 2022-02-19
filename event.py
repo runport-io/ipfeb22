@@ -58,10 +58,6 @@ class Event:
    
     ------------------  --------------------------------------------------------
     """
-    @classmethod
-    def from_flat(cls):
-        pass
-
     def __init__(self, headline=None, body=None, source=None):
         self.body = TextField(body)
         self.headline = TextField(headline)
@@ -73,6 +69,33 @@ class Event:
         if source:
             self.set_source(source)
 
+    def __str__(self):
+        string = up.make_string(self)
+        return string
+    
+    @classmethod
+    def from_flat(cls, data):
+        """
+
+        Event.from_flat(data) -> Event
+
+        Class method.
+
+        Method returns an instance of Event populated based on the information
+        in the parameter. Method delegates to the constructor of each attribute.
+        """
+        # placeholder code, rewrite.
+        new = cls()
+        
+        # add logic to skip attrs?
+        # update for non-object based elements? somehow? e.g. raw?
+        
+        for attr, value in new.__dict__:
+            detail = data[attr]
+            new.attr = value.from_flat(detail)
+
+        return new
+    
     def get_body(self):
         """
 
@@ -84,7 +107,14 @@ class Event:
         return result
 
     def get_headline(self):
-        return self.headline.get_content()
+        """
+
+        Event.get_headline() -> obj
+
+        Method returns the content from the instance's headline. 
+        """
+        result = self.headline.get_content()
+        return result
 
     def get_number(self):
         """
@@ -123,11 +153,14 @@ class Event:
         source = self.source.get_sender()
         return source
 
-    def __str__(self):
-        string = up.make_string(self)
-        return string   
+    def get_summary():
+        """
 
-    def get_card():
+        Event.get_summary() -> string
+
+        Method returns a string that summarizes the instance. The string
+        truncates the body of the event.
+        """
         pass
         # placeholder for abbreviated representation
         #
@@ -140,14 +173,32 @@ class Event:
         # first couple lines of event body?
         # how is this different than just print() or print_short()?
 
-    def set_headline(self, headline):
-        self.headline.set_content(headline)
+    def set_body(self, content):
+        """
 
-    def set_body(self, string):
-        self.body.set_content(string)
+        Event.set_body(content) -> None
+
+        Method records the argument as the body of the instance.
+        """
+        self.body.set_content(content)
+
+    def set_headline(self, content):
+        """
+
+        Event.set_headline(content) -> None
+
+        Method records the argument as the headline of the instance.
+        """
+        self.headline.set_content(content)
 
     def set_number(self):
-        
+        """
+
+        Event.set_number() -> uuid
+
+        Method sets the event's number. Method uses the source's number as the
+        namespace. 
+        """
         namespace = self.source.number.get_number()
         # source should get its number from observer + string
         name = self.headline.get_content()
