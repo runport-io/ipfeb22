@@ -6,6 +6,7 @@
 # 2) Port.
 import constants
 import event as e
+import exceptions
 import observ2
 import parser2
 
@@ -29,35 +30,48 @@ class Welder:
         event.set_body(body)
         return event
     
-    def add_headline(self, msg, event, overwrite=False):
+    def add_headline(self, msg, event, force=False):
         """
 
-        Welder.add_headline() -> event
+        Welder.add_headline(msg, event, force=False) -> event
 
-        Returns an event populated with a headline.
+        Method adds the message subject as the headline of the event. Method
+        overwrites any existing headline if you set "force" to True, and throws
+        an OverrideException otherwise. 
         """
         headline = msg.get(constants.EMAIL_LIB_SUBJECT)
-        event.set_headline(headline, overwrite=overwrite)
+        existing = event.get_headline()
+        
+        if force or not existing:
+            event.set_headline(headline)
+        else:
+            raise exceptions.OverrideException
+            
         return event
 
     def add_original(self):
         pass
 
-    def add_source(self, msg, event, overwrite=False):
+    def add_source(self, msg, event, force=False):
         """
 
-        Welder.add_source(msg, event, overwrite=False) -> event
+        Welder.add_source(msg, event, force=False) -> event
 
-        Method records the sender of the message as the source of the event.
-        Method modifies event in place before returning it to you. 
+        Method records the sender of the message on the event. Method modifies
+        the event in place. 
+
+        If you set "overwrite" to True, method will record the source regardless
+        of whether the event already has a source. Otherwise, method will only
+        record the source if the existing source is blank.
         """
         email_address = msg.get(constants.EMAIL_LIB_FROM)
         source = parser2.extract_domain(email_address)
         existing = event.get_source()
-        if existing and not overwrite:
-            pass
+        
+        if force or not existing:
+            event.set_source(source)
         else:
-            event.set_source(source, overwrite=overwrite)
+            raise exceptions.OverrideError
         
         return event
         
