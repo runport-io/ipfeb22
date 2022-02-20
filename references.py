@@ -80,16 +80,21 @@ def get_next(string, prefix, length):
         if remainder[0] == prefix:
             # next step is also a reference potentially
             next_part = get_next(remainder, prefix, length)
+            print(next_part)
             result.extend(next_part[0])
+            remainder = next_part[1]
 
         else:
             pass
 
     return (result, remainder)
 
-    
-            
-            
+# do the comparison for equivalent tokens
+# add a little bit of include URLs or not
+
+# edge cases
+# escaped new lines
+# single blank
     
 
     # go through each location
