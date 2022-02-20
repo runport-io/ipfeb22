@@ -93,7 +93,7 @@ def establish_session(service=GMAIL):
 def get_body(msg, glue=NEW_LINE, trace=False):
     """
 
-    get_body(msg, glue, trace) -> string
+    get_body() -> string
 
     Returns a string connected by glue that represents the body of a message.
     """

@@ -30,6 +30,7 @@ SPACE = " "
 NEW_LINE = "\n"
 TAB = "\t"
 AT = "@"
+EQUALS = "="
 
 # Credentials
 file_name = "credentials.json"

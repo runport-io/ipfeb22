@@ -190,6 +190,28 @@ def parse_quotable(string):
     result = wip
     return result
 
+def parse_hex(string):
+    pass
+    # take the string
+    # walk it
+    # for any character thats an "=":
+    # look at next character
+    # if the next character is a space, stop and move on
+    ## locate the breakers
+    # for each breaker, start byte
+    # for each byte:
+    #   try to decode the byte, if you get the unicodedecodeerror, then
+    #   work more
+    #   if you don't, replace.
+    #   break
+    # go through the string iteratively
+
+
+# somethign that works:
+#   turn the byte into an integer through int(byte, 16)
+#   construct a bytes array: ar = bytes([byte])
+#   decode intro string
+
 def parse_base64(string):
     result = ""
     bytestring = string.encode(ASCII)
@@ -202,5 +224,4 @@ def parse_base64(string):
     # turns bytestring into regular string
 
     return result
-
 
