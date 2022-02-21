@@ -107,12 +107,24 @@ def get_tokens(string, prefix, length, trace=False):
 
     return result
 
+def transform(tokens):
+    # return a dictionary thats a look up table
+    result = dict()
+    prefix = "0x"
+    for token in tokens:
+        seed = list()
+        for node in token:
+            adj_node = prefix + node
+            value = int(adj_node, 16)
+            seed.append(value)
+            
+        result[token] = bytes(seed)
+    
+    return result
 
-
-# do the comparison for equivalent tokens
-# add a little bit of include URLs or not
 
 # edge cases
+# add a little bit of include URLs or not
 # escaped new lines
 # single blank
     
