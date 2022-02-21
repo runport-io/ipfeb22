@@ -7,3 +7,10 @@ class PortError(Exception):
 
 class OverrideError(PortError):    
     pass
+
+class PlaceholderError(PortError):
+    """
+
+    Flag for operations that I have not yet defined.
+    """
+    pass

@@ -8,9 +8,16 @@
 # n/a
 
 # 2) Port.
-import constants
+# n/a
 
-def locate_references(string, prefix=constants.EQUALS):
+# 3) Data
+EQUALS = "="
+HEX_PREFIX = "0x"
+STRICT = "strict"
+TAB = "\t"
+UTF8 = "utf-8"
+
+def locate_references(string, prefix=EQUALS):
     """
 
     locate_references(string) -> list
@@ -29,33 +36,6 @@ def locate_references(string, prefix=constants.EQUALS):
     return result
 
 # need to handle the "= " empty byte
-
-def identify_tokens(string, references, prefix=constants.EQUALS, length=2):
-    """
-
-    identify_tokens() -> dict
-
-    Function picks out the tokens that follow a handle in the string. Expects
-    each token to have the length you specify.
-
-    Function treats uniques as a token. 
-    """
-    tokens = set()
-    skip = len(prefix)
-    
-    for ref in references:
-        token = ""
-        start_this = ref + skip
-        end_this = start_this + length
-        this_token = string[start_this:end_this]
-        token = this_token
-        if token in tokens:
-            continue
-        else:
-            next_token = get_next(remainder, prefix, length)
-            token = token + next_token
-            # check the one after, and so on
-    pass
 
 def get_next(string, prefix, length, trace=False):
     # goal of this function if to return one token of variable length, as well
@@ -122,13 +102,134 @@ def transform(tokens):
     
     return result
 
+def adjust_base(string, starting_base=16, ending_base=10,
+                prefix=HEX_PREFIX):
+    """
+
+    adjust_base() -> int
+
+    Function recomputes the string as an integer in the ending_base. Throws a
+    PlaceholderError if you try to compute a result other than in base 10.
+    """
+    result = None
+    
+    if ending_base != 10:
+        c = "I have defined only transformations into base 10."
+        raise exceptions.PlaceholderError(c)
+    else:
+        adj_string = prefix + string
+        result = int(adj_string, starting_base)
+
+    return result
+
+def get_bytes(token, prefix=HEX_PREFIX):
+    """
+
+    get_bytes() -> bytestring
+
+    Function changes a token of references into a bytestring. 
+    """
+    result = bytes()
+    seed = get_integers(token)
+    result = bytes(seed)
+    return result
+
+def get_integers(token, prefix=HEX_PREFIX):
+    """
+
+    get_integers -> list
+
+    Function returns a list of integers that correspond to each item in the
+    token. 
+    """
+    result = list()
+
+    for node in token:
+        value = adjust_base(node, prefix=prefix)
+        result.append(value)
+
+    return result
+
+def turn_tokens_into_bytes(tokens, prefix=HEX_PREFIX):
+    """
+
+    turn_tokens_into_bytes() -> dict
+    
+    Function returns a mapping of each token to a bytestring. You should input
+    an iterable for "tokens."
+    """
+    result = dict()
+    for token in tokens:
+        result[token] = get_bytes(token)
+
+    return result
+
+def turn_tokens_into_strings(tokens, prefix=HEX_PREFIX, encoding=UTF8,
+                             errors=STRICT):
+    """
+
+    turn_tokens_into_strings() -> dict
+
+    Function returns a dictionary of each token mapped to the string it
+    represents. 
+    """
+    result = dict()
+    for token in tokens:
+        wip = get_bytes(token, prefix=prefix)
+        value = wip.decode(encoding=encoding, errors=errors)
+        result[token] = value
+    return result
+
+def clean_string2(string, trace=False, escape=EQUALS):
+    """
+
+    clean_string2 -> string
+
+    Function replaces references to bytes in string with the string equivalents. 
+    """
+    result = string
+    tokens = get_tokens(string, prefix=escape)
+
+    if trace:
+        print("Tokens:   ", tokens)
+
+    lookup = turn_tokens_into_strings(tokens)
+
+    if trace:
+        print("Lookup:   ")
+        keys = sorted(lookup.keys())
+        for key in keys:
+            view = constants.TAB + str(key) + ": " + str(lookup[key])
+            print(view)
+
+    for key, value in lookup.items():
+        adj_key = escape + escape.join(key)
+        # key is now a tuple, need to put in the escapes back in to detect
+        # occurences in the string
+        
+        if trace:
+                print("Key:      ", key)
+                print("Adj. key: ", adj_key)
+        
+        result = result.replace(adj_key, value)
+        
+    return result
+
 def extract_and_replace(string, prefix):
+    """
+
+    extract_and_replace() -> string
+
+    Function cleans string of references to bytes by replacing the references
+    with their unicode equivalents. Expects each reference to start with the
+    prefix.
+    """
     result = string
     tokens = get_tokens(string, prefix=prefix)
     lookup = transform(tokens)
     print(lookup)
     for token, byte_string in lookup.items():
-        adj_token = "=" + "=".join(token)
+        adj_token = prefix + prefix.join(token)
         print("Adj. token:", adj_token)
         value = byte_string.decode()
         print("value:     ", value)
@@ -138,22 +239,21 @@ def extract_and_replace(string, prefix):
 
 # to do:
 # works ok, but doesn't fix one reference, f0 etc.
-# pull the parse into char logic into a function, so i could get the result for
-# a single function
 # check on the reaplcement for that.
 # check on othr messages. 
 
-# take a string, and replace everything in the transform
-#
 
 # edge cases
 # add a little bit of include URLs or not
 # escaped new lines
 # single blank
     
-
     # go through each location
     # for each location, see what's in 2, and what's in 4
     # compare
     # or keep parsing? 
+
+#
+# replace the escaped new line somehow
+# get_tokens() should return a dictionary
 
