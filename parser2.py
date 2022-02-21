@@ -7,7 +7,9 @@ import base64
 
 # 2) Port.
 import constants
+import references
 
+# 3) Data
 UTF8 = "UTF-8?"
 UTF8_LO = "utf-8?"
 UTF_PREFIXES = (UTF8, UTF8_LO)
@@ -28,6 +30,7 @@ EMPTY_STRING = ""
 EM_DASH = "-"
 EQUALS = "="
 FWD_SLASH = "/"
+NEW_LINE = "\n"
 QUESTION_MARK = "?"
 SEMICOLON = ";"
 SPACE = " "
@@ -39,6 +42,8 @@ CONTENT_ENCODING="Content-Transfer-Encoding"
 CONTENT_TYPE = "Content-Type"
 FIELDS = [CHARSET, CONTENT_ENCODING, CONTENT_TYPE]
 
+
+# 4) Functions
 def detect_encoding(string):
     result = (None, None)
     encoding = None
@@ -70,7 +75,11 @@ def extract_domain(email_address):
 
 def extract_encoding(string):
     """
-    takes out the encoding prefix
+
+    extract_encoding() -> tuple
+    
+    Function takes a string with an encoding mark and extracts the encoding
+    mark. 
     """
     result = (None, None)
     prefix = ""
@@ -243,9 +252,6 @@ def unescape_chars(string, escape=EQUALS, chars=BREAKS, lookup=None):
 # line1: split by semicolon
 # check for "Content-Transfer-Encoding"
 
-def extract_encoding:
-    pass
-
 def clean_body(string):
     """
 
@@ -263,7 +269,7 @@ def clean_body(string):
 
     # if encoding is utf8
     # <--- should extract encoding and pass it down
-    body = html_entities.clean_string(body, encoding=encoding)
+    body = references.clean_string(body)
 
     return body, data
 
@@ -274,11 +280,12 @@ def strip_header_from_body(string, line_count=2):
     """
     result = tuple()
     header = list()
-    lines = string.splitlines(NEW_LINE)
+    lines = string.splitlines(keepends=True)
+    # keep ends so I can reconstruct rest of string
     header = lines[:line_count]
     
     remainder = lines[line_count:]
-    body = NEW_LINE.join(remainder) 
+    body = "".join(remainder)
 
     result = (header, body)
     return result
@@ -339,3 +346,8 @@ def strip_links(string):
     number to link.
     """
     pass
+
+
+# detect if there is a header?
+# if blah in line 1
+# if blah2 in l;ine 2, then strip the header, parse the header

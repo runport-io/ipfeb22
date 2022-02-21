@@ -68,7 +68,7 @@ def get_next(string, prefix, length, trace=False):
                 print("next part:  ", next_part[0])
             
             next_tokens = next_part[0]
-            if next_tokens[0]!= token:
+            if next_tokens and next_tokens[0]!= token:
                 result.extend(next_tokens)
 
             remainder = next_part[1]
@@ -127,7 +127,8 @@ def get_bytes(token, prefix=HEX_PREFIX):
 
     get_bytes() -> bytestring
 
-    Function changes a token of references into a bytestring. 
+    Function changes a token of references into a bytestring. You should use a
+    tuple or list of strings as the token, for example ("C5", "A0").
     """
     result = bytes()
     seed = get_integers(token)
@@ -180,12 +181,13 @@ def turn_tokens_into_strings(tokens, prefix=HEX_PREFIX, encoding=UTF8,
         result[token] = value
     return result
 
-def clean_string2(string, trace=False, escape=EQUALS):
+def clean_string(string, trace=False, escape=EQUALS):
     """
 
-    clean_string2 -> string
+    clean_string -> string
 
-    Function replaces references to bytes in string with the string equivalents. 
+    Function replaces references to bytes in string with the string equivalents.
+    You should replace escaped new lines first, otherwise this will break.
     """
     result = string
     tokens = get_tokens(string, prefix=escape)
@@ -199,7 +201,7 @@ def clean_string2(string, trace=False, escape=EQUALS):
         print("Lookup:   ")
         keys = sorted(lookup.keys())
         for key in keys:
-            view = constants.TAB + str(key) + ": " + str(lookup[key])
+            view = TAB + str(key) + ": " + str(lookup[key])
             print(view)
 
     for key, value in lookup.items():
@@ -242,10 +244,7 @@ def extract_and_replace(string, prefix):
 
 # edge cases
 # add a little bit of include URLs or not
-# escaped new lines
 # single blank
-    
-# replace the escaped new line
+
 # get_tokens() should return a dictionary
-# make a new routine that does the job of taking the header out
-# 
+ 
