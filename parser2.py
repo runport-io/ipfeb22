@@ -22,13 +22,22 @@ ASCII = "ascii"
 
 # ASCII
 APOSTROPHE = "'"
+COLON = ":"
 COMMA = ","
 EMPTY_STRING = ""
 EM_DASH = "-"
+EQUALS = "="
 FWD_SLASH = "/"
 QUESTION_MARK = "?"
+SEMICOLON = ";"
 SPACE = " "
 UNDER = "_"
+
+# Headers
+CHARSET = "charset"
+CONTENT_ENCODING="Content-Transfer-Encoding"
+CONTENT_TYPE = "Content-Type"
+FIELDS = [CHARSET, CONTENT_ENCODING, CONTENT_TYPE]
 
 def detect_encoding(string):
     result = (None, None)
@@ -190,28 +199,6 @@ def parse_quotable(string):
     result = wip
     return result
 
-def parse_hex(string):
-    pass
-    # take the string
-    # walk it
-    # for any character thats an "=":
-    # look at next character
-    # if the next character is a space, stop and move on
-    ## locate the breakers
-    # for each breaker, start byte
-    # for each byte:
-    #   try to decode the byte, if you get the unicodedecodeerror, then
-    #   work more
-    #   if you don't, replace.
-    #   break
-    # go through the string iteratively
-
-
-# somethign that works:
-#   turn the byte into an integer through int(byte, 16)
-#   construct a bytes array: ar = bytes([byte])
-#   decode intro string
-
 def parse_base64(string):
     result = ""
     bytestring = string.encode(ASCII)
@@ -225,3 +212,130 @@ def parse_base64(string):
 
     return result
 
+def unescape_chars(string, escape=EQUALS, chars=BREAKS, lookup=None):
+    """
+
+    unescape_chars() -> string
+
+    Function removes escapes from characters. For example, if you have a string
+    where newlines have escapes, you can use this routine to strip the escape
+    from the newline without affecting other escaped values.
+
+    If you specify lookup, function will replace the character with the value in
+    the lookup. You should provide a dictionary for the lookup.
+    """
+    result = string
+    
+    for char in chars:
+        query = escape+char
+        replacement = char
+        if lookup:
+            replacement = lookup[char]
+            
+        result = result.replace(query, replacement)
+
+    return result
+
+# outline
+# body, split by newline
+# take first two lines
+# check for "Content-Type"
+# line1: split by semicolon
+# check for "Content-Transfer-Encoding"
+
+def extract_encoding:
+    pass
+
+def clean_body(string):
+    """
+
+    -> string, dict
+
+    Returns cleaned string and dictionary of header and optionally links.
+    """
+    body = string
+    data = ""
+
+    body = unescape_chars(body)
+    # clean the new lines
+    header, body = strip_header_from_body(body)
+    data = parse_header(header)
+
+    # if encoding is utf8
+    # <--- should extract encoding and pass it down
+    body = html_entities.clean_string(body, encoding=encoding)
+
+    return body, data
+
+def strip_header_from_body(string, line_count=2):
+    """
+
+    strip_header_from_body() -> list, string
+    """
+    result = tuple()
+    header = list()
+    lines = string.splitlines(NEW_LINE)
+    header = lines[:line_count]
+    
+    remainder = lines[line_count:]
+    body = NEW_LINE.join(remainder) 
+
+    result = (header, body)
+    return result
+
+def fold_case(iterable):
+    """
+    -> list
+    """
+    result = list()
+    for item in iterable:
+        adj_item = item.casefold()
+        result.append(adj_item)
+        
+    return result
+    
+def parse_header(header, match_case=False, strip_whitespace=True):
+    """
+
+    -> dict
+
+    Function returns a dictionary 
+    """
+    result = dict()
+    wip = dict()
+    assignment_operators = [COLON, EQUALS]
+    
+    if not match_case:
+        header = fold_case(header)
+        assignment_operators = fold_case(assignment_operators)
+    
+    for line in header:
+        # line1: "Content-Type: text/plain; charset=utf-8"
+        segments = line.split(SEMICOLON)
+        for segment in segments:
+            #segment: "Content-Type: text/plain;"
+            operator = ""
+            for operator in assignment_operators:
+                if operator in segment:
+                    key, value = segment.split(operator)
+                    wip[key] = value
+
+    if strip_whitespace:
+        for k, v in wip.items():
+            adjk = k.strip()
+            adjv = v.strip()
+            result[adjk] = adjv
+    else:
+        result = wip
+
+    return result
+
+def strip_links(string):
+    """
+
+    strip_links() -> dictionary
+
+    Function removes links, replaces them with numbers. Returns dictionary of
+    number to link.
+    """
+    pass

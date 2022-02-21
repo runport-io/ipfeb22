@@ -214,7 +214,7 @@ def clean_string2(string, trace=False, escape=EQUALS):
         result = result.replace(adj_key, value)
         
     return result
-
+  
 def extract_and_replace(string, prefix):
     """
 
@@ -239,21 +239,13 @@ def extract_and_replace(string, prefix):
 
 # to do:
 # works ok, but doesn't fix one reference, f0 etc.
-# check on the reaplcement for that.
-# check on othr messages. 
-
 
 # edge cases
 # add a little bit of include URLs or not
 # escaped new lines
 # single blank
     
-    # go through each location
-    # for each location, see what's in 2, and what's in 4
-    # compare
-    # or keep parsing? 
-
-#
-# replace the escaped new line somehow
+# replace the escaped new line
 # get_tokens() should return a dictionary
-
+# make a new routine that does the job of taking the header out
+# 
