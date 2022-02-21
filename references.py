@@ -57,7 +57,7 @@ def identify_tokens(string, references, prefix=constants.EQUALS, length=2):
             # check the one after, and so on
     pass
 
-def get_next(string, prefix, length):
+def get_next(string, prefix, length, trace=False):
     # goal of this function if to return one token of variable length, as well
     # as the remainder of the string
     result = list()
@@ -80,14 +80,34 @@ def get_next(string, prefix, length):
         if remainder[0] == prefix:
             # next step is also a reference potentially
             next_part = get_next(remainder, prefix, length)
-            print(next_part)
-            result.extend(next_part[0])
-            remainder = next_part[1]
+            if trace:
+                print(next_part)
+                print("\n")
+                print("token: ", token)
+                print("result: ", result)
+                print("next part:  ", next_part[0])
+            
+            next_tokens = next_part[0]
+            if next_tokens[0]!= token:
+                result.extend(next_tokens)
 
+            remainder = next_part[1]
         else:
             pass
 
     return (result, remainder)
+
+def get_tokens(string, prefix, length, trace=False):
+    result = set()
+    rem = string
+    while rem:
+        token, rem = get_next(rem, prefix, length, trace=trace)
+        adj_token = tuple(token)
+        result.add(adj_token)
+
+    return result
+
+
 
 # do the comparison for equivalent tokens
 # add a little bit of include URLs or not
