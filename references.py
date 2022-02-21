@@ -97,7 +97,7 @@ def get_next(string, prefix, length, trace=False):
 
     return (result, remainder)
 
-def get_tokens(string, prefix, length, trace=False):
+def get_tokens(string, prefix, length=2, trace=False):
     result = set()
     rem = string
     while rem:
@@ -122,6 +122,29 @@ def transform(tokens):
     
     return result
 
+def extract_and_replace(string, prefix):
+    result = string
+    tokens = get_tokens(string, prefix=prefix)
+    lookup = transform(tokens)
+    print(lookup)
+    for token, byte_string in lookup.items():
+        adj_token = "=" + "=".join(token)
+        print("Adj. token:", adj_token)
+        value = byte_string.decode()
+        print("value:     ", value)
+        result = result.replace(adj_token, value)
+
+    return result
+
+# to do:
+# works ok, but doesn't fix one reference, f0 etc.
+# pull the parse into char logic into a function, so i could get the result for
+# a single function
+# check on the reaplcement for that.
+# check on othr messages. 
+
+# take a string, and replace everything in the transform
+#
 
 # edge cases
 # add a little bit of include URLs or not
