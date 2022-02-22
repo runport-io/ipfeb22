@@ -1,7 +1,21 @@
-# IMAP observer
-# (c) Port. Prerogative Club 2022
-# Port. 2.0.
-# Governed by GPL 3.0, unless agreed otherwise.
+# Copyright Port. Prerogative Club ("the Club")
+#
+# 
+# This file is part of Port. 2.0. ("Port.")
+#
+# Port. is free software: you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# Port. is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# Port. If not, see <https://www.gnu.org/licenses/>.
+#
+# Questions? Contact hi@runport.io.
 
 """
 
@@ -85,52 +99,6 @@ class IMAPObserver:
         # should probably do more here, actually sign in
         # select inbox
 
-
-    def set_service(self, service, override=False):
-        """
-
-        IMAPObserver.set_service() -> None
-
-        Records service on the instance. Raises error if you already defined
-        the service, unless you set "override" to True.
-        """
-        utilities.set_with_override(self, "_service",
-                                    service, override=override)
-
-    def get_service(self):
-        """
-
-        IMAPObserver.get_service() -> string or None
-
-        Returns service stored on instance.
-        """
-        return self._service
-
-    def set_offset(self, offset, override=True):
-        """
-
-        IMAPObserver.set_offset() -> int
-
-        Records the most recent email you read. Instance will start retrieving
-        messages from this point by default in the future.
-        """
-        utilities.set_with_override(self, "_offset", offset, override=override)
-
-    def get_offset(self, offset):
-        """
-
-        IMAPObserver.get_offset() -> int
-
-        Returns offset for instance.
-        """
-        return self._offset
-
-    def set_session(self, session, override):
-        utilities.set_with_override(self, "_session", session, override=override)
-
-    def get_session(self):
-        return self._session
-        
     def get_events(self, offset, count, flatten=False)
         """
 
@@ -142,13 +110,21 @@ class IMAPObserver:
         events = list()
         messages = self.get_messages(offset, count)
         for message in messages:
-            event = self.turn_msg_into_event(message)
+            event = self.make_event(message)
             if flatten:
                 event = event.flatten()
             events.append(event)                
 
         return events
     
+    def get_session(self):
+        return self._session
+        
+    def get_message_by_muid(self, muid):
+        session = self.get_session()
+        message = kit.get_message_by_UID(session, muid)
+        return message
+
     def get_messages(self, offset, count):
         """
 
@@ -165,10 +141,20 @@ class IMAPObserver:
 
         return messages
 
-    def get_message_by_muid(self, muid):
+    def get_muids(self, offset=0, count=None, trace=False):
         session = self.get_session()
-        message = kit.get_message_by_UID(session, muid)
-        return message
+        serials = self.get_serials(offset, count, trace)
+        muids = kit.get_UIDs(session, serials)
+        return muids
+
+    def get_offset(self, offset):
+        """
+
+        IMAPObserver.get_offset() -> int
+
+        Returns offset for instance.
+        """
+        return self._offset
 
     def get_serials(self, offset=0, count=None, trace=False):
         """
@@ -194,11 +180,46 @@ class IMAPObserver:
         
         return serials
 
-    def get_muids(self, offset=0, count=None, trace=False):
-        session = self.get_session()
-        serials = self.get_serials(offset, count, trace)
-        muids = kit.get_UIDs(session, serials)
-        return muids
+    def get_service(self):
+        """
+
+        IMAPObserver.get_service() -> string or None
+
+        Returns service stored on instance.
+        """
+        return self._service
+
+    def is_authenticated(self):
+        result = self._signed_in
+        return result
+
+    def is_connected(self):
+        pass
+
+    def set_offset(self, offset, override=True):
+        """
+
+        IMAPObserver.set_offset() -> int
+
+        Records the most recent email you read. Instance will start retrieving
+        messages from this point by default in the future.
+        """
+        utilities.set_with_override(self, "_offset", offset, override=override)
+
+    
+    def set_service(self, service, override=False):
+        """
+
+        IMAPObserver.set_service() -> None
+
+        Records service on the instance. Raises error if you already defined
+        the service, unless you set "override" to True.
+        """
+        utilities.set_with_override(self, "_service",
+                                    service, override=override)
+
+    def set_session(self, session, override):
+        utilities.set_with_override(self, "_session", session, override=override)
 
     def sign_in(self, guest, token=None):
         """
@@ -214,10 +235,6 @@ class IMAPObserver:
             session = kit.authenticate(session, guest, token)
             self.set_session(session, overwrite=True)
             self._signed_in = True
-
-    def check_if_signed_in(self):
-        result = self._signed_in
-        return result
 
     def sign_out(self):
         """

@@ -64,8 +64,7 @@ import parser2
 from constants import *
 
 # 3) Constants
-GMAIL = "imap.gmail.com"
-USER = "put@runport.io"
+file_name = FILE_NAME
 
 # 4) Functions
 def authenticate(session, guest, token=None):

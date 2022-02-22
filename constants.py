@@ -9,6 +9,10 @@ TO_PRINT ="TO_PRINT"
 
 # COMMANDS
 
+# Services
+GMAIL = "imap.gmail.com"
+USER = "put@runport.io"
+
 # IMAP commands and strings
 INBOX = "INBOX"
 UID = "UID"
@@ -45,7 +49,7 @@ UNDER = "_"
 BREAKS = [NEW_LINE, CARRIAGE_RETURN, TAB]
 
 # Credentials
-file_name = "credentials.json"
+FILE_NAME = "credentials.json"
 GUEST = "guest"
 TOKEN = "token"
 
