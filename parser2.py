@@ -1,5 +1,24 @@
 # parsing tools
 # (c) Port. Prerogative Club 2022
+"""
+
+Module defines tools for parsing emails and potentially other text transferred
+over HTTP. 
+------------------  ------------------------------------------------------------
+Attribute           Description
+------------------  ------------------------------------------------------------
+
+DATA:
+N/a
+
+FUNCTIONS:
+N/a
+
+CLASSES:
+N/a
+------------------  ------------------------------------------------------------
+"""
+
 
 # Imports
 # 1) Built-ins
@@ -15,7 +34,7 @@ UTF8_LO = "utf-8?"
 UTF_PREFIXES = (UTF8, UTF8_LO)
 START_ENCODING = "=?"
 END_ENCODING = "?="
-BREAKS = ("\t", "\r", "\n")
+##BREAKS = ("\t", "\r", "\n")
 
 # Encoding
 QUOTABLE = "q?"
@@ -130,7 +149,7 @@ def parse_parens(string, trace=False):
     
     return result
 
-def remove_breaks(string, chars=BREAKS):
+def remove_breaks(string, chars=constants.BREAKS):
     result = string
     for char in chars:
         result = result.replace(char, EMPTY_STRING)
@@ -221,29 +240,7 @@ def parse_base64(string):
 
     return result
 
-def unescape_chars(string, escape=EQUALS, chars=BREAKS, lookup=None):
-    """
 
-    unescape_chars() -> string
-
-    Function removes escapes from characters. For example, if you have a string
-    where newlines have escapes, you can use this routine to strip the escape
-    from the newline without affecting other escaped values.
-
-    If you specify lookup, function will replace the character with the value in
-    the lookup. You should provide a dictionary for the lookup.
-    """
-    result = string
-    
-    for char in chars:
-        query = escape+char
-        replacement = char
-        if lookup:
-            replacement = lookup[char]
-            
-        result = result.replace(query, replacement)
-
-    return result
 
 # outline
 # body, split by newline

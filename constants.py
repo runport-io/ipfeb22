@@ -26,11 +26,14 @@ PLAIN_TEXT = "text/plain"
 BATCH_SIZE = 10
 
 # Parsing
-SPACE = " "
-NEW_LINE = "\n"
-TAB = "\t"
 AT = "@"
+CARRIAGE_RETURN = "\r"
 EQUALS = "="
+NEW_LINE = "\n"
+SPACE = " "
+TAB = "\t"
+
+BREAKS = [NEW_LINE, CARRIAGE_RETURN, TAB]
 
 # Credentials
 file_name = "credentials.json"
@@ -41,4 +44,7 @@ STANDARD_WIDTH = 18
 
 # UUIDs
 TEST_STRING = "4be0643f-1d98-573b-97cd-ca98a65347dd"
+
+# ENCODING
+UTF8 = "utf-8"
 
