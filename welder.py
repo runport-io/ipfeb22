@@ -60,9 +60,12 @@ class Welder:
         Method adds the message body to the event. Method modifies event in
         place.
         """
-        body = observ2.get_body(msg)
-        body, data = parser_for_email_body.parse_body(body)
+        raw_body = observ2.get_body(msg)
+        event.body.set_raw(raw_body)
+        body, data = parser_for_email_body.parse_body(raw_body)
         event.set_body(body)
+        event.body.set_data(data)
+        
         return event
     
     def add_headline(self, msg, event, force=False):

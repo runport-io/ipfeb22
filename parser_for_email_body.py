@@ -31,6 +31,7 @@ FUNCTIONS:
 casefold_items      removes capitals from each string in a container
 parse_body          takes header off the email, decodes text
 parse_header        turns lines of text in the header into a dictionary of data
+prep_string         separates and parses header, cleans whitespace
 strip_header        removes header from the body of the email
 strip_links         [ND] removes links from body
 
@@ -76,43 +77,21 @@ def parse_body(string, trace=False):
     If you set trace to "True", routine shows work.
     """
     body, data = prep_string(string)
-    
-    charset = data[constants.CHARSET]
-    charset = charset.casefold()
-    if trace:
-        print("Charset:  ", charset)
-    
-    if charset == constants.UTF8.casefold():
-        body = references.clean_string(body, trace=trace, encoding=charset)
-    if trace:
-        print("Body, cleaned: \n", body)
-        print("\n\n\n\n")
+
+    if body:
+        if data:    
+            charset = data[constants.CHARSET]
+            charset = charset.casefold()
+            if trace:
+                print("Charset:  ", charset)
+
+            if charset == constants.UTF8.casefold():
+                body = references.clean_string(body, trace=trace, encoding=charset)
+            if trace:
+                print("Body, cleaned: \n", body)
+                print("\n\n\n\n")
     
     return body, data
-
-def prep_string(string, strip_whitespace=True):
-    """
-
-    prep_string() -> tuple
-
-    Function prepares string for processing by removing header and stripping
-    whitespace. You should err on side of stripping whitespace.
-    """
-    body = string
-    body = references.unescape_chars(body)
-
-    if strip_whitespace:
-        body = body.strip()
-        # Remove leading whitespace to reduce odds of missing header.
-    
-    header, body = strip_header(body)
-    if strip_whitespace:
-        body.strip()
-        # Remove whitespace again now that I separated the header.
-        
-    data = parse_header(header)
-    
-    return (body, data)
     
 def parse_header(header, match_case=False, strip_whitespace=True):
     """
@@ -150,6 +129,52 @@ def parse_header(header, match_case=False, strip_whitespace=True):
         result = wip
 
     return result
+
+def remove_nonalnum(string, include_chars=[constants.HYPHEN]):
+    """
+
+    remove_nonalnum -> string
+
+    Function strips string of characters that are not letters or numbers. You
+    can specify characters you want to keep in addition to these.
+    """
+    result = ""
+    for char in string:
+        if char.isalnum():
+            result = result + char
+        else:
+            if char in include_chars:
+                result = result + char
+            else:
+                pass
+            
+    return result    
+
+def prep_string(string, strip_whitespace=True):
+    """
+
+    prep_string() -> tuple
+
+    Function prepares string for processing by removing header and stripping
+    whitespace. You should err on side of stripping whitespace.
+    """
+    body = string
+    data = dict()
+    if body:
+        body = references.unescape_chars(body)
+
+        if strip_whitespace:
+            body = body.strip()
+            # Remove leading whitespace to reduce odds of missing header.
+        
+        header, body = strip_header(body)
+        if strip_whitespace:
+            body.strip()
+            # Remove whitespace again now that I separated the header.
+            
+        data = parse_header(header)
+    
+    return (body, data)
 
 def strip_header(string):
     """

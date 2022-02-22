@@ -58,6 +58,8 @@ class TextField:
         
     def __init__(self, content=None):
         self._content = content
+        self._data = None
+        self._raw = None
         self.number = Number()
     
     def get_content(self):
@@ -92,7 +94,62 @@ class TextField:
         glue = constants.NEW_LINE
         string = glue.join(lines)
         return string
-    
+
+    def get_raw(self):
+        """
+
+        get_raw() -> str
+
+        Method returns the format of the instance prior to any transformations.
+        You should expect a string.
+        """
+        result = self._raw
+        return result
+
+    def set_raw(self, obj):
+        """
+
+        set_raw() -> None
+        
+        Method stores the string version of the object on the instance.
+        """
+        self._raw = repr(obj)
+
+    def get_data(self, copy=True):
+        """
+
+        get_data() -> obj
+
+        Method returns data from the instance. If you change "copy" to False,
+        you get the object itself, otherwise method returns a copy of that
+        object so that you can manipulate it.
+        """
+        result = self._data
+        if copy:
+            result = result.copy()
+        return result
+
+    def set_data(self, dictionary):
+        """
+
+        set_data() -> None
+
+        Method sets data to the parameter you specify.
+        """
+        self._data = dictionary
+
+    def get_snippet(self, line_count=10):
+        """
+
+        get_snippet() -> string
+
+        Method returns the number of lines you specify from content.
+        """
+        content = self.get_content()
+        lines = content.splitlines(keepends=True)
+        snippet = "".join(lines[:line_count])
+        return snippet
+        
     # consider adding a log attribute
     # every time i make a change, i log it. append only. requires a 
     # signature. probably don't need it right now? could run some logic or
