@@ -26,15 +26,21 @@ PLAIN_TEXT = "text/plain"
 BATCH_SIZE = 10
 
 # Parsing
+APOSTROPHE = "'"
 AT = "@"
 CARRIAGE_RETURN = "\r"
 COLON = ":"
+COMMA = ","
+EMPTY_STRING = ""
 EQUALS = "="
+FWD_SLASH = "/"
 HYPHEN = "-"
 NEW_LINE = "\n"
+QUESTION_MARK = "?"
 SEMICOLON = ";"
 SPACE = " "
 TAB = "\t"
+UNDER = "_"
 
 BREAKS = [NEW_LINE, CARRIAGE_RETURN, TAB]
 

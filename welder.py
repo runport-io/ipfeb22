@@ -162,30 +162,38 @@ class Welder:
         event.record_receipt(timestamp)
         return event
 
+
 # Testing
-def run_test():    
-    w = Welder()
-    
+_file_name = "emails.pkl"
+
+def _get_messages(file_name):
     import pickle
-    file_name = "emails.pkl"
     f = open(file_name, "rb")
     messages = pickle.load(f)
 
-    events = list()
-    for msg in messages:
-        event = w.make_event_from_msg(msg)
-        events.append(event)
+    return messages
 
+def _main():
+    messages = _get_messages(_file_name)
+    events = _run_test(messages)
+    
+def _run_test(messages):    
+    w = Welder()
+    result = list()
+    for msg in messages:
+
+        event = w.make_event_from_msg(msg)
+        result.append(event)
+        
         body = event.get_body()
-        print("Event:   ", event)
+        print("Headline:   ", event.get_headline())
         print("Body:    ",)
         print(body)
         print("\n\n")
     
-    result = (messages, events)
     return result
 
 if __name__ == "__main__":
-    run_test()
+    _main()
 
 #*"Well done."

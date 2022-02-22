@@ -40,18 +40,15 @@ BASE64 = "b?"
 ASCII = "ascii"
 
 # ASCII
-APOSTROPHE = "'"
-
-COMMA = ","
-EMPTY_STRING = ""
-EM_DASH = "-"
-EQUALS = "="
-FWD_SLASH = "/"
-NEW_LINE = "\n"
-QUESTION_MARK = "?"
-
-UNDER = "_"
-
+##APOSTROPHE = "'"
+##COMMA = ","
+##EMPTY_STRING = ""
+##EM_DASH = "-"
+##EQUALS = "="
+##FWD_SLASH = "/"
+##NEW_LINE = "\n"
+##QUESTION_MARK = "?"
+##UNDER = "_"
 
 # 4) Functions
 def detect_encoding(string):
@@ -143,7 +140,7 @@ def parse_parens(string, trace=False):
 def remove_breaks(string, chars=constants.BREAKS):
     result = string
     for char in chars:
-        result = result.replace(char, EMPTY_STRING)
+        result = result.replace(char, constants.EMPTY_STRING)
 
     return result
 
@@ -172,7 +169,7 @@ def clean_string(string):
     
     #if no spaces, then replace underscores
     if constants.SPACE not in wip:
-        wip = wip.replace(UNDER, constants.SPACE)
+        wip = wip.replace(constants.UNDER, constants.SPACE)
     
     result = wip
     return result
@@ -207,13 +204,13 @@ def parse_quotable(string):
     result = ""
     wip = string
 
-    wip = wip.replace("=2C", COMMA)
+    wip = wip.replace("=2C", constants.COMMA)
     wip = wip.replace("=20", constants.SPACE)
-    wip = wip.replace("=E2=80=99", APOSTROPHE)
-    wip = wip.replace("=27", APOSTROPHE)
-    wip = wip.replace("=2D", EM_DASH)
-    wip = wip.replace("=3", QUESTION_MARK)
-    wip = wip.replace("=2F", FWD_SLASH)
+    wip = wip.replace("=E2=80=99", constants.APOSTROPHE)
+    wip = wip.replace("=27", constants.APOSTROPHE)
+    wip = wip.replace("=2D", constants.HYPHEN)
+    wip = wip.replace("=3", constants.QUESTION_MARK)
+    wip = wip.replace("=2F", constants.FWD_SLASH)
 
     result = wip
     return result

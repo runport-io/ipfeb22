@@ -60,6 +60,10 @@ import constants
 HEX_PREFIX = "0x"
 STRICT = "strict"
 
+UNESCAPES = dict()
+for char in constants.BREAKS:
+    UNESCAPES[char] = constants.EMPTY_STRING
+
 # 4) Functions
 def adjust_base(string, starting_base=16, ending_base=10,
                 prefix=HEX_PREFIX):
@@ -92,6 +96,8 @@ def clean_string(string, trace=False, escape=constants.EQUALS,
     """
     result = ""
     result = unescape_chars(string, escape=escape)
+    # Removes escaped new lines. I haven't parsed the hex tokens here, and
+    # sometimes the escaped new lines break these.
     
     tokens = get_tokens(result, prefix=escape)
 
@@ -291,7 +297,7 @@ def turn_tokens_into_strings(tokens, prefix=HEX_PREFIX, encoding=constants.UTF8,
     return result
 
 def unescape_chars(string, escape=constants.EQUALS, chars=constants.BREAKS,
-                   lookup=None):
+                   lookup=UNESCAPES):
     """
 
     unescape_chars() -> string

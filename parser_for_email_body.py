@@ -32,6 +32,7 @@ casefold_items      removes capitals from each string in a container
 parse_body          takes header off the email, decodes text
 parse_header        turns lines of text in the header into a dictionary of data
 prep_string         separates and parses header, cleans whitespace
+remove_nonalnum     takes string down to letters and numbers only
 strip_header        removes header from the body of the email
 strip_links         [ND] removes links from body
 
@@ -118,7 +119,9 @@ def parse_header(header, match_case=False, strip_whitespace=True):
             for operator in assignment_operators:
                 if operator in segment:
                     key, value = segment.split(operator)
-                    wip[key] = value
+                    permitted_chars = [constants.FWD_SLASH, constants.HYPHEN]
+                    cleaned_value = make_alnum(value, permitted_chars)
+                    wip[key] = cleaned_value
 
     if strip_whitespace:
         for k, v in wip.items():
@@ -130,10 +133,34 @@ def parse_header(header, match_case=False, strip_whitespace=True):
 
     return result
 
-def remove_nonalnum(string, include_chars=[constants.HYPHEN]):
+def prep_string(string, strip_whitespace=True):
     """
 
-    remove_nonalnum -> string
+    prep_string() -> tuple
+
+    Function prepares string for processing by removing header and stripping
+    whitespace. You should err on side of stripping whitespace.
+    """
+    body = string
+    data = dict()
+    if body:
+        if strip_whitespace:
+            body = body.strip()
+            # Remove leading whitespace to reduce odds of missing header.
+        
+        header, body = strip_header(body)
+        if strip_whitespace:
+            body.strip()
+            # Remove whitespace again now that I separated the header.
+            
+        data = parse_header(header)
+    
+    return (body, data)
+
+def make_alnum(string, include_chars=[constants.HYPHEN]):
+    """
+
+    make_alnum -> string
 
     Function strips string of characters that are not letters or numbers. You
     can specify characters you want to keep in addition to these.
@@ -149,32 +176,6 @@ def remove_nonalnum(string, include_chars=[constants.HYPHEN]):
                 pass
             
     return result    
-
-def prep_string(string, strip_whitespace=True):
-    """
-
-    prep_string() -> tuple
-
-    Function prepares string for processing by removing header and stripping
-    whitespace. You should err on side of stripping whitespace.
-    """
-    body = string
-    data = dict()
-    if body:
-        body = references.unescape_chars(body)
-
-        if strip_whitespace:
-            body = body.strip()
-            # Remove leading whitespace to reduce odds of missing header.
-        
-        header, body = strip_header(body)
-        if strip_whitespace:
-            body.strip()
-            # Remove whitespace again now that I separated the header.
-            
-        data = parse_header(header)
-    
-    return (body, data)
 
 def strip_header(string):
     """
@@ -232,8 +233,7 @@ def strip_links(string):
     c = "Have not built this functionality yet."
     raise exceptions.PlaceholderError(c)
 
-
-s1 = """
+bods1 = """
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 
