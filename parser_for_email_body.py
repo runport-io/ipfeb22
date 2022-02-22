@@ -52,7 +52,11 @@ def parse_body(string, strip_links=False):
     body = references.unescape_chars(body)
     body = body.strip()
     # Remove leading whitespace to reduce odds of missing header.
+
     header, body = strip_header(body)
+    body.strip()
+    # Remove whitespace again now that I separated the header.
+    
     data = parse_header(header)
     charset = data[constants.CHARSET]
 
