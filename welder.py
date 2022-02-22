@@ -1,7 +1,21 @@
-# welder
-# (c) Port. Prerogative Club 2022 ("the Club")
-# Port. 2
-# License: GPL 3.0, unless agreed to in writing with the Club
+# Copyright Port. Prerogative Club ("the Club")
+#
+# 
+# This file is part of Port. 2.0. ("Port.")
+#
+# Port. is free software: you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# Port. is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# Port. If not, see <https://www.gnu.org/licenses/>.
+#
+# Questions? Contact hi@runport.io.
 
 """
 
@@ -28,6 +42,7 @@ import event as e
 import exceptions
 import observ2
 import parser2
+import parser_for_email_body
 
 # 3) Data
 # N/a
@@ -46,6 +61,7 @@ class Welder:
         place.
         """
         body = observ2.get_body(msg)
+        body, data = parser_for_email_body.parse_body(body)
         event.set_body(body)
         return event
     
@@ -145,20 +161,25 @@ class Welder:
 
 # Testing
 def run_test():    
+    w = Welder()
+    
     import pickle
     file_name = "emails.pkl"
     f = open(file_name, "rb")
-    results = pickle.load(f)
-    for msg in results:
-        body = observ2.get_body(msg)
+    messages = pickle.load(f)
+
+    events = list()
+    for msg in messages:
+        event = w.make_event_from_msg(msg)
+        events.append(event)
+
+        body = event.get_body()
+        print("Event:   ", event)
+        print("Body:    ",)
         print(body)
         print("\n\n")
-        
-    email0 = results[0]
-    w = Welder()
-    event = w.make_event_from_msg(email0)
-    result = (results, email0, event)
-
+    
+    result = (messages, events)
     return result
 
 if __name__ == "__main__":

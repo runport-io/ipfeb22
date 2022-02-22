@@ -1,14 +1,44 @@
-# parser_for_email_body
-# (c) Port. Prerogative Club ("the Club")
-# Port. 2.0
-# Subject to GPL 3.0, unless agreed to in writing with the Club.
+# Copyright Port. Prerogative Club ("the Club")
+#
+# 
+# This file is part of Port. 2.0. ("Port.")
+#
+# Port. is free software: you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# Port. is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# Port. If not, see <https://www.gnu.org/licenses/>.
+#
+# Questions? Contact hi@runport.io.
 
-# outline
-# body, split by newline
-# take first two lines
-# check for "Content-Type"
-# line1: split by semicolon
-# check for "Content-Transfer-Encoding"
+"""
+
+Module defines routines for parsing the body of an email. 
+------------------  ------------------------------------------------------------
+Attribute           Description
+------------------  ------------------------------------------------------------
+
+DATA:
+N/a
+
+FUNCTIONS:
+casefold_items      removes capitals from each string in a container
+parse_body          takes header off the email, decodes text
+parse_header        turns lines of text in the header into a dictionary of data
+strip_header        removes header from the body of the email
+strip_links         [ND] removes links from body
+
+CLASSES:
+N/a
+------------------  ------------------------------------------------------------
+"""
+
 
 # Imports
 # 1) Built-ins
@@ -37,35 +67,53 @@ def casefold_items(iterable):
         
     return result
 
-def parse_body(string, strip_links=False):
+def parse_body(string, trace=False):
     """
 
     parse_body() -> string, dict
 
     Function delivers a string and a data dictionary that represent the input.
-    If you strip links, routine takes out links from the string, replaces them
-    with references, and puts the results in the data dictionary under "_links".
+    If you set trace to "True", routine shows work.
     """
-    body = string
-    data = ""
-
-    body = references.unescape_chars(body)
-    body = body.strip()
-    # Remove leading whitespace to reduce odds of missing header.
-
-    header, body = strip_header(body)
-    body.strip()
-    # Remove whitespace again now that I separated the header.
+    body, data = prep_string(string)
     
-    data = parse_header(header)
     charset = data[constants.CHARSET]
-
-    if charset.casefold() == constants.UTF8:
-        # <--- should extract encoding and pass it down
-        body = references.clean_string(body)
-
+    charset = charset.casefold()
+    if trace:
+        print("Charset:  ", charset)
+    
+    if charset == constants.UTF8.casefold():
+        body = references.clean_string(body, trace=trace, encoding=charset)
+    if trace:
+        print("Body, cleaned: \n", body)
+        print("\n\n\n\n")
+    
     return body, data
 
+def prep_string(string, strip_whitespace=True):
+    """
+
+    prep_string() -> tuple
+
+    Function prepares string for processing by removing header and stripping
+    whitespace. You should err on side of stripping whitespace.
+    """
+    body = string
+    body = references.unescape_chars(body)
+
+    if strip_whitespace:
+        body = body.strip()
+        # Remove leading whitespace to reduce odds of missing header.
+    
+    header, body = strip_header(body)
+    if strip_whitespace:
+        body.strip()
+        # Remove whitespace again now that I separated the header.
+        
+    data = parse_header(header)
+    
+    return (body, data)
+    
 def parse_header(header, match_case=False, strip_whitespace=True):
     """
 
@@ -422,14 +470,8 @@ Unsubscribe:
 https://subscribe.wordpress.com/?key=1c4097fb88eec03ccd4ac5fa30b77b88&email=put%40runport.io&b=szebPNHuyzBRvZ277EWp4gArypzGlScsUiQeqHKEkNtVlrpNg_s8vAIg_JrnjPSl2sesxPjw0X5pp_PUow%3D%3D
 """
 
-def run_test(string):
-    body, data = parse_body(string)
-    print("Data: ")
-    print(data)
-    print("\n")
-    print("Body: ")
-    print(body)
-    print("\n\n")
+def run_test(string):    
+    body, data = parse_body(string, trace=True)
 
 if __name__ == "__main__":
     run_test(s1)

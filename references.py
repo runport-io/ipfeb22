@@ -1,7 +1,21 @@
-# references
-# (c) Port. Prerogative Club ("the Club")
-# Port. 2.0
-# Subject to GPL 3.0, unless agreed to in writing with the Club.
+# Copyright Port. Prerogative Club ("the Club")
+#
+# 
+# This file is part of Port. 2.0. ("Port.")
+#
+# Port. is free software: you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# Port. is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# Port. If not, see <https://www.gnu.org/licenses/>.
+#
+# Questions? Contact hi@runport.io.
 
 """
 
@@ -20,6 +34,7 @@ UTF8                handle for UTF-8
 FUNCTIONS:
 adjust_base         turn hexadecimal or other input into a number in base10
 clean_string        replace references with characters in a string
+construct_sequence  turns token into a string with escapes
 get_bytes           turns a container of hex strings into a bytestring
 get_integers        turns a container of hex strings into base 10 integers
 get_next            walk a string, pull out one reference at a time
@@ -67,7 +82,8 @@ def adjust_base(string, starting_base=16, ending_base=10,
 
     return result
 
-def clean_string(string, trace=False, escape=constants.EQUALS):
+def clean_string(string, trace=False, escape=constants.EQUALS,
+                 encoding=constants.UTF8):
     """
 
     clean_string -> string
@@ -83,26 +99,44 @@ def clean_string(string, trace=False, escape=constants.EQUALS):
     if trace:
         print("Tokens:   ", tokens)
 
-    lookup = turn_tokens_into_strings(tokens)
-
-    if trace:
-        print("Lookup:   ")
-        keys = sorted(lookup.keys())
-        for key in keys:
-            view = constants.TAB + str(key) + ": " + str(lookup[key])
-            print(view)
-
-    for key, value in lookup.items():
-        adj_key = escape + escape.join(key)
+    lookup = turn_tokens_into_strings(tokens, encoding=encoding)
+    
+    sorted_keys = sorted(lookup.keys())
+    # Non-ordered nature of dictionary complicates debugging. For example, I
+    # found a blank key (tuple()). The logic in this function used to translate
+    # that into a "=", the same as the escape. As a result, the key would strip
+    # out the escapes from the string, effectively ending translation. Depending
+    # on where this key fell in the keys() sequence, the translation would end
+    # at the beginning, middle, or end of the same string! 
+    
+    for key in sorted_keys:
+        if not key:
+            continue
+            # Should skip empty keys
+            
+        adj_key = construct_sequence(key, escape)
         # key is now a tuple, need to put in the escapes back in to detect
         # occurences in the string
+        value = lookup[key]
         
         if trace:
                 print("Key:      ", key)
                 print("Adj. key: ", adj_key)
+                print("Value:    ", value)
         
         result = result.replace(adj_key, value)
         
+    return result
+
+def construct_sequence(token, escape):
+    """
+
+    construct_sequence -> string
+
+    Function returns the string that corresponds to the token. You should use
+    a container of strings as the token.
+    """
+    result = escape + escape.join(token)
     return result
 
 # OBSOLETE!
