@@ -233,7 +233,7 @@ def strip_links(string):
     c = "Have not built this functionality yet."
     raise exceptions.PlaceholderError(c)
 
-bods1 = """
+s1 = """
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
 

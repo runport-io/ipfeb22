@@ -78,13 +78,8 @@ class Welder:
         an OverrideException otherwise. 
         """
         headline = msg.get(constants.EMAIL_LIB_SUBJECT)
-        existing = event.get_headline()
-        
-        if force or not existing:
-            event.set_headline(headline)
-        else:
-            raise exceptions.OverrideException
-            
+        cleaned = parser2.clean_string(headline)
+        event.set_headline(cleaned, force=force)
         return event
 
     def add_original(self):

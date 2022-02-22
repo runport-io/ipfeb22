@@ -1,5 +1,21 @@
-# Event
-# (c) Port. Prerogative Club 2022
+# Copyright Port. Prerogative Club ("the Club")
+#
+# 
+# This file is part of Port. 2.0. ("Port.")
+#
+# Port. is free software: you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# Port. is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# Port. If not, see <https://www.gnu.org/licenses/>.
+#
+# Questions? Contact hi@runport.io.
 
 """
 
@@ -14,8 +30,7 @@ DATA:
 FUNCTIONS:
 
 CLASSES:
-Event               Organizes information detected by observers or created
-                    elsewhere in Port.
+Event               Object organizes information in time.
 ------------------  ------------------------------------------------------------
 """
 
@@ -182,14 +197,14 @@ class Event:
         """
         self.body.set_content(content)
 
-    def set_headline(self, content):
+    def set_headline(self, content, force=False):
         """
 
         Event.set_headline(content) -> None
 
         Method records the argument as the headline of the instance.
         """
-        self.headline.set_content(content)
+        self.headline.set_content(content, force=force)
 
     def set_number(self):
         """
