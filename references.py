@@ -40,7 +40,6 @@ get_integers        turns a container of hex strings into base 10 integers
 get_next            walk a string, pull out one reference at a time
 get_tokens          extract tokens from string
 locate_references   find substrings that start with the prefix you specify
-map_tokens          [OBS] map each token to a bytestring
 turn_tokens_into_bytes     maps tuples to bytestrings
 turn_tokens_into_strings   maps tuples to unicode characters
 unescape_chars      removes escapes from breaks in the string
@@ -137,31 +136,6 @@ def construct_sequence(token, escape):
     a container of strings as the token.
     """
     result = escape + escape.join(token)
-    return result
-
-# OBSOLETE!
-def extract_and_replace(string, prefix):
-    """
-
-    extract_and_replace() -> string
-
-    [OBSOLETE]
-
-    Function cleans string of references to bytes by replacing the references
-    with their unicode equivalents. Expects each reference to start with the
-    prefix.
-    """
-    result = string
-    tokens = get_tokens(string, prefix=prefix)
-    lookup = map_tokens(tokens)
-    print(lookup)
-    for token, byte_string in lookup.items():
-        adj_token = prefix + prefix.join(token)
-        print("Adj. token:", adj_token)
-        value = byte_string.decode()
-        print("value:     ", value)
-        result = result.replace(adj_token, value)
-
     return result
 
 def get_bytes(token, prefix=HEX_PREFIX):
@@ -283,29 +257,6 @@ def locate_references(string, prefix=constants.EQUALS):
         if string[i] == prefix:
             result.append(i)
         i = i + 1
-    
-    return result
-
-# OBSOLETE
-def map_tokens(tokens, prefix=HEX_PREFIX):
-    """
-
-    map_tokens() -> dict
-
-    [OBSOLETE]
-
-    Function maps each token in the container to a bytestring.
-    """
-    # return a dictionary thats a look up table
-    result = dict()
-    for token in tokens:
-        seed = list()
-        for node in token:
-            adj_node = prefix + node
-            value = int(adj_node, 16)
-            seed.append(value)
-            
-        result[token] = bytes(seed)
     
     return result
 
