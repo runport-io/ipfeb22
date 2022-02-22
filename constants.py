@@ -28,8 +28,10 @@ BATCH_SIZE = 10
 # Parsing
 AT = "@"
 CARRIAGE_RETURN = "\r"
+COLON = ":"
 EQUALS = "="
 NEW_LINE = "\n"
+SEMICOLON = ";"
 SPACE = " "
 TAB = "\t"
 
@@ -48,3 +50,8 @@ TEST_STRING = "4be0643f-1d98-573b-97cd-ca98a65347dd"
 # ENCODING
 UTF8 = "utf-8"
 
+# Headers
+CHARSET = "charset"
+CONTENT_ENCODING="Content-Transfer-Encoding"
+CONTENT_TYPE = "Content-Type"
+##FIELDS = [CHARSET, CONTENT_ENCODING, CONTENT_TYPE]

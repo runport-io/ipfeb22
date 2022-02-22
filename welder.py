@@ -149,10 +149,16 @@ def run_test():
     file_name = "emails.pkl"
     f = open(file_name, "rb")
     results = pickle.load(f)
+    for msg in results:
+        body = observ2.get_body(msg)
+        print(body)
+        print("\n\n")
+        
     email0 = results[0]
     w = Welder()
     event = w.make_event_from_msg(email0)
     result = (results, email0, event)
+
     return result
 
 if __name__ == "__main__":

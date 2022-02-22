@@ -26,12 +26,10 @@ import base64
 
 # 2) Port.
 import constants
-import references
 
 # 3) Data
-UTF8 = "UTF-8?"
-UTF8_LO = "utf-8?"
-UTF_PREFIXES = (UTF8, UTF8_LO)
+UTF8_Q = "UTF-8?"
+UTF_PREFIXES = (UTF8_Q, UTF8_Q.casefold())
 START_ENCODING = "=?"
 END_ENCODING = "?="
 ##BREAKS = ("\t", "\r", "\n")
@@ -43,7 +41,7 @@ ASCII = "ascii"
 
 # ASCII
 APOSTROPHE = "'"
-COLON = ":"
+
 COMMA = ","
 EMPTY_STRING = ""
 EM_DASH = "-"
@@ -51,15 +49,8 @@ EQUALS = "="
 FWD_SLASH = "/"
 NEW_LINE = "\n"
 QUESTION_MARK = "?"
-SEMICOLON = ";"
-SPACE = " "
-UNDER = "_"
 
-# Headers
-CHARSET = "charset"
-CONTENT_ENCODING="Content-Transfer-Encoding"
-CONTENT_TYPE = "Content-Type"
-FIELDS = [CHARSET, CONTENT_ENCODING, CONTENT_TYPE]
+UNDER = "_"
 
 
 # 4) Functions
@@ -156,12 +147,12 @@ def remove_breaks(string, chars=constants.BREAKS):
 
     return result
 
-def remove_padding(string, char=SPACE):
+def remove_padding(string, char=constants.SPACE):
     result = ""
     wip = string
-    padding = SPACE * 2
+    padding = char * 2
     while padding in wip:
-        wip = wip.replace(padding, SPACE)
+        wip = wip.replace(padding, char)
 
     result = wip
     return result
@@ -180,8 +171,8 @@ def clean_string(string):
     wip = remove_padding(wip)
     
     #if no spaces, then replace underscores
-    if SPACE not in wip:
-        wip = wip.replace(UNDER, SPACE)
+    if constants.SPACE not in wip:
+        wip = wip.replace(UNDER, constants.SPACE)
     
     result = wip
     return result
@@ -217,7 +208,7 @@ def parse_quotable(string):
     wip = string
 
     wip = wip.replace("=2C", COMMA)
-    wip = wip.replace("=20", SPACE)
+    wip = wip.replace("=20", constants.SPACE)
     wip = wip.replace("=E2=80=99", APOSTROPHE)
     wip = wip.replace("=27", APOSTROPHE)
     wip = wip.replace("=2D", EM_DASH)
@@ -241,110 +232,3 @@ def parse_base64(string):
     return result
 
 
-
-# outline
-# body, split by newline
-# take first two lines
-# check for "Content-Type"
-# line1: split by semicolon
-# check for "Content-Transfer-Encoding"
-
-def clean_body(string):
-    """
-
-    -> string, dict
-
-    Returns cleaned string and dictionary of header and optionally links.
-    """
-    body = string
-    data = ""
-
-    body = unescape_chars(body)
-    # clean the new lines
-    header, body = strip_header_from_body(body)
-    data = parse_header(header)
-
-    # if encoding is utf8
-    # <--- should extract encoding and pass it down
-    body = references.clean_string(body)
-
-    return body, data
-
-def strip_header_from_body(string, line_count=2):
-    """
-
-    strip_header_from_body() -> list, string
-    """
-    result = tuple()
-    header = list()
-    lines = string.splitlines(keepends=True)
-    # keep ends so I can reconstruct rest of string
-    header = lines[:line_count]
-    
-    remainder = lines[line_count:]
-    body = "".join(remainder)
-
-    result = (header, body)
-    return result
-
-def fold_case(iterable):
-    """
-    -> list
-    """
-    result = list()
-    for item in iterable:
-        adj_item = item.casefold()
-        result.append(adj_item)
-        
-    return result
-    
-def parse_header(header, match_case=False, strip_whitespace=True):
-    """
-
-    -> dict
-
-    Function returns a dictionary 
-    """
-    result = dict()
-    wip = dict()
-    assignment_operators = [COLON, EQUALS]
-    
-    if not match_case:
-        header = fold_case(header)
-        assignment_operators = fold_case(assignment_operators)
-    
-    for line in header:
-        # line1: "Content-Type: text/plain; charset=utf-8"
-        segments = line.split(SEMICOLON)
-        for segment in segments:
-            #segment: "Content-Type: text/plain;"
-            operator = ""
-            for operator in assignment_operators:
-                if operator in segment:
-                    key, value = segment.split(operator)
-                    wip[key] = value
-
-    if strip_whitespace:
-        for k, v in wip.items():
-            adjk = k.strip()
-            adjv = v.strip()
-            result[adjk] = adjv
-    else:
-        result = wip
-
-    return result
-
-def strip_links(string):
-    """
-
-    strip_links() -> dictionary
-
-    Function removes links, replaces them with numbers. Returns dictionary of
-    number to link.
-    """
-    pass
-
-
-# detect if there is a header?
-# if blah in line 1
-# if blah2 in l;ine 2, then strip the header, parse the header

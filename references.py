@@ -1,4 +1,4 @@
-# References
+# references
 # (c) Port. Prerogative Club ("the Club")
 # Port. 2.0
 # Subject to GPL 3.0, unless agreed to in writing with the Club.
@@ -110,6 +110,8 @@ def extract_and_replace(string, prefix):
     """
 
     extract_and_replace() -> string
+
+    [OBSOLETE]
 
     Function cleans string of references to bytes by replacing the references
     with their unicode equivalents. Expects each reference to start with the
@@ -235,6 +237,8 @@ def locate_references(string, prefix=constants.EQUALS):
 
     locate_references(string) -> list
 
+    [OBS]
+
     Returns a list of integers that represent the locations of the handle in the
     string. You should remove newlines from a string before sending.
     """
@@ -253,6 +257,8 @@ def map_tokens(tokens, prefix=HEX_PREFIX):
     """
 
     map_tokens() -> dict
+
+    [OBSOLETE]
 
     Function maps each token in the container to a bytestring.
     """
