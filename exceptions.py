@@ -14,3 +14,10 @@ class PlaceholderError(PortError):
     Flag for operations that I have not yet defined.
     """
     pass
+
+class ParameterError(PortError):
+    """
+
+    Flag for something beinng wrong with inputs.
+    """
+    pass

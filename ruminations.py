@@ -25,6 +25,7 @@ import textwrap
 # Port.
 import constants
 import event
+import exceptions
 import gui
 
 class Chartist:
@@ -47,41 +48,77 @@ class Chartist:
         pass
         # same rows as month?
 
-    def draw_strings_as_columns(self, *strings):
+    def draw_strings_as_columns(self, strings, spacer=constants.SPACE,
+                                top_down=True):
+        """
+        -> list
+
+        Returns list of struings. If top_down is False, the list will start with
+        the line that's at the bottom of the chart.
+        """
         # let's say it's one string
         heights = list()
-        adj_columns = list()
         
         for string in strings:
             height = len(string)
             heights.append(height)
             # height can be a property of column
-            adj_column = copy.copy(col)
             
         # add block for managing max height
         # cap height at ceiling, say 40
         
         row_count = max(heights)
+        adj_columns = list()
+        for column in strings:
+            adj_column = self.pad_string(column, row_count)
+            adj_columns.append(adj_column)
+                
         rows = list()
+        row_strings = list()
 
         i = 0
         while i < row_count:
             row = list()
-            for col in strings:
-                pass
+            for column in adj_columns:
+                cell = column[i]
+                row.append(cell)
+                
+            rows.append(row)
+            # row is a list of strings now
+            
+            row_string = spacer.join(row)
+            row_strings.append(row_string)
+            
+            i = i + 1
+
+        # no width management, function assumes you are passing in strings of
+        # width 1.
+
+        result = row_strings
+        if top_down:
+            result = result[::-1]
+            # Routine creates rows at the bottom of the chart first.
+
+        return result
+        # row_strings ship without newlines
 
     def pad_string(self, string, length, fill=constants.SPACE):
         """
-        -> string
 
-        Function returns a string padded to the length you specify. [Function
-        will truncate string if string is longer than length].
+        pad_string() -> string
+
+        Method returns a string padded to length with fill. If you specify a
+        string that's longer than length, method will throw a ParameterError.
         """
         result = ""
         starting_length = len(string)
         if starting_length > length:
-            raise exceptions.OpError
+            c = "String {string} is longer than length {length}"
+            lookup = {"string" : string, "length" : length}
+            cf = c.format(**lookup)
+            raise exceptions.ParameterError(cf)
             # can use textwrap to break into more manageable strings < length
+            
         gap = length - starting_length
         length_of_fill = len(fill)
         fill_count = gap // length_of_fill + 1
@@ -103,8 +140,22 @@ def run_test1(seed):
     s2b = dali.pad_string(seed, 30, fill="abracadabra")
     print(s2b)
 
+line1 = "*" * 4
+line2 = "*" * 6
+line3 = "*" * 4
+line4 = "*" * 5
+line5 = "*" * 1
+line6 = "*" * 2
+lines = [line1, line2, line3, line4, line5, line6]
+def run_test2():
+    vaka = Chartist()
+    chart_lines = vaka.draw_strings_as_columns(lines)
+    for line in chart_lines:
+        print(line)
+    
 def run_test(string):
     run_test1(string)
+    run_test2()
 
 if __name__ == "__main__":
     run_test(s1)      
