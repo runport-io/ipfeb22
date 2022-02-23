@@ -144,6 +144,14 @@ class Welder:
         
         return event
     
+    def make_events(self, messages):
+        events = list()
+        for message in messages:
+            event = self.make_event_from_msg(message)
+            events.append(event)
+    
+        return events
+        
     def record_receipt(self, msg, event, overwrite=False):
         """
 
