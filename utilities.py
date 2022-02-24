@@ -27,6 +27,28 @@ def deepcopy(obj, recur=False):
     new = obj.from_flat(data=data)
     return new
 
+def flatten(obj, recur=False):
+    result = dict()
+    wip = dict()
+    wip.update(obj.__dict__)
+
+    # remove attributes we don't like
+    skip_attrs = getattr(obj, SKIP)
+    for attr in skip_attrs:
+        wip.pop(attr)
+
+    if recur:
+        # walk the attributes and flatten them
+        for key, value in wip.items():
+            f = getattr(value, "flatten")
+            adj_value = f()
+            if not f:
+                adj_value = flatten(value, recur=True)
+            result[k] = adj_value
+
+    return result
+   
+
 def get_lines(obj, include_header=True, width=None, indent=None):
     """
 

@@ -87,6 +87,12 @@ class Event:
     def __str__(self):
         string = up.make_string(self)
         return string
+
+    def __hash__(self):
+        result = hash(self.get_number())
+        if not result:
+            raise exceptions.NumberError("No number defined for object")
+        return result
     
     @classmethod
     def from_flat(cls, data):
@@ -110,6 +116,15 @@ class Event:
             new.attr = value.from_flat(detail)
 
         return new
+
+    def flatten(self):
+        """
+
+        -> dict()
+
+        Method returns a dictionary of primitives. 
+        """
+        pass        
     
     def get_body(self):
         """
@@ -260,3 +275,25 @@ print("e2: ")
 e2 = Event(headline="I got a cappucino.", source="me")
 print(e2)
 print("\n")
+
+def run_test3():
+    container_a = {e1, e2}
+    container_b = {e2, "a"}
+    intersection = container_a & container_b
+    print(intersection)
+
+def run_test4():
+    result = e2.flatten()
+    print(result)
+
+def run_test5():
+    pass
+    # get some real events and flatten those
+
+def run_test6():
+    pass
+    # get the flat events from 5, expand each one
+    # do something
+
+if __name__ == "__main__":
+    run_test3()
