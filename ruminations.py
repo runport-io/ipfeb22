@@ -127,6 +127,109 @@ class Chartist:
         result = result[:length]
         return result
 
+    def pad_list(self, container, length, fill=None):
+        """
+
+        -> list
+
+        """
+        result = container.copy()
+        starting_length = len(container)
+        gap = length - starting_length
+        if gap < 0:
+            c = "Container is shorter than length."
+            raise exceptions.ParameterError(c)
+
+        i = 0
+        while i < gap:
+            result.append(fill)
+            i = i + 1
+
+        result = result[:length]
+        return result        
+
+    def rotate_clockwise(self, rows):
+        """
+
+        -> list
+
+        Function returns a list of lists that represent rows rotated 90 degrees.
+        For example, if you start with [a, b, c], [d, e], you get [d, a],
+        [e, b], [None, c].
+        """
+        new_rows = list()
+        x = 0
+        for row in rows:
+            length = len(row)
+            if length > x:
+                x = length
+            
+        padded_rows = list()
+        for row in rows:
+            padded_row = self.pad_list(row, length=x)
+            padded_rows.append(padded_row)
+        # make routine, now all rows are equal length
+        reversed_order = padded_rows[::-1]
+        print("Reversed order:  \n", reversed_order)
+        # [d, e], [a, b, c]
+
+        i = 0
+        while i < x:
+            new_row = list()
+            for starting_row in reversed_order:
+                # [d, e]
+                item = starting_row[i]
+                # d; should work because I padded all rows to the same height.
+                new_row.append(item)
+                # [d].append(a)
+            new_rows.append(new_row)
+            #[[d, a]].append([e, b])
+            i = i + 1
+
+        return new_rows
+
+    def draw_rows_as_columns(self, rows):
+        pass
+        # turn rows 3 times
+        # for each row, join with spacer. check for width issues.
+        #       # also check for height issues
+        #       # may be event should return views: small, medium, large, xl?
+        #       # a view can be defined as a list of strings
+        # get all the strings
+        # add legends if necessary
+        # return
+
+    def plot_events_over_days(self, events, days=4):
+
+        days = dict()
+##        i = 0
+##        while i < days:
+##            day = list()
+##            days.append(day)
+##            i = i + 1
+
+        for event in events:
+            day_of_event = event.timestamp.to_day()
+            if day_of_event not in days.keys():
+                days[day_of_event] = list()
+                days[day_of_event].append(event)
+            else:
+                days[day_of_event].append(event)
+                # but need to sort then within days
+                # ideally would get in order of recency.
+                # if not, use sets?
+
+        return days
+
+        # sort into buckets
+        # then figure out how many days i want to print
+        #   # function of screen size and type of view
+        # then get strings or something? sort in some way I want
+        # questions:
+        #   should periods have markers in them for some reason?
+        #   e.g., start
+        #   may be there is a better way? 
+        
 # Testing
 s1 = "ilya"
 def run_test1(seed):
@@ -152,10 +255,45 @@ def run_test2():
     chart_lines = vaka.draw_strings_as_columns(lines)
     for line in chart_lines:
         print(line)
+
+class Mock():
+    def __init__(self, name):
+        self.name = name
+
+    def __str__(self):
+        return self.name
+
+a = Mock("a")
+b = Mock("b")
+c = Mock("c")
+d = Mock("d")
+e = Mock("e")
+row1 = ["a", "b", "c", "d"]
+row2 = ["e", "f"]
+row3 = [a, b, c, d]
+row4 = [e]
+mivr = Chartist()
+
+def run_test3():
+    print(row1)
+    result1 = mivr.pad_list(row1, 6)
+    print(result1)
+    
+    print(row2)
+    result2 = mivr.pad_list(row2, 6)
+    print(result2)
+
+def run_test4(rows):
+    print(rows)
+    result = mivr.rotate_clockwise(rows)
+    print(result)
+    return result       
     
 def run_test(string):
     run_test1(string)
     run_test2()
+    run_test3()
+    run_test4([row1, row2])
 
 if __name__ == "__main__":
     run_test(s1)      
