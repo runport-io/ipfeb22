@@ -63,14 +63,7 @@ class Event:
     timestamp           instance of TimeStamp, shows when event took place? this may not be necessary. kind of duplicates log, because log can be a list of tuples (time, note)
     
     FUNCTIONS:
-    copy                returns deep copy of event
-    print_contents      returns a string that looks nice when you print it
-    email_from          (cls) generates an instance of the class from an email
-    [json_to             returns a JSON object 
-    json_from           (cls) generates an instance of the class from JSON]
-    get_fields          returns list of fields for instance
-    get_field_names     returns list of field names for instance
-   
+        
     ------------------  --------------------------------------------------------
     """
     def __init__(self, headline=None, body=None, source=None):
