@@ -93,7 +93,7 @@ class Scanner:
         You get back a list of tuples showing the starting and ending location.
         """
         result = list()
-        wip = re.finditer(string, brand)
+        wip = re.finditer(brand, string)
         # wip is a generator
         for match in wip:
             span = match.span()
@@ -116,5 +116,51 @@ class Scanner:
         return result
 
     
-            
-           
+b1 = {"Queen of Glory", "Film Movement"}
+s1 = """
+Queen of Glory was produced by Jamund Washington, Kelley Robin Hicks and Baff
+Akoto and also stars Meeko, Oberon K.A. Adjepong and Adam Leon. The film made
+its world premiere at the 2021 Tribeca Film Festival, where it won the award for
+Best New Narrative Director. It has subsequently claimed the Hamptons
+International Film Festival’s Excellence in Directing Award and the Mill Valley
+Film Festival’s inaugural Mind the Gap Creation Prize, and is currently
+nominated for Independent Spirit Awards in the categories of Best First Feature
+and Best Supporting Male, with the latter recognition going to Mensah’s co-star,
+Meeko.
+
+“Queen of Glory heralds a true coming-out-party for Nana–both in front of and
+behind the camera,” said Film Movement President Michael Rosenberg. “Throughout
+the years, we’re proud of our track record of introducing unique new talents to
+cinema lovers, and we’re excited that we’re able to play a part in Nana’s career
+– one that’s sure to be rich, varied and successful.”
+
+“Our entire team is thrilled to partner with Film Movement and is honored to be
+a part of their history of bold, passionate and boundary-pushing films,” added
+Mensah. “We can’t wait for them to introduce this very special film to audiences
+this year.”
+
+Film Movement is a North American distributor founded in 2002 that has also
+recently acquired Stefan Ruzowitzky’s thriller Hinterlands; Hong Sung-eun’s
+feature directorial debut, Aloners; Bobbi Jo Hart’s doc Fanny: The Right to
+Rock; Laura Wandel’s Playground; French actress Sandrine Kiberlain’s feature
+directorial debut, A Radiant Girl; Mario Martone’s Italian period drama, The
+King of Laughter, starring Toni Servillo; Olivia Peace’s coming-of-age drama
+Tahara; Philipp Stölzl’s Chess Story, based on the Stefan Zweig novel of the
+same name; Jacqueline Lentzou’s debut feature Moon, 66 Questions; and Bogdan
+George Apetri’s acclaimed Romanian crime thriller, Miracle.
+"""
+
+hp = Scanner()
+
+def run_test1():
+    print("Text: ")
+    print(s1)
+    print("Brands: ")
+    print(b1)
+    index = hp.index_brands(s1, b1)
+    print("Index: ")
+    print(index)
+    return index
+
+if __name__ == "__main__":
+    run_test1()

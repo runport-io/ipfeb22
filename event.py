@@ -40,6 +40,7 @@ Event               Object organizes information in time.
 # 2) Port.
 import utilities as up
 
+from brands2 import Brands
 from number import Number
 from source import Source
 from textfield import TextField
@@ -63,11 +64,13 @@ class Event:
     timestamp           instance of TimeStamp, shows when event took place? this may not be necessary. kind of duplicates log, because log can be a list of tuples (time, note)
     
     FUNCTIONS:
-        
+    get_body()
+    get_word()          Returns a one-word summary of the event.
     ------------------  --------------------------------------------------------
     """
     def __init__(self, headline=None, body=None, source=None):
         self.body = TextField(body)
+        self.brands = Brands()
         self.headline = TextField(headline)
         self.number = Number()
         self.source = Source()
@@ -128,6 +131,24 @@ class Event:
         """
         result = self.body.get_content()
         return result
+
+    def get_word(self):
+        """
+
+        get_word() -> string
+
+        Method returns a string that describes the instance. Looks to brands by
+        default, then headline if no brand is available. 
+        """
+        ranked_brands = event.brands.get_ranked()
+        if ranked_brands:
+            word = ranked_brands[0]
+        else:
+            headline = self.get_headline()
+            words = headline.split()
+            word = words[0]
+            
+        return word
 
     def get_headline(self):
         """

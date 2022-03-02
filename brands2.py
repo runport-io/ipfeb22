@@ -51,13 +51,14 @@ class Brands:
     Attribute           Description
     ------------------  --------------------------------------------------------
     DATA:
+    N/a
     
     FUNCTIONS:
     add_location        Records the location of a brand in the index
     get_brands          Returns a set of keys from the index          
     get_count           Returns the number of occurences for a brand
     get_counts          Returns a dictionary of brands to occurences
-    get_first           Returns the first brand in the inde
+    get_first           Returns the first brand in the index
     get_inverted        Returns a map of location to brand
     get_locations       Returns all locations for the brand
     get_ranked          Returns a list of brands ordered by number of occurences
