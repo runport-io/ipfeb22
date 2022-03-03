@@ -114,7 +114,6 @@ class Scanner:
             spans = self.index_brand(string, brand)
             result[brand] = spans
         return result
-
     
 b1 = {"Queen of Glory", "Film Movement"}
 s1 = """

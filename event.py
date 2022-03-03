@@ -30,7 +30,7 @@ DATA:
 FUNCTIONS:
 
 CLASSES:
-Event               Object organizes information in time.
+Event               Object organizes information about a moment in time.
 ------------------  ------------------------------------------------------------
 """
 
@@ -40,7 +40,6 @@ Event               Object organizes information in time.
 # 2) Port.
 import utilities as up
 
-from brands2 import Brands
 from number import Number
 from source import Source
 from textfield import TextField
@@ -49,46 +48,68 @@ from timestamp import TimeStamp
 class Event:
     """
     
-    Events record observations at one or more points in time.
+    Events describe a moment in time. Events hash as their Number.
 
     ------------------  --------------------------------------------------------
     ------------------  --------------------------------------------------------
     Attribute           Description
     ------------------  --------------------------------------------------------
     DATA:
-    number              instance of Number
-    source              instance of Source, tracks where the event came from
-    brands              instance of Brands, tracks brands mentioned in event.
-    headline            instance of TextField, tracks the headline
     body                instance of TextField, tracks the body
-    timestamp           instance of TimeStamp, shows when event took place? this may not be necessary. kind of duplicates log, because log can be a list of tuples (time, note)
-    
+    headline            instance of TextField, tracks the headline
+    number              instance of Number
+    source              instance of Source, tracks where the event came from       
+    timestamp           instance of TimeStamp, shows when event took place  <---------------------------- move to source
+
     FUNCTIONS:
-    get_body()
-    get_word()          Returns a one-word summary of the event.
+    from_flat()         CLASS METHOD; generates an instance from a JSON object
+    flatten()           turns instance into a JSON object
+
+    get_body()          returns the body of the instance
+    get_headline()      returns the headline for the instance
+    get_lines()         returns a list of strings that represent the instance
+    get_number()        returns the id number for the instance
+    get_raw()           returns the data used to construct the instance, if any              
+    get_word()          returns a one-word summary of the instance
+
+    set_body()          records text to body
+    set_headline()      records text to headline
+    set_number()        assigns number to the event #<-------------------------------------------------------change name
+    set_raw()           as
+    set_source()        sets instance source #<--------------------------------------------------------------------remove
     ------------------  --------------------------------------------------------
     """
     def __init__(self, headline=None, body=None, source=None):
         self.body = TextField(body)
-        self.brands = Brands()
         self.headline = TextField(headline)
         self.number = Number()
+        # ideally, this should be a product of all the other attributes' numbers.
         self.source = Source()
+        # received_by: id_card (name, parent, id, date, signature) ## e.g., ilya's gmap obs
+        # received_from: id_card
+        # recorded_by: (x) ## ilya's controller
+        # recorded_in: (y) ## ilya's storage x
+        # pubished_by: (z) and so on
+        
         self.timestamp = TimeStamp()
         self._raw = None
-
+        # not clear why this is necessary?
+        # may be replace with data.
+        # data.raw, data.feedback
+        
         if source:
             self.set_source(source)
-
-    def __str__(self):
-        string = up.make_string(self)
-        return string
+            #<------------------------------------------------------------------------------------------------delegate down
 
     def __hash__(self):
         result = hash(self.get_number())
         if not result:
             raise exceptions.NumberError("No number defined for object")
         return result
+    
+    def __str__(self):
+        string = up.make_string(self)
+        return string
     
     @classmethod
     def from_flat(cls, data):
@@ -112,6 +133,8 @@ class Event:
             new.attr = value.from_flat(detail)
 
         return new
+        #<--------------------------------------------------------------------------------------------------------------------------------------------------------
+        # attach the data to raw
 
     def flatten(self):
         """
@@ -120,7 +143,12 @@ class Event:
 
         Method returns a dictionary of primitives. 
         """
-        pass        
+        pass
+        # does something or other here.
+        # should go through each attribute it and flatten it.
+        # 
+    
+        #<--------------------------------------------------------------------------------------------------------------------------------------------------------
     
     def get_body(self):
         """
@@ -132,24 +160,6 @@ class Event:
         result = self.body.get_content()
         return result
 
-    def get_word(self):
-        """
-
-        get_word() -> string
-
-        Method returns a string that describes the instance. Looks to brands by
-        default, then headline if no brand is available. 
-        """
-        ranked_brands = event.brands.get_ranked()
-        if ranked_brands:
-            word = ranked_brands[0]
-        else:
-            headline = self.get_headline()
-            words = headline.split()
-            word = words[0]
-            
-        return word
-
     def get_headline(self):
         """
 
@@ -160,17 +170,6 @@ class Event:
         result = self.headline.get_content()
         return result
 
-    def get_number(self):
-        """
-
-        Event.get_number() -> obj
-
-        Method delegates to instance.number. Method returns the results of
-        number.get_number() for the instance.
-        """
-        result = self.number.get_number()
-        return result
-    
     def get_lines(self, omit_raw=True):
         """
 
@@ -186,37 +185,48 @@ class Event:
             
         lines = up.get_lines(alt)
         return lines
+        # consider moving this to camera? keeps this object lighter.  <---------------------------------------------------------------
     
-    def get_source(self):
+    def get_number(self):
         """
 
-        Event.get_source() -> obj
+        Event.get_number() -> obj
 
-        Method returns the instance sender. Method delegates to instance.source.
+        Method delegates to instance.number. Method returns the results of
+        number.get_number() for the instance.
         """
-        source = self.source.get_sender()
-        return source
+        result = self.number.get_number()
+        return result
 
-    def get_summary():
+##    def get_raw(self):
+##        """
+##
+##        get_raw () -> obj
+##
+##        Method returns the raw version of the event. You get what you put in. 
+##        """
+##        result = self._raw
+##        return result
+##        # unclear if this is valuable <---------------------------------------------------------------
+        
+    def get_word(self):
         """
 
-        Event.get_summary() -> string
+        get_word() -> string
 
-        Method returns a string that summarizes the instance. The string
-        truncates the body of the event.
+        Method returns a string that describes the instance. Looks to brands by
+        default, then headline if no brand is available. 
         """
-        pass
-        # placeholder for abbreviated representation
-        #
-        # returns: event name
-        # event headline
-        # event number
-        # event namespace
-        # event source
-        # event date
-        # first couple lines of event body?
-        # how is this different than just print() or print_short()?
-
+        ranked_brands = event.body.index.get_ranked()
+        if ranked_brands:
+            word = ranked_brands[0]
+        else:
+            headline = self.get_headline()
+            words = headline.split()
+            word = words[0]
+            
+        return word
+    
     def set_body(self, content):
         """
 
@@ -235,7 +245,7 @@ class Event:
         """
         self.headline.set_content(content, force=force)
 
-    def set_number(self):
+    def set_number(self, force=False):
         """
 
         Event.set_number() -> uuid
@@ -243,18 +253,28 @@ class Event:
         Method sets the event's number. Method uses the source's number as the
         namespace. 
         """
+        if self.get_number():
+            if not force:
+                c = "Number exists."
+                raise exceptions.OverrideError(c)
+    
         namespace = self.source.number.get_number()
         # source should get its number from observer + string
         name = self.headline.get_content()
         number = self.number.set_number(namespace, name)
+        # could refactor this as: get_number, assign_number(number, force)
 
         return number
-        # or can have the event be the product of source and whatever. the problem
-        # there is that the id gets really long.
-        # I could write some functions that take a number and convert it into a
-        # base 64 or base 85 integer. that shrinks them a lot. then i would have
-        # a way to trace inheritance, and would have product = descendant, and
-        # that kind of stuff.
+
+    def set_raw(self, data, force=False):
+        """
+
+        set_raw() -> None
+
+        Method records the data in the instance. You will get an OverrideError
+        if the instance already has raw data, unless you set "force" to True.
+        """
+        up.set_with_override(self, "_raw", data, override=force)
 
     def set_source(self, source):
         """
@@ -265,13 +285,11 @@ class Event:
         recording.
         """
         self.source.set_sender(source)
-        
-    # can experiment with the number approach later.
-    # number approach:
-    # generate an id, randomly, or something like that. or based on a seed. either alone,
-    # or in a namespace. 
-    # multiply the id by the inheritance tree.
-    # voila
+
+# should move the timestamp to source, i think. it is on the source that i
+# record when i get something, and where i record that info - if its on the
+# observer, or something else, is logic that's not obvious from here.
+# i can retain event.get_number() and delegate accordingly. 
 
 # tests
 # make event

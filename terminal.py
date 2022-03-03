@@ -1,7 +1,10 @@
-class Terminal:
+class Shell:
     def __init__(self):
         self.watchlist = None
         self.events = None
+        # cache
+        self.alternator = None
+        # manages the cycle
 
     def brand_events(self):
         brands = self.watchlist.flatten()
@@ -30,5 +33,23 @@ class Terminal:
         # filters by watchlist
         pass
 
+    def update(self):
+        events = self.alternator.pull(n)
+        # arrive inflated; should i do that here or there? let's say in there
+        branded_events = self.iron(events)
+        # inflates and brands
+        if not hurry:
+            self.acdc.save(branded_events)
+            # can be optional
+        # print events somehow
+        self.hp.print(branded_evens)
+            # really want to see these as bars
+        return branded_events
 
+    
+
+
+        
+
+    
     

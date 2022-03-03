@@ -24,9 +24,12 @@ TextField           Container for storing text and information about the text.
 
 # 2) Port.
 import constants
+import context
 import utilities as up
 
+from brands2 import Index
 from number import Number
+
 
 # Constants
 
@@ -40,6 +43,7 @@ class TextField:
     Attribute           Description
     ------------------  --------------------------------------------------------
     DATA:
+    index               an instance of Index, tracks mentions in the body.   
     number              an instance of Number
     
     FUNCTIONS:
@@ -60,6 +64,7 @@ class TextField:
         self._content = content
         self._data = None
         self._raw = None
+        self.index = Index()
         self.number = Number()
     
     def get_content(self):
@@ -95,26 +100,6 @@ class TextField:
         string = glue.join(lines)
         return string
 
-    def get_raw(self):
-        """
-
-        get_raw() -> str
-
-        Method returns the format of the instance prior to any transformations.
-        You should expect a string.
-        """
-        result = self._raw
-        return result
-
-    def set_raw(self, obj):
-        """
-
-        set_raw() -> None
-        
-        Method stores the string version of the object on the instance.
-        """
-        self._raw = repr(obj)
-
     def get_data(self, copy=True):
         """
 
@@ -129,14 +114,35 @@ class TextField:
             result = result.copy()
         return result
 
-    def set_data(self, dictionary):
+    def get_mentions(self, brand, length=100, flag=True):
         """
 
-        set_data() -> None
+        get_mentions() -> dict
 
-        Method sets data to the parameter you specify.
+        Method returns a dictionary of spans mapped to strings. You can specify
+        the number of characters you want from each side of the mention through
+        "length" and whether to flag the mention. 
         """
-        self._data = dictionary
+        result = dict()
+        body = self.get_content()
+        spans = self.index.get_locations(brand)
+
+        for span in spans:
+            mention = context.get_context(body, span, length, flag)
+            result[span] = mention
+
+        return result
+
+    def get_raw(self):
+        """
+
+        get_raw() -> str
+
+        Method returns the format of the instance prior to any transformations.
+        You should expect a string.
+        """
+        result = self._raw
+        return result
 
     def get_snippet(self, line_count=10):
         """
@@ -149,6 +155,25 @@ class TextField:
         lines = content.splitlines(keepends=True)
         snippet = "".join(lines[:line_count])
         return snippet
+
+    def set_data(self, dictionary):
+        """
+
+        set_data() -> None
+
+        Method sets data to the parameter you specify.
+        """
+        self._data = dictionary
+
+    def set_raw(self, obj):
+        """
+
+        set_raw() -> None
+        
+        Method stores the string version of the object on the instance.
+        """
+        self._raw = repr(obj)
+        # might not be necessary
         
     # consider adding a log attribute
     # every time i make a change, i log it. append only. requires a 
