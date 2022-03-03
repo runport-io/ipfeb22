@@ -12,42 +12,6 @@
 #   I want a chart of emails over the last 7 days
 #   I want axes labelled
 
-def split_events_into_periods(events, length_in_seconds):
-    pass
-
-    # 1. find earliest and latest: sort by time.
-        # build a dictionary of events by time
-        # sort that dictionary
-        # result is a list by key date.
-        #
-        # subroutines:
-        #  map_to_time(list) -> dictionary
-    
-    # 2. compute number of periods
-        # total = latest.stop - earliest.start
-        # number = total / length_in_seconds, rounded up to the nearest integr.
-        # deliverable = length_of_period
-        #
-        # subroutines:
-        #   get_period_count(start, stop, length) -> int
-        #   get_period_length(start, stop, count) -> int
-
-    # 3. make the periods
-        # deliverable, a list of periods
-        # start with the start, then add length_of_period
-        #
-        # subroutines:
-        #   make_number_of_periods(start, length) -> list()
-
-    # 4. go through the events, now in order, and add them to period
-        # deliverable: list of periods, now populated
-        # go through this one period at a time. keep going through the list of
-        # events, until you find the first one that's later. Slice off that.
-        # then repeat.
-
-        # subroutines:
-        #  match_events_to_periods(events, periods) -> list
-
 class Sorter:
     def __init__(self):
         pass
