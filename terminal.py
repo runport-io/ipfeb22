@@ -1,5 +1,6 @@
 import alternator
 import cache
+import scanner
 import watchlist
 
 class Shell:
@@ -7,11 +8,12 @@ class Shell:
         self.watchlist = watchlist.Watchlist()
         self.events = None
         # cache
+        self.scanner = scanner.Scanner()
         self.alternator = alternator.Alternator()
         # manages the cycle
 
-    def brand_events(self):
-        brands = self.watchlist.flatten()
+    def brand_events(self, events):
+        brands = self.watchlist.get_uniques()
         self.scanner.scan(events, brands)
 
     def refresh_brands(self):
@@ -26,8 +28,8 @@ class Shell:
 
     def load_events(self, count=20):
         events = self.alternator.pull(count)
-        # get events from controller
-        # check_brands
+        return events
+        # check_brands?
 
     def view_all(self):
         # returns all events
@@ -68,7 +70,13 @@ def run_test2(shell):
     shell.watchlist.add_brand("yo")
     shell.watchlist.add_brand("nike")
     events = shell.load_events(count=10)
-    branded_events = shell.brand_events()
+    print("length of events:")
+    print(len(events))
+    print("first event")
+    print(events[0])
+    
+    branded_events = shell.brand_events(events)
+    # is this an in-place change?
     
     events = shell.filter_events()
     return events

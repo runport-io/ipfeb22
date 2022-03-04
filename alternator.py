@@ -19,7 +19,7 @@ class Alternator:
 
         pull events from controller.
         """
-        events = controller.update(count)
+        offset, events = controller.update(count)
         return events
 
     def save(self):

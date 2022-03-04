@@ -32,7 +32,8 @@ def store_events(events):
 
 def update(count=20):
     events = get_events(count)
-    offset = store_events(events)
+    offset = temp.add_events(events)
+    # offset is None, current implementation does not track offsets.
     result = (offset, events)
     return result
 
