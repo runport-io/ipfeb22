@@ -8,15 +8,21 @@
 # bad version - send them across as is
 # no unpacking or repacking
 
-import email_observer
 import cache
+import email_observer
 
+import observ2
+# I am importing this just for the credentials
 
 marketing = email_observer.EmailObserver()
 temp = cache.Cache()
 
+guest, token = observ2.load_credentials()
+marketing.activate(token)
+# need to have a flag of some sort here: marketing.is_active() -> bool
+
 def get_events(count):
-    events = marketing.get_events(count)
+    events = marketing.get_events(offset=0, count=count)
     return events
     # list how many events, that kind of thing
 

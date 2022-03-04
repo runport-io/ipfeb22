@@ -40,8 +40,8 @@ class EmailObserver:
         count = self.connector.connect(token)
         return count
     
-    def get_events(self, count=None):
-        messages = self.connector.get_messages(count=count)
+    def get_events(self, offset, count):
+        messages = self.connector.get_messages(offset=offset, count=count)
         # self.connector.clear_memory() ## clean the connector
         events = self.transformer.make_events(messages)
         return events

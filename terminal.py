@@ -67,7 +67,7 @@ def run_test1():
 def run_test2(shell):
     shell.watchlist.add_brand("yo")
     shell.watchlist.add_brand("nike")
-    events = shell.load_events()
+    events = shell.load_events(count=10)
     branded_events = shell.brand_events()
     
     events = shell.filter_events()

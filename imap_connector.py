@@ -97,6 +97,7 @@ class ImapConnector:
         if offset is None:
             # I want to keep the data if offset=0
             offset = self.get_offset()
+            
         uniques = self.refresh(offset, count, increment=True)
         for uid in uniques:
             message = self.get_message(uid)

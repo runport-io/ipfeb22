@@ -69,7 +69,7 @@ def casefold_items(iterable):
         
     return result
 
-def parse_body(string, trace=False):
+def parse_body(string, trace=True):
     """
 
     parse_body() -> string, dict
@@ -78,7 +78,13 @@ def parse_body(string, trace=False):
     If you set trace to "True", routine shows work.
     """
     body, data = prep_string(string)
+    if trace:
+        print("Input: ")
+        print(string)
 
+        print("Data: ")
+        print(data)
+        
     if body:
         if data:    
             charset = data[constants.CHARSET]
