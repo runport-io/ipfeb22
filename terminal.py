@@ -14,7 +14,11 @@ class Shell:
 
     def brand_events(self, events):
         brands = self.watchlist.get_uniques()
-        self.scanner.scan(events, brands)
+        #<-------------------------------------------------- in place!!!!
+        for event in events:        
+            matches = self.scanner.scan(event, brands)
+            print(matches)
+            #<-------------------------------------------- temp!!
 
     def refresh_brands(self):
         flat_watchlist = self.watchlist.flatten()
