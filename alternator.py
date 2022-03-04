@@ -1,5 +1,7 @@
 # Alternator
 
+import controller
+
 class Alternator:
     # connects to controller.
     
@@ -11,9 +13,14 @@ class Alternator:
         # delete the events that I didn't save
         # almost want to do something like keep the event id and the date.
 
-    def pull(self):
-        pass
-        # get a certain number of events from controller
+    def pull(self, count):
+        """
+        -> list
+
+        pull events from controller.
+        """
+        events = controller.update(count)
+        return events
 
     def save(self):
         pass
@@ -34,15 +41,6 @@ class Alternator:
         #   #   event.attention or something
         #   #   the question is what is part of what, right now i have event and
         #   #   then compositions around it.
-
-    def exit(self):
-        pass
-        # for event in cache:
-            # if event.has_metadata():
-            #   event.save
-            
-        # performs the burn operation
-        # clear cache completely
 
     def get_event(self):
         pass

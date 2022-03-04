@@ -1,8 +1,6 @@
 # cache
 # (c) Port. Prerogative Club 2022
 
-
-
 class Cache:
     def __init__(self):
         self.hose = list()

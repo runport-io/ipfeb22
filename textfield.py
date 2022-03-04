@@ -27,7 +27,7 @@ import constants
 import context
 import utilities as up
 
-from brands2 import Index
+from index import Index
 from number import Number
 
 

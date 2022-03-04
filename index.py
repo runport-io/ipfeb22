@@ -40,7 +40,7 @@ Brands              A directory of names that a text contains.
 # 2) Port.
 # N/a
 
-class Brands:
+class Index:
     """
     
     This object records the locations of substrings and provides methods to
