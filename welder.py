@@ -99,7 +99,7 @@ class Welder:
         """
         email_address = msg.get(constants.EMAIL_LIB_FROM)
         source = parser2.extract_domain(email_address)
-        existing = event.get_source()
+        existing = event.source.get_sender()
         
         if force or not existing:
             event.set_source(source)
