@@ -114,6 +114,12 @@ class Welder:
 
         # ideally, source would be an entity, may be? linked through a URL?
 
+    def add_timestamp(self, msg, event, time=None):
+        date = msg.get("Date")
+        print(date)
+        event.set_timestamp(date)
+        
+
     def make_blank(self):
         """
 

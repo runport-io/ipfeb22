@@ -1,6 +1,7 @@
 import alternator
 import cache
 import scanner
+import sorter
 import watchlist
 
 class Shell:
@@ -9,6 +10,7 @@ class Shell:
         # manages the cycle for retrieval
         self.cache = cache.Cache()
         self.scanner = scanner.Scanner()
+        self.sorter = sorter.Sorter()
         self.watchlist = watchlist.Watchlist()
         
     def brand_events(self, events):
@@ -77,7 +79,6 @@ class Shell:
         # performs the burn operation
         # clear cache completely
 
-    
 def run_test1():
     s = Shell()
     return s
@@ -87,6 +88,7 @@ def run_test2(shell):
     shell.watchlist.add_brand("nike")
     events = shell.load_events(count=10)
     shell.cache.add_events(events)
+    
     print("length of events:")
     print(len(events))
     print("first event")
@@ -100,16 +102,34 @@ def run_test2(shell):
     print(filtered_events)
     
     return filtered_events
-
     # branded events are likely the same as filtered events
 
-def run_test3():
-    pass
+def run_test3(shell, events):
+    DAY = shell.sorter.DAY
+    print("Events: ")
+    print(events)
+    periods = shell.sorter.split_events_into_periods(events, DAY, sort=True)
+    print("First period: ")
+    print(period[0])
+    return periods
+    
+    # events come presorted by time. <----------------------------- i ruin that
+    # need to split the events into days
+    # need to wrap the events in the wrapper
+        # potentially do that when loading events?
+    # 
+    
     # print the events as lines over days. use sorter and graphing.
+    # print over 8 days
+    
 
 def run_test():
     shell = run_test1()
-    run_test2(shell)
+    filtered_events = run_test2(shell)
+    events = shell.cache.get_events()
+    periods = run_test3(shell, events)
+    
+    
     
 if __name__ == "__main__":
     run_test()

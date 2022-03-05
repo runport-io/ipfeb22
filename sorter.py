@@ -12,7 +12,13 @@
 #   I want a chart of emails over the last 7 days
 #   I want axes labelled
 
+import utilities
+
 class Sorter:
+    HOUR = 3600
+    DAY = 86400
+    WEEK = 604800
+    
     def __init__(self):
         pass
 
@@ -60,6 +66,7 @@ class Sorter:
             event = events.pop(0)
             timestamp = event.get_timestamp()
             if period.includes(timestamp):
+                # need to make this routine
                 period.contents.append(event)
                 # woah woah
             else:
@@ -83,19 +90,21 @@ class Sorter:
         result = sorted(events, key=by_timestamp)
         return result
 
-    def split_events_into_periods(self, events, period_length, trace=False):
+    def split_events_into_periods(self, events, period_length, sort=False):
         """
 
         () -> list
 
         Returns list of periods
         """      
-        ordered_events = self.sort_events_by_timestamp(events)
-        start = ordered_events[0].get_timestamp()
-        end = ordered_events[-1].get_timestamp()
+        if sort:
+            events = self.sort_events_by_timestamp(events)
+        print(events)
+        start = events[0].get_timestamp()
+        end = events[-1].get_timestamp()
 
         periods = self.make_periods(start, end, period_length)
-        self.fill_periods_with_events(periods, ordered_events)
+        self.fill_periods_with_events(periods, events)
         # changes periods in place
 
         return periods
@@ -106,6 +115,26 @@ class Period:
         self.stop = None
         self.contents = None
 
+    def __str__(self):
+        string = utilities.make_string()
+        return string
+        
+    def get_lines(self):
+        result = list()
+        line1 = "Period "
+        result.append(line1)
+        
+        line2 = "Start: " + str(self.start)
+        result.append(line2)
+
+        line3 = "Stop: " + str(self.stop)
+        result.append(line3)
+
+        line4 = "Contents: \n" + str(self.contents)
+        result.append(line4)
+
+        return result
+    
     def set_length(self, length):
         """
         -> None
@@ -122,16 +151,7 @@ class Period:
             result = True
         return result
         
-# if this code works:
-  # i need to get the data - in json - make it into something eaiser to handle
-  # then sort the events [done]
-  # make views for the event:
-        # here, that means "*" to start
-        # sizes 1 through 4. 1: "*", 2: "br", 3: is the one I have with the box
-        # 4 is full screen? 
-  # then create a view object:
-      # the view object takes a series of events and splits them into screens
-      # it has some state, so I can go back and forth
+
 
     
     
