@@ -5,17 +5,16 @@ import watchlist
 
 class Shell:
     def __init__(self):
-        self.watchlist = watchlist.Watchlist()
-        self.events = None
-        # cache
-        self.scanner = scanner.Scanner()
         self.alternator = alternator.Alternator()
-        # manages the cycle
-
+        # manages the cycle for retrieval
+        self.cache = cache.Cache()
+        self.scanner = scanner.Scanner()
+        self.watchlist = watchlist.Watchlist()
+        
     def brand_events(self, events):
         brands = self.watchlist.get_uniques()
         
-        for event in events:        
+        for event in events:
             matches = self.scanner.scan(event, brands)
             print(matches)
             for brand, locations in matches.items():
@@ -87,6 +86,7 @@ def run_test2(shell):
     shell.watchlist.add_brand("yo")
     shell.watchlist.add_brand("nike")
     events = shell.load_events(count=10)
+    shell.cache.add_events(events)
     print("length of events:")
     print(len(events))
     print("first event")
