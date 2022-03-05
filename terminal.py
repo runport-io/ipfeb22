@@ -14,11 +14,15 @@ class Shell:
 
     def brand_events(self, events):
         brands = self.watchlist.get_uniques()
-        #<-------------------------------------------------- in place!!!!
+        
         for event in events:        
             matches = self.scanner.scan(event, brands)
             print(matches)
-            #<-------------------------------------------- temp!!
+            for brand, locations in matches.items():
+                for start, end in locations:
+                    event.body.index.add_location(brand, start, end)
+
+        return events
 
     def refresh_brands(self):
         flat_watchlist = self.watchlist.flatten()
@@ -39,9 +43,18 @@ class Shell:
         # returns all events
         pass
 
-    def filter_events(self, events, watchlist):
-        # filters by watchlist
-        pass
+    def filter_events(self, events, brands=None):
+        result = list()
+        if brands is None:
+            brands = self.watchlist.get_uniques()
+        # brands is a set
+        for event in events:
+            mentions = event.body.index.get_brands()
+            overlap = brands & mentions
+            if overlap:
+                result.append(event)
+
+        return result
 
     def update(self):
         events = self.alternator.pull(n)
@@ -80,10 +93,15 @@ def run_test2(shell):
     print(events[0])
     
     branded_events = shell.brand_events(events)
-    # is this an in-place change?
+    # is this an in-place change? yes.
     
-    events = shell.filter_events()
-    return events
+    filtered_events = shell.filter_events(branded_events)
+    print ("Filtered events: ")
+    print(filtered_events)
+    
+    return filtered_events
+
+    # branded events are likely the same as filtered events
 
 def run_test3():
     pass

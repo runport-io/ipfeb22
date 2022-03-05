@@ -59,7 +59,7 @@ class Scanner:
     def __init__(self):
         pass
 
-    def scan(self, event, brands, match_case=True):
+    def scan(self, event, brands, fold_case=True):
         """
 
         scan() -> dict
