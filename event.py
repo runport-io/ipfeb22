@@ -90,7 +90,7 @@ class Event:
         # recorded_by: (x) ## ilya's controller
         # recorded_in: (y) ## ilya's storage x
         # pubished_by: (z) and so on
-        
+        # source should really be a list
         self.timestamp = TimeStamp()
         self._raw = None
         # not clear why this is necessary?
@@ -209,6 +209,16 @@ class Event:
 ##        return result
 ##        # unclear if this is valuable <---------------------------------------------------------------
         
+    def get_timestamp(self):
+        """
+
+        get_timestamp() -> int or None
+
+        Method returns the time of receipt for the instance.
+        """
+        result = self.timestamp.time_of_receipt
+        return result
+       
     def get_word(self):
         """
 

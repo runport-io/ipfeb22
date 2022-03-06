@@ -41,15 +41,14 @@ class TimeStamp:
     DATA:
     START_OF_TIME       reference time in float format
     time_of_observation time in float format
-    time_of_record      time in float format
-    [hook                instance of hook]
+    time_of_receipt     time in float format
 
     FUNCTIONS:
     get_lines()         returns list of strings with attributes
     json_from()         enriches instance with data from string
     json_to()           returns string that represents data in JSON format
     set_observation()   records time of observation
-    set_record()        records time of record
+    set_receipt()       records argument as time of receipt
     print()             prints    
     ------------------  --------------------------------------------------------
     """
@@ -57,7 +56,7 @@ class TimeStamp:
     
     def __init__(self):
         self.time_of_observation = None
-        self.time_of_record = None
+        self.time_of_receipt = None        
 
     def get_lines(self, header=True):
         """
@@ -74,7 +73,7 @@ class TimeStamp:
             result.append(line1)
 
         line2 = "Observed:   " + str(self.time_of_observation)
-        line3 = "Recorded:   " + str(self.time_of_record)
+        line3 = "Recorded:   " + str(self.time_of_receipt)
         result.extend([line2, line3])
 
         return result
@@ -151,19 +150,15 @@ class TimeStamp:
             
         return now
             
-    def set_record(self, trace=False):
+    def set_receipt(self, time):
         """
 
-        TimeStamp.set_record() -> time()
+        TimeStamp.set_receipt() -> None
 
-        Records the time at call as the time of record. Returns time.
+        Method records the time you specify as the time of receipt.
         """
-        now = time.time()
-        self.time_of_record = now
-        if trace:
-            print(self._time_of_record)
-            
-        return now
+        self.time_of_receipt = time
+        return None
 
 # This code pretends to do unit tests.
 ts1 = TimeStamp()

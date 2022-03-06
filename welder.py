@@ -34,14 +34,16 @@ class Welder        What do you say when you turn an email into an event?*
 
 # Imports
 # 1) Built-ins
-# n/a
+import time
 
 # 2) Port.
 import constants
+
 import event as e
 import exceptions
 import observ2
 import parser2
+import parser_for_dates
 import parser_for_email_body
 
 # 3) Data
@@ -114,11 +116,22 @@ class Welder:
 
         # ideally, source would be an entity, may be? linked through a URL?
 
-    def add_timestamp(self, msg, event, time=None):
-        date = msg.get("Date")
-        print(date)
-        event.set_timestamp(date)
-        
+    def add_timestamp(self, msg, event, time_number=None):
+        """
+
+        add_timestamp() -> event
+
+        Method extracts the time of receipt from the message ("Date"), converts
+        it into a float, and records it on the event. You are changing the
+        event in place.
+        """
+        if time_number is None:
+            date = msg.get("Date")
+            # date is string
+            time_tuple = parser_for_dates.convert_to_tuple(date)
+            time_number = time.mktime(time_tuple)
+        event.timestamp.set_receipt(time_number)
+        return event
 
     def make_blank(self):
         """
@@ -145,8 +158,8 @@ class Welder:
         event = self.add_source(msg, event)
         event = self.add_headline(msg, event)
         event = self.add_body(msg, event)
+        event = self.add_timestamp(msg, event)
         # event.assign_id()
-        # add timestamp, original
         
         return event
     
