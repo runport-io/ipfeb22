@@ -46,27 +46,26 @@ class Sorter:
         result = math.ceil(count)
         return result
 
-    def make_periods(self, start, end, length):
+    def fill_period(self, period, events):
         """
 
-        -> list
+        fill_period() -> tuple
 
-        Method returns a list of periods. 
+        Method returns a tuple of the period and the events that do not fit
+        into the period. You change the period in place.
         """
-        result = list()
-        i = 0
+        remainder = list()
+        for event in events:
+            timestamp = event.get_timestamp()
+            status = period.includes(timestamp)
+            if status:
+                period.append_to_contents(event)
+            else:
+                remainder.append(event)
+                # timestamp not in period
+        return (period, remainder)
 
-        count = self.count_periods(start, end, length)
 
-        while i < count:
-            period = Period(start)
-            start = period.set_length(length)
-            # sets the next starting point to the end of this one
-            result.append(period)
-            i = i + 1
-
-        return result
-    
     def fill_periods_with_events(self, periods, events, trace=False):
         """
 
@@ -89,19 +88,46 @@ class Sorter:
         return periods
         # consider returning events too?
 
-    def fill_period(self, period, events):
-        remainder = list()
-        for event in events:
-            timestamp = event.get_timestamp()
-            status = period.includes(timestamp)
-            if status:
-                period.append_to_contents(event)
-            else:
-                remainder.append(event)
-                # timestamp not in period
-        return (period, remainder)
+    def make_periods(self, start, end, length):
+        """
 
-        
+        -> list
+
+        Method returns a list of periods. 
+        """
+        result = list()
+        i = 0
+
+        count = self.count_periods(start, end, length)
+
+        while i < count:
+            period = Period(start)
+            start = period.set_length(length)
+            # sets the next starting point to the end of this one
+            result.append(period)
+            i = i + 1
+
+        return result
+
+    def make_number_of_periods(self, start, count, length=DAY):
+        """
+
+        make_number_of_periods() -> list
+
+        Method generates a list of periods starting at the "start" date. If you
+        don't specify the length, you default to DAY.
+        """
+        result = list()           
+        start = start
+        for i in range(count):
+            period = Period(start)
+            period.set_length(length)
+            start = period.end
+            
+            result.append(period)
+
+        return result
+    
     def sort_events_by_timestamp(self, events):
         """
         -> list
@@ -131,6 +157,41 @@ class Sorter:
 
         return periods
 
+    def pad_periods(self, periods, target, length=None, append=True):
+        """
+        -> list()
+        
+        Method creates a list of periods of length "count", where each blank
+        period has the length "length". If you set "append" to "True", the
+        list will include the blanks at the end, otherwise method will insert
+        them before the periods you provide.
+        """
+        result = None
+        wip = periods[:target]
+        # wip can still be shorter than target, because I can do a slice of
+        # len-3 list [:8]
+        count = len(wip)
+        if count == target:
+            result = wip
+        else:
+            gap = target - count
+            if length is None:
+                length = self.DAY
+
+            if append:
+                start = wip[-1].end
+                filler = self.make_number_of_periods(start, gap, length)
+                result = wip + filler
+                
+            else:
+                first_start = wip[0].start
+                start = first_start - gap * length
+                filler = self.make_number_of_periods(start, gap, length)
+                result = filler + wip
+
+        return result
+
+        
 class Period:
     def __init__(self, start=None):
         self.start = start
@@ -165,7 +226,11 @@ class Period:
         if self.contents is None:
             self.contents = list()
         self.contents.append(obj)
-    
+
+    def get_length(self):
+        length = self.stop - self.start
+        return length
+        
     def set_length(self, length):
         """
         -> None
@@ -182,23 +247,6 @@ class Period:
             result = True
         return result
         
-# could add an alt_sort:
-
-# for event in events:
-#   timestamp = event.get_timestamp()
-#   if timestamp not in lookup.keys():
-#       period = Period(start=something)
-#
-# go through each event, make a period on the fly
-# if the events are sorted, it is easier
-# but if not:
-# i have to record the hypothetical start
-#   bring that down if i find one that is lower
-#
-# this is all fine and good
-# but the thing i am sorting on is days
-# units of time
-# i could piggyback on the time routine.
 
 
     

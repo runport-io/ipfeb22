@@ -1,5 +1,7 @@
 import alternator
 import cache
+import event_wrapper
+import gui
 import scanner
 import sorter
 import watchlist
@@ -39,6 +41,13 @@ class Shell:
         events = self.alternator.pull(count)
         return events
         # check_brands?
+
+    def wrap_events(self, events):
+        result = list()
+        for event in events:
+            wrapper = event_wrapper.EventWrapper(event)
+            result.append(wrapper)
+        return result
 
     def view_all(self):
         # returns all events
@@ -114,19 +123,47 @@ def run_test3(shell, events):
     return periods
     
     # events come presorted by time. <----------------------------- i ruin that
-    # need to split the events into days
-    # need to wrap the events in the wrapper
-        # potentially do that when loading events?
-    # 
+
+def run_test4():
+    print_as_dots()
+    print_as_tiles()
+
+def print_as_dots(periods, cols=4):
+    """
+    print 4 rows? architecture: extract strings, print the strings.
+    """
+    adjusted = periods[:cols]
+    # should hypothetically pad to length
     
-    # print the events as lines over days. use sorter and graphing.
-    # print over 8 days
+    containers_of_strings = list()
+    for period in adjusted:
+        strings_for_period = list()
+        for event in period.contents:
+            dot = event.get_dot()
+            strings_for_period.append(dot)
+        containers_of_strings.append(strings_for_period)
+    return containers_of_strings
+    # rewrite. <------------------------------------------------------------------------------
+
+def print_as_tiles(shell, periods):
+    """
+    prints periods as rows. if periods < rows, adds periods of equal length
+    after.
     
+    """
+    length = period[0].get_length()
+    adjusted_periods = shell.sorter.pad_periods(periods, target=rows, length=length)
+    for period in adjusted_periods:
+        lines = gui.render_row(*period)
+        # row will be longer than 80 characters
+        # need to manage that somehow <---------------------------------------------------------
+        string = "".join(lines)
+        print(string)
 
 def run_test():
     shell = run_test1()
     filtered_events = run_test2(shell)
-    # populates cache
+    # populates cache #<--------------------------------------------------------------- refactor
     events = shell.cache.get_events()
     periods = run_test3(shell, events)
     

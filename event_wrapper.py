@@ -8,7 +8,6 @@ class EventWrapper:
         # placeholder for tracking time, attention, etc.
         self.tags = None
         # placeholder for commentary, etc
-        self.notes = None
 
     def unwrap(self):
         """
@@ -20,11 +19,6 @@ class EventWrapper:
         # take the work
         # take the tags
         # take the notes
-
-    def wrap(self):
-        """
-        """
-        pass
 
     def tag(self, tag):
         pass
