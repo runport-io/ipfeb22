@@ -21,18 +21,22 @@
 # 1) Built-ins
 import time
 
+# 2) Port.
+import utilities
+
 class Period:
     def __init__(self, start=None):
-        self.start = start
-        self.stop = None
-        self.contents = None
+        self._start = start
+        self._stop = None
+        self._contents = list()
 
     def __hash__(self):
-        result = (self.start, self.stop)
+        result = (self._start, self._stop)
         return result
         
     def __str__(self):
-        string = utilities.make_string(self)
+        lines = self.get_lines()
+        string = "".join(lines)
         return string
 
     def append_to_contents(self, obj):
@@ -40,9 +44,7 @@ class Period:
 
         -> None
         """
-        if self.contents is None:
-            self.contents = list()
-        self.contents.append(obj)
+        self._contents.append(obj)
 
     def check_timestamp(self, timestamp):
         """
@@ -53,49 +55,61 @@ class Period:
         [period.start, period.stop).
         """
         result = False
-        if self.start <= timestamp < self.stop:
+        if self._start <= timestamp < self._stop:
             result = True
         return result
 
+    def get_contents(self):
+        result = self._contents
+        return result
+    
+    def get_start(self):
+        result = self._start
+        return result
+
+    def get_stop(self):
+        result = self._stop
+        return result
+    
     def get_length(self):
-        length = self.stop - self.start
+        length = self._stop - self._start
         return length
 
     def get_lines(self):
         result = list()
-        line1 = "Period "
+        line1 = "Period " + repr(self) + "\n"
         result.append(line1)
         
-        line2 = "Start: " + str(self.start)
+        line2 = "Start: " + self.get_start_as_string() + "\n"
         result.append(line2)
 
-        line3 = "Stop: " + str(self.stop)
+        line3 = "Stop: " + self.get_stop_as_string() + "\n"
         result.append(line3)
 
-        line4 = "Contents: \n" + str(self.contents)
+        line4 = "Contents: \n" + str(self._contents)
         result.append(line4)
 
         return result
         
     def get_start_as_local(self):
-        result = time.localtime(self.start)
+        result = time.localtime(self._start)
         return result
 
     def get_stop_as_local(self):
-        result = time.localtime(self.stop)
+        result = time.localtime(self._stop)
         return result
 
     def get_start_as_string(self):
-        result = time.ctime(self.start)
+        result = time.ctime(self._start)
         return result
 
     def get_stop_as_string(self):
-        result = time.ctime(self.stop)
+        result = time.ctime(self._stop)
         return result
         
     def set_length(self, length):
         """
         -> None
         """
-        self.stop = self.start + length
-        return self.stop
+        self._stop = self._start + length
+        return self._stop

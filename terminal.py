@@ -1,9 +1,10 @@
 import alternator
 import cache
+import camera
 import event_wrapper
 import gui
 import scanner
-import sorter
+import scheduler
 import watchlist
 
 class Shell:
@@ -12,7 +13,7 @@ class Shell:
         # manages the cycle for retrieval
         self.cache = cache.Cache()
         self.scanner = scanner.Scanner()
-        self.sorter = sorter.Sorter()
+        self.scheduler = scheduler.Scheduler()
         self.watchlist = watchlist.Watchlist()
         
     def brand_events(self, events):
@@ -114,51 +115,61 @@ def run_test2(shell):
     # branded events are likely the same as filtered events
 
 def run_test3(shell, events):
-    DAY = shell.sorter.DAY
-    print("Events: ")
-    print(events)
-    periods = shell.sorter.split_events_into_periods(events, DAY, sort=True)
+    DAY = shell.scheduler.DAY
+    periods = shell.scheduler.split_events_into_periods(events, DAY, sort=True)
     print("First period: ")
     print(periods[0])
     return periods
     
     # events come presorted by time. <----------------------------- i ruin that
 
-def run_test4():
-    print_as_dots()
-    print_as_tiles()
+def run_test4(shell, periods):
+    _print_as_dots(shell, periods)
+    _print_as_tiles(shell, periods)
 
-def print_as_dots(periods, cols=4):
+def _print_as_dots(shell, periods, rows=4):
     """
-    print 4 rows? architecture: extract strings, print the strings.
-    """
-    adjusted = periods[:cols]
-    # should hypothetically pad to length
+
+    -> lines
     
-    containers_of_strings = list()
-    for period in adjusted:
-        strings_for_period = list()
-        for event in period.contents:
-            dot = event.get_dot()
-            strings_for_period.append(dot)
-        containers_of_strings.append(strings_for_period)
-    return containers_of_strings
-    # rewrite. <------------------------------------------------------------------------------
-
-def print_as_tiles(shell, periods):
+    Function prints each of the events in periods as a line of dots.
+    """
+    canon = camera.Camera()
+    lines = list()
+    padded = shell.scheduler.pad_periods(periods, target=rows)
+    print("Padded result")
+    print(padded)
+    print("Length: " + str(len(padded)))
+        
+    for period in padded:
+        line = ""
+        for event in period.get_contents():
+            dot = canon.get_dot_for_top(event)
+            line = line + dot
+        line = line + "\n"
+        lines.append(line)
+    wip = "".join(lines)
+    print(wip)
+    return lines
+    
+def _print_as_tiles(shell, periods, rows=4):
     """
     prints periods as rows. if periods < rows, adds periods of equal length
     after.
     
     """
-    length = period[0].get_length()
-    adjusted_periods = shell.sorter.pad_periods(periods, target=rows, length=length)
+    adjusted_periods = shell.scheduler.pad_periods(periods, target=rows)
     for period in adjusted_periods:
-        lines = gui.render_row(*period)
+        events = period.get_contents()
+        for e in events:
+            e_lines = gui.render_event(e)
+            for line in e_lines: print(line)
+            print("\n")
+            
+        # lines = gui.render_row(*events)
         # row will be longer than 80 characters
         # need to manage that somehow <---------------------------------------------------------
-        string = "".join(lines)
-        print(string)
+        # print(string)
 
 def run_test():
     shell = run_test1()
@@ -166,8 +177,7 @@ def run_test():
     # populates cache #<--------------------------------------------------------------- refactor
     events = shell.cache.get_events()
     periods = run_test3(shell, events)
-    
-    
+    lines = run_test4(shell, periods)    
     
 if __name__ == "__main__":
     run_test()

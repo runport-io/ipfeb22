@@ -123,7 +123,7 @@ class Scheduler:
         for i in range(count):
             period = period_obj.Period(start)
             period.set_length(length)
-            start = period.end
+            start = period.get_stop()
             
             result.append(period)
 
@@ -148,7 +148,6 @@ class Scheduler:
         """      
         if sort:
             events = self.sort_events_by_timestamp(events)
-        print(events)
         start = events[0].get_timestamp()
         end = events[-1].get_timestamp()
 
@@ -180,12 +179,12 @@ class Scheduler:
                 length = self.DAY
 
             if append:
-                start = wip[-1].end
+                start = wip[-1].get_stop()
                 filler = self.make_number_of_periods(start, gap, length)
                 result = wip + filler
                 
             else:
-                first_start = wip[0].start
+                first_start = wip[0].get_start()
                 start = first_start - gap * length
                 filler = self.make_number_of_periods(start, gap, length)
                 result = filler + wip

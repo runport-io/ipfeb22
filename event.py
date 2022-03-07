@@ -227,9 +227,9 @@ class Event:
         Method returns a string that describes the instance. Looks to brands by
         default, then headline if no brand is available. 
         """
-        ranked_brands = event.body.index.get_ranked()
+        ranked_brands = self.body.index.get_ranked()
         if ranked_brands:
-            word = ranked_brands[0]
+            word = ranked_brands[0][0]
         else:
             headline = self.get_headline()
             words = headline.split()

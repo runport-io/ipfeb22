@@ -51,44 +51,59 @@ def render_event(event, border_char=BORDER_CHAR):
     render_event(event) -> list 
 
     Returns list of strings that formats event as a box.     
-    """  
-    left_pad = border_char + " "
-    right_pad = " " + border_char
-
-    max_length = event_width - len(left_pad) - len(right_pad)
-    max_length = int(max_length)
-    
-    brand = clean(event[BRAND])
-    headline = clean(event[HEADLINE])
-    if not headline:
-        headline = PADDING_CHAR * max_length
-
-    headline_1 = headline[: max_length]
-    headline_2 = headline[max_length : (max_length * 2)]
-
+    """
     strings = list()
-    first_row = make_border()
-    strings.append(first_row)
-    
-    second_row = render_line(headline_1)
-    strings.append(second_row)
+    if event is None:
+        for i in range(7):
+            strings.append("/n")
+    else:
+        left_pad = border_char + " "
+        right_pad = " " + border_char
 
-    third_row = render_line(headline_2)
-    strings.append(third_row)
+        max_length = event_width - len(left_pad) - len(right_pad)
+        max_length = int(max_length)
 
-    fourth_row = render_line("")
-    # blank row
-    strings.append(fourth_row)
+        try:
+            stated_brand = event.get_word()
+        except AttributeError:
+            stated_brand = event[BRAND]
 
-    # Fifth row
-    fifth_row = render_line(brand)
-    strings.append(fifth_row)
+        try:
+            stated_headline = event.get_headline()
+        except AttributeError:
+            stated_headline = event[HEADLINE]
+            
+        brand = clean(stated_brand)
+        headline = clean(stated_headline)
 
-    sixth_row = copy.copy(fourth_row)
-    strings.append(fourth_row)
+        if not headline:
+            headline = PADDING_CHAR * max_length
 
-    seventh_row = make_border()
-    strings.append(seventh_row)
+        headline_1 = headline[: max_length]
+        headline_2 = headline[max_length : (max_length * 2)]
+
+        first_row = make_border()
+        strings.append(first_row)
+
+        second_row = render_line(headline_1)
+        strings.append(second_row)
+
+        third_row = render_line(headline_2)
+        strings.append(third_row)
+
+        fourth_row = render_line("")
+        # blank row
+        strings.append(fourth_row)
+
+        # Fifth row
+        fifth_row = render_line(brand)
+        strings.append(fifth_row)
+
+        sixth_row = copy.copy(fourth_row)
+        strings.append(fourth_row)
+
+        seventh_row = make_border()
+        strings.append(seventh_row)
 
     return strings
 
