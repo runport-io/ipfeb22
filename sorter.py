@@ -25,9 +25,10 @@ import math
 
 # 2) Port.
 import exceptions
+import period_obj
 import utilities
 
-class Sorter:
+class Scheduler:
     HOUR = 3600
     DAY = 86400
     WEEK = 604800
@@ -57,7 +58,7 @@ class Sorter:
         remainder = list()
         for event in events:
             timestamp = event.get_timestamp()
-            status = period.includes(timestamp)
+            status = period.check_timestamp(timestamp)
             if status:
                 period.append_to_contents(event)
             else:
@@ -101,7 +102,7 @@ class Sorter:
         count = self.count_periods(start, end, length)
 
         while i < count:
-            period = Period(start)
+            period = period_obj.Period(start)
             start = period.set_length(length)
             # sets the next starting point to the end of this one
             result.append(period)
@@ -120,7 +121,7 @@ class Sorter:
         result = list()           
         start = start
         for i in range(count):
-            period = Period(start)
+            period = period_obj.Period(start)
             period.set_length(length)
             start = period.end
             
@@ -190,63 +191,3 @@ class Sorter:
                 result = filler + wip
 
         return result
-
-        
-class Period:
-    def __init__(self, start=None):
-        self.start = start
-        self.stop = None
-        self.contents = None
-
-    def __str__(self):
-        string = utilities.make_string(self)
-        return string
-        
-    def get_lines(self):
-        result = list()
-        line1 = "Period "
-        result.append(line1)
-        
-        line2 = "Start: " + str(self.start)
-        result.append(line2)
-
-        line3 = "Stop: " + str(self.stop)
-        result.append(line3)
-
-        line4 = "Contents: \n" + str(self.contents)
-        result.append(line4)
-
-        return result
-
-    def append_to_contents(self, obj):
-        """
-
-        -> None
-        """
-        if self.contents is None:
-            self.contents = list()
-        self.contents.append(obj)
-
-    def get_length(self):
-        length = self.stop - self.start
-        return length
-        
-    def set_length(self, length):
-        """
-        -> None
-        """
-        self.stop = self.start + length
-        return self.stop
-
-    def includes(self, timestamp):
-        """
-        -> bool
-        """
-        result = False
-        if self.start <= timestamp <= self.stop:
-            result = True
-        return result
-        
-
-
-    
