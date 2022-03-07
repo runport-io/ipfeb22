@@ -110,7 +110,7 @@ def run_test3(shell, events):
     print(events)
     periods = shell.sorter.split_events_into_periods(events, DAY, sort=True)
     print("First period: ")
-    print(period[0])
+    print(periods[0])
     return periods
     
     # events come presorted by time. <----------------------------- i ruin that
@@ -126,6 +126,7 @@ def run_test3(shell, events):
 def run_test():
     shell = run_test1()
     filtered_events = run_test2(shell)
+    # populates cache
     events = shell.cache.get_events()
     periods = run_test3(shell, events)
     

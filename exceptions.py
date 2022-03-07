@@ -55,3 +55,10 @@ class ParameterError(PortError):
     Flag for something beinng wrong with inputs.
     """
     pass
+
+class OperationError(PortError):
+    """
+
+    I raise this when the outcome differs from what I wanted.
+    """
+    pass

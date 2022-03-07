@@ -1,17 +1,30 @@
-# curator
-# goal: get emails, display them
-# perform filtering
-# get emails: controller.get_emails()
-# display them:
-#  for event in events:
-#    view = EventView(event)
-#    ## alts: Event.view(); add this to the viewer
-#    ## have a function: view_small() ->, view_big() ->
+# Copyright Port. Prerogative Club ("the Club")
+#
+# 
+# This file is part of Port. 2.0. ("Port.")
+#
+# Port. is free software: you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# Port. is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# Port. If not, see <https://www.gnu.org/licenses/>.
+#
+# Questions? Contact hi@runport.io.
 
-# what else:
-#   I want a chart of emails over the last 7 days
-#   I want axes labelled
 
+# Imports
+
+# 1) Built-ins
+import math
+
+# 2) Port.
+import exceptions
 import utilities
 
 class Sorter:
@@ -28,9 +41,9 @@ class Sorter:
         count_periods() -> int
         
         """
-        distance = start - stop
+        distance = stop - start
         count = distance / length
-        result = roundup(count)
+        result = math.ceil(count)
         return result
 
     def make_periods(self, start, end, length):
@@ -63,23 +76,32 @@ class Sorter:
         """
         # let's pretend events is a list in order
         for period in periods:
-            event = events.pop(0)
-            timestamp = event.get_timestamp()
-            if period.includes(timestamp):
-                # need to make this routine
-                period.contents.append(event)
-                # woah woah
-            else:
-                continue
-
+            period, remainder = self.fill_period(period, events)
+            events = remainder
+            
         # should have no events left in events here
         if events:
             c = "Some events not sorted."
-            raise OperationError(c)
+            print("Length of events: ", len(events))
+            print(events)            
+            raise exceptions.OperationError(c)
 
         return periods
         # consider returning events too?
 
+    def fill_period(self, period, events):
+        remainder = list()
+        for event in events:
+            timestamp = event.get_timestamp()
+            status = period.includes(timestamp)
+            if status:
+                period.append_to_contents(event)
+            else:
+                remainder.append(event)
+                # timestamp not in period
+        return (period, remainder)
+
+        
     def sort_events_by_timestamp(self, events):
         """
         -> list
@@ -116,7 +138,7 @@ class Period:
         self.contents = None
 
     def __str__(self):
-        string = utilities.make_string()
+        string = utilities.make_string(self)
         return string
         
     def get_lines(self):
@@ -134,6 +156,15 @@ class Period:
         result.append(line4)
 
         return result
+
+    def append_to_contents(self, obj):
+        """
+
+        -> None
+        """
+        if self.contents is None:
+            self.contents = list()
+        self.contents.append(obj)
     
     def set_length(self, length):
         """
@@ -147,11 +178,27 @@ class Period:
         -> bool
         """
         result = False
-        if self.start <= timestamp <= self.end:
+        if self.start <= timestamp <= self.stop:
             result = True
         return result
         
+# could add an alt_sort:
+
+# for event in events:
+#   timestamp = event.get_timestamp()
+#   if timestamp not in lookup.keys():
+#       period = Period(start=something)
+#
+# go through each event, make a period on the fly
+# if the events are sorted, it is easier
+# but if not:
+# i have to record the hypothetical start
+#   bring that down if i find one that is lower
+#
+# this is all fine and good
+# but the thing i am sorting on is days
+# units of time
+# i could piggyback on the time routine.
 
 
-    
     
