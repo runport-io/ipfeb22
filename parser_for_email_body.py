@@ -69,7 +69,7 @@ def casefold_items(iterable):
         
     return result
 
-def parse_body(string, trace=True):
+def parse_body(string, trace=False):
     """
 
     parse_body() -> string, dict

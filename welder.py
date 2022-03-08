@@ -86,6 +86,8 @@ class Welder:
 
     def add_headline_alt(self, msg, event, force=False):
         headline = msg.get(constants.EMAIL_LIB_SUBJECT)
+        charsets = msg.get_charsets()
+        
 
     def add_original(self):
         pass
@@ -197,11 +199,7 @@ def _get_messages(file_name):
     messages = pickle.load(f)
 
     return messages
-
-def _main():
-    messages = _get_messages(_file_name)
-    events = _run_test(messages)
-    
+  
 def _run_test(messages):    
     w = Welder()
     result = list()
@@ -217,6 +215,10 @@ def _run_test(messages):
         print("\n\n")
     
     return result
+
+def _main():
+    messages = _get_messages(_file_name)
+    events = _run_test(messages)
 
 if __name__ == "__main__":
     _main()

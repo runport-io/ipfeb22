@@ -35,9 +35,10 @@ END_ENCODING = "?="
 ##BREAKS = ("\t", "\r", "\n")
 
 # Encoding
-QUOTABLE = "q?"
-BASE64 = "b?"
 ASCII = "ascii"
+BASE64 = "b?"
+QUOTABLE = "q?"
+WIN1252 = "windows-1252?"
 
 # ASCII
 ##APOSTROPHE = "'"
@@ -159,6 +160,7 @@ def clean_string(string):
     """
     result = ""
     wip = string
+    wip = wip.strip()
     
     if wip.startswith(START_ENCODING):
         wip = clean_utf(wip)
@@ -194,11 +196,40 @@ def clean_utf(string):
         elif encoding == BASE64:
             wip = parse_base64(wip)
     else:
-        # reserved for non utf8 encoding, call subroutine
-        pass
+        if wip.startswith(WIN1252):
+            wip = clean_win(string)
+        else:
+            pass
+            # additional encodings
+            # must refactor
     
     result = wip
     return result
+
+def clean_win(string):
+    result = ""
+    substrings = string.split()
+    cleaned_subs = list()
+    for substring in substrings:
+        cleaned = clean_win_substring(substring)
+        cleaned_subs.append(cleaned)
+    result = "".join(cleaned_subs)
+    return result
+
+def clean_win_substring(substring):
+    wip = substring
+    wip = wip.strip()
+    # just in case
+    wip = wip.replace(START_ENCODING, "")
+    wip = wip.replace(END_ENCODING, "")
+
+    token = WIN1252 + QUOTABLE.upper()
+    wip = wip.replace(token, "")
+    
+    wip = wip.replace("_", " ")
+    wip = wip.replace("=92","'")
+    
+    return wip
 
 def parse_quotable(string):
     result = ""
