@@ -231,9 +231,7 @@ class Event:
         if ranked_brands:
             word = ranked_brands[0][0]
         else:
-            headline = self.get_headline()
-            words = headline.split()
-            word = words[0]
+            word = ""
             
         return word
     

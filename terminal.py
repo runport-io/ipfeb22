@@ -89,6 +89,8 @@ class Shell:
         # performs the burn operation
         # clear cache completely
 
+# Testing
+
 def run_test1():
     s = Shell()
     return s
@@ -123,10 +125,6 @@ def run_test3(shell, events):
     
     # events come presorted by time. <----------------------------- i ruin that
 
-def run_test4(shell, periods):
-    _print_as_dots(shell, periods)
-    _print_as_tiles(shell, periods)
-
 def _print_as_dots(shell, periods, rows=4):
     """
 
@@ -160,17 +158,19 @@ def _print_as_tiles(shell, periods, rows=4):
     """
     adjusted_periods = shell.scheduler.pad_periods(periods, target=rows)
     for period in adjusted_periods:
-        events = period.get_contents()
-        for e in events:
-            e_lines = gui.render_event(e)
-            for line in e_lines: print(line)
-            print("\n")
-            
-        # lines = gui.render_row(*events)
+        print("Rendering period ...")
+        print(period)
+        
+        events = period.get_contents()            
+        lines = gui.render_row(*events)
         # row will be longer than 80 characters
         # need to manage that somehow <---------------------------------------------------------
-        # print(string)
+        for line in lines: print(line)
 
+def run_test4(shell, periods):
+    _print_as_dots(shell, periods)
+    _print_as_tiles(shell, periods)
+    
 def run_test():
     shell = run_test1()
     filtered_events = run_test2(shell)

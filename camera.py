@@ -53,8 +53,12 @@ class Camera:
         Method returns a string of length 1 that represents the event based on
         the brand that occurs most frequently in the event. If the event does
         not list any brands, returns the first charcter of the headline.
-        """       
-        char = event.get_word()[0]
+        """
+        string = event.get_word()
+        if not string:
+            string = event.get_headline()
+            
+        char = string[0]
         return char
         
     def get_block(self, event):

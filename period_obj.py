@@ -77,7 +77,7 @@ class Period:
 
     def get_lines(self):
         result = list()
-        line1 = "Period " + repr(self) + "\n"
+        line1 = "\nPeriod " + repr(self) + "\n"
         result.append(line1)
         
         line2 = "Start: " + self.get_start_as_string() + "\n"
@@ -88,6 +88,7 @@ class Period:
 
         line4 = "Contents: \n" + str(self._contents)
         result.append(line4)
+        result.append("\n\n")
 
         return result
         
