@@ -250,8 +250,11 @@ def render_tile(brand, headline, border_char=BORDER_CHAR):
     if not headline:
         headline = PADDING_CHAR * max_length
 
-    headline_1 = headline[: max_length]
-    headline_2 = headline[max_length : (max_length * 2)]
+    segments = textwrap.wrap(headline, max_length)
+    headline_1 = segments[0]
+    headline_2 = ""
+    if len(segments) > 1:
+        headline_2 = segments[1]
 
     first_row = make_border(border_char=border_char)
     strings.append(first_row)
