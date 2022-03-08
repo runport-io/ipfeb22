@@ -102,6 +102,46 @@ def clean(string):
 
     # <------------------------------------------------------------------------------- replace with the parser call. 
 
+def cut_string_in_pieces(string, width):
+    """
+
+    cut_strings_in_pieces() -> list
+
+    Function splits the string into consecutive segments of no more than width.
+    You get back a list of results that rounds up the quotient of the length of
+    the string and the width to the nearest integer. 
+    """
+    result = list()
+    
+    i = 0
+    j = i + width
+    
+    while i < len(string):
+        substring = string[i:j]
+        result.append(substring)
+        i = j
+        j = j + width
+    
+    return result
+
+def generate_views(string, width=80, raw=True):
+    """
+
+    generate_screen() -> generator
+
+    Function takes a string of an arbitrary length and breaks it into pieces of
+    width. If you turn off "raw", routine delegates to textwrap for splitting
+    and will attempt to break on spaces.
+    """
+    substrings = list()
+    if raw:
+        substrings = cut_string_in_pieces(string, width)
+    else:
+        substrings = textwrap.wrap(string, width)
+
+    for substring in substrings:
+        yield substring
+
 def make_border(border_char=BORDER_CHAR):
     """
 
@@ -117,7 +157,8 @@ def render_blank():
 
     render_blank() -> list
 
-    Function returns a list of blank lines that matches the dimension of an event.
+    Function returns a list of blank lines that matches the dimension of an
+    event.
     """
     empty = ""
     space = " "
@@ -193,7 +234,7 @@ def render_line(content, length=event_width, border_char=BORDER_CHAR,
             
     return result
 
-def render_row(*events):
+def render_row(*events, max_columns=COLUMNS):
     """
 
     render_row(*events) -> list
@@ -202,10 +243,9 @@ def render_row(*events):
     """
     result = list()
     
-    if events:
-        
+    if events:   
         aligned_events = list()
-        for event in events[ :COLUMNS]:
+        for event in events[ :max_columns]:
             prepped = align_in_column(event)
             aligned_events.append(prepped)
 
@@ -250,11 +290,15 @@ def render_tile(brand, headline, border_char=BORDER_CHAR):
     if not headline:
         headline = PADDING_CHAR * max_length
 
-    segments = textwrap.wrap(headline, max_length)
-    headline_1 = segments[0]
+    headline_1 = headline
     headline_2 = ""
-    if len(segments) > 1:
-        headline_2 = segments[1]
+    # I am defending against headlines that are an empty string or a space.
+    if headline:
+        segments = textwrap.wrap(headline, max_length)
+        if segments:
+            headline_1 = segments[0]
+        if len(segments) > 1:
+            headline_2 = segments[1]
 
     first_row = make_border(border_char=border_char)
     strings.append(first_row)
@@ -320,6 +364,8 @@ blank2 = {
     BRAND : ""
     }
 
+long_sentence1 = "The parentheses aren’t always necessary, but it’s easier to always add them instead of having to remember when they’re needed."
+
 def run_test1():
     for line in align_in_column(event1):
         print(line)
@@ -344,6 +390,10 @@ def run_test3():
 def run_test4():
     spacer = render_event(blank2, border_char=" ")
     print(spacer)
+
+    views = generate_views(long_sentence1, raw=False)
+    for view in views:
+        print(view)
 
 def run_test():
     run_test1()
