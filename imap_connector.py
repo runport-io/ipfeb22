@@ -188,7 +188,7 @@ def unpack_response(response):
     
 # Testing
 url = constants.GMAIL
-def run_test(url):
+def run_test(url, offset=-30):
     guest, token = observ2.load_credentials()
     # The EmailObserver should pass those in. The Controller should send them
     # to EmailObserver.
@@ -197,7 +197,7 @@ def run_test(url):
     count = ct1.connect(token)
     print("Count: ", count)
 
-    uniques1 = ct1.refresh(offset=-30, count=10)
+    uniques1 = ct1.refresh(offset=offset, count=10)
     print("Uniques #1: ", uniques1)
 
     msgs = ct1.get_messages()

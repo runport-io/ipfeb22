@@ -293,6 +293,7 @@ def render_tile(brand, headline, border_char=BORDER_CHAR):
     headline_1 = headline
     headline_2 = ""
     # I am defending against headlines that are an empty string or a space.
+    
     if headline:
         segments = textwrap.wrap(headline, max_length)
         if segments:

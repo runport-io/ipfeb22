@@ -84,6 +84,9 @@ class Welder:
         event.set_headline(cleaned, force=force)
         return event
 
+    def add_headline_alt(self, msg, event, force=False):
+        headline = msg.get(constants.EMAIL_LIB_SUBJECT)
+
     def add_original(self):
         pass
 
