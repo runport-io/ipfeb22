@@ -1,3 +1,27 @@
+# Copyright Port. Prerogative Club ("the Club")
+#
+# 
+# This file is part of Port. 2 ("Port.")
+#
+# Port. is free software: you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# Port. is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# Port. If not, see <https://www.gnu.org/licenses/>.
+#
+# Questions? Contact hi@runport.io.
+
+# Imports
+# 1) Built-ins
+# N/a
+
+# 2) Port.
 import alternator
 import cache
 import camera
@@ -7,6 +31,10 @@ import scanner
 import scheduler
 import watchlist
 
+# 3) Constants
+# N/A
+
+# 4) Functions
 class Shell:
     def __init__(self):
         self._offset = 0
@@ -18,12 +46,15 @@ class Shell:
         self.scheduler = scheduler.Scheduler()
         self.watchlist = watchlist.Watchlist()
        
-    def brand_events(self, events):
+    def brand_events(self, events, trace=False):
         brands = self.watchlist.get_uniques()
         
         for event in events:
             matches = self.scanner.scan(event, brands)
-            print(matches)
+
+            if trace:
+                print(matches)
+            
             for brand, locations in matches.items():
                 for start, end in locations:
                     event.body.index.add_location(brand, start, end)
@@ -139,37 +170,39 @@ class Shell:
         return result
 
 # Testing
-
 def run_test1():
     s = Shell()
     return s
 
-def run_test2(shell):
+def run_test2(shell, trace=False):
     shell.watchlist.add_brand("yo")
     shell.watchlist.add_brand("nike")
     events = shell.load_events(count=10)
     shell.cache.add_events(events)
-    
-    print("length of events:")
-    print(len(events))
-    print("first event")
-    print(events[0])
+
+    if trace:
+        print("length of events:")
+        print(len(events))
+        print("first event")
+        print(events[0])
     
     branded_events = shell.brand_events(events)
     # is this an in-place change? yes.
     
     filtered_events = shell.filter_events(branded_events)
-    print ("Filtered events: ")
-    print(filtered_events)
+    if trace:
+        print ("Filtered events: ")
+        print(filtered_events)
     
     return filtered_events
     # branded events are likely the same as filtered events
 
-def run_test3(shell, events):
+def run_test3(shell, events, trace=False):
     DAY = shell.scheduler.DAY
     periods = shell.scheduler.split_events_into_periods(events, DAY, sort=True)
-    print("First period: ")
-    print(periods[0])
+    if trace:
+        print("First period: ")
+        print(periods[0])
     return periods
     
     # events come presorted by time. <----------------------------- i ruin that

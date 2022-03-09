@@ -45,6 +45,10 @@ from source import Source
 from textfield import TextField
 from timestamp import TimeStamp
 
+# 3) Constants
+# N/a
+
+# 4) Functions
 class Event:
     """
     
@@ -306,15 +310,17 @@ class Event:
 # compare
 
 # Testing
-e1 = Event()
-print("e1: ")
-print(e1)
-print("\n")
+def run_test1():
+    e1 = Event()
+    print("e1: ")
+    print(e1)
+    print("\n")
 
-print("e2: ")
-e2 = Event(headline="I got a cappucino.", source="me")
-print(e2)
-print("\n")
+def run_test2():
+    print("e2: ")
+    e2 = Event(headline="I got a cappucino.", source="me")
+    print(e2)
+    print("\n")
 
 def run_test3():
     container_a = {e1, e2}
@@ -335,5 +341,10 @@ def run_test6():
     # get the flat events from 5, expand each one
     # do something
 
-if __name__ == "__main__":
+def run_test():
+    run_test1()
+    run_test2()
     run_test3()
+
+if __name__ == "__main__":
+    run_test()

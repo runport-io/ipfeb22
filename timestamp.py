@@ -1,5 +1,21 @@
-# timestamp
-# (c) Port. Prerogative Club 2022
+# Copyright Port. Prerogative Club ("the Club")
+#
+# 
+# This file is part of Port. 2 ("Port.")
+#
+# Port. is free software: you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# Port. is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# Port. If not, see <https://www.gnu.org/licenses/>.
+#
+# Questions? Contact hi@runport.io.
 
 """
 
@@ -19,17 +35,18 @@ TextField           Container for storing text and information about the text.
 ------------------  ------------------------------------------------------------
 """
 
-# Bbuilt-ins
+# Imports
+# 1) Built-ins
 import json
 import time
 
-# P2
+# 2) Port.
 import constants
 
-# Constants
-# N/A
+# 3) Constants
+# N/a
 
-# Classes
+# 4) Functions
 class TimeStamp:
     """
 
@@ -160,24 +177,29 @@ class TimeStamp:
         self.time_of_receipt = time
         return None
 
-# This code pretends to do unit tests.
-ts1 = TimeStamp()
-print("ts1: ")
-ts1.print()
-ts2 = TimeStamp()
-print("ts2: ")
-ts2.print()
+# Testing
 
-ts1.set_observation(trace=True)
-print("ts.set_observation()")
-print("ts1: ")
-ts1.print()
+def run_test():        
+    ts1 = TimeStamp()
+    print("ts1: ")
+    ts1.print()
+    ts2 = TimeStamp()
+    print("ts2: ")
+    ts2.print()
 
-flat = ts1.json_to()
-print(flat)
+    ts1.set_observation(trace=True)
+    print("ts.set_observation()")
+    print("ts1: ")
+    ts1.print()
 
-##ts2.json_from(flat)
-##ts2.print()
+    flat = ts1.json_to()
+    print(flat)
 
-ts3 = TimeStamp.from_json(flat)
-ts3.print()
+    ##ts2.json_from(flat)
+    ##ts2.print()
+
+    ts3 = TimeStamp.from_json(flat)
+    ts3.print()
+
+if __name__ == "__main__":
+    run_test()

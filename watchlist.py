@@ -1,6 +1,21 @@
-# Watchlist
-# (c) Port. Prerogative Club 2022
-
+# Copyright Port. Prerogative Club ("the Club")
+#
+# 
+# This file is part of Port. 2.0. ("Port.")
+#
+# Port. is free software: you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# Port. is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# Port. If not, see <https://www.gnu.org/licenses/>.
+#
+# Questions? Contact hi@runport.io.
 
 # Imports
 # 1) Built-ins
@@ -11,6 +26,10 @@ import constants
 import serializer
 import utilities as up
 
+# 3) Constants
+# N/a
+
+# 4) Functions
 class Watchlist:
     """
     ------------------  --------------------------------------------------------
@@ -48,7 +67,7 @@ class Watchlist:
         string = glue.join(lines)
         return string
         
-    def add_brand(self, brand, group_name=None):
+    def add_brand(self, brand, group_name=None, trace=False):
         """
 
         Watchlist.add_brand() -> None
@@ -57,7 +76,8 @@ class Watchlist:
         creates the group if it does not exist. 
         """
         group = self.add_group(group_name, brand)
-        print(group)
+        if trace:
+            print(group)
         
         # register brand in the index
         # num = len(self._index)
@@ -142,29 +162,32 @@ class Watchlist:
         """
         self._groups.update(data)
 
-# "Testing"
-w = Watchlist()
-print(w)
+# Testing
+def run_test():
+    w = Watchlist()
+    print(w)
 
-w.add_brand("Birch Coffee")
-print(w)
+    w.add_brand("Birch Coffee")
+    print(w)
 
-w.add_brand("S'well")
-w.add_brand("Piccolina Kids")
-print(w)
+    w.add_brand("S'well")
+    w.add_brand("Piccolina Kids")
+    print(w)
 
-coffee = w.add_group("coffee", "Starbucks", "Birch Coffee", "Variety")
-print(coffee)
-print(w)
+    coffee = w.add_group("coffee", "Starbucks", "Birch Coffee", "Variety")
+    print(coffee)
+    print(w)
 
-uniques = w.get_uniques()
-print(uniques)
+    uniques = w.get_uniques()
+    print(uniques)
 
-data = serializer.flatten(w)
-print(data)
+    data = serializer.flatten(w)
+    print(data)
 
-new = w.from_flat(data)
-print(new)
+    new = w.from_flat(data)
+    print(new)
 
-# adjust pretty print to show the group name in line, or something
+    # adjust pretty print to show the group name in line, or something
 
+if __name__ == "__main__":
+    run_test()

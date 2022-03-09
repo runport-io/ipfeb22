@@ -1,5 +1,21 @@
-# textfield
-# (c) Port. Prerogative Club 2022
+# Copyright Port. Prerogative Club ("the Club")
+#
+# 
+# This file is part of Port. 2 ("Port.")
+#
+# Port. is free software: you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# Port. is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# Port. If not, see <https://www.gnu.org/licenses/>.
+#
+# Questions? Contact hi@runport.io.
 
 """
 
@@ -30,10 +46,9 @@ import utilities as up
 from index import Index
 from number import Number
 
+# 3) Constants
 
-# Constants
-
-# Classes
+# 4) Functions
 class TextField:
     """
     
@@ -179,22 +194,26 @@ class TextField:
     # every time i make a change, i log it. append only. requires a 
     # signature. probably don't need it right now? could run some logic or
     # something that prints the command
-    
-f1 = TextField("Something happened somewhere and no one knows.")
-print(f1)
 
-f2 = f1.copy()
-print(f2)
+def run_test():
+    f1 = TextField("Something happened somewhere and no one knows.")
+    print(f1)
 
-try:
-    f2.set_content("blah blah")
-except Exception:
-    # fix this block
-    print(Exception)
+    f2 = f1.copy()
+    print(f2)
 
-f2.set_content("blah blah", force=True)
-print("Field 2, mod:")
-print(f2)
+    try:
+        f2.set_content("blah blah")
+    except Exception:
+        # fix this block
+        print(Exception)
+
+    f2.set_content("blah blah", force=True)
+    print("Field 2, mod:")
+    print(f2)
+
+if __name__ == "__main__":
+    run_test()
 
 
 
