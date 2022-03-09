@@ -238,7 +238,7 @@ def _test_batches(shell, count, offset, cycles):
         events = _test_batch(shell, count)
         batches.append(events)
     
-   return batches
+    return batches
 
 def _test_batch(shell, count):
     offset = shell.get_offset()
