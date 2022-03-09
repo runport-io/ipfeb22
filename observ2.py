@@ -275,7 +275,7 @@ def get_subjects(session, uids):
 
     return result
 
-def get_UIDs(session, serial_ids):
+def get_UIDs(session, serial_ids, trace=False):
     """
 
     get_UIDs() -> list()
@@ -288,7 +288,8 @@ def get_UIDs(session, serial_ids):
     result = list()
     for serial_id in serial_ids:
        resp_code, data = session.fetch(serial_id, '(UID)')
-       print(resp_code, data)
+       if trace:
+           print(resp_code, data)
        # data is a list of one bytestring
        content = data[0].decode()
        # turns bytestring into regular string

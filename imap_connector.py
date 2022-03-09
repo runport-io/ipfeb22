@@ -21,7 +21,8 @@
 # Imports
 
 # 1) Built-ins
-# N/a
+from email import policy
+from email.parser import BytesParser
 
 # 2) Port.
 import constants
@@ -32,6 +33,8 @@ ALL = "ALL"
 BATCH = 10
 READ_ONLY = True
 STANDARD_OFFSET = -40
+
+Z_PARSER = BytesParser(policy=policy.default)
 
 # 4) Functions
 class ImapConnector:
@@ -59,7 +62,6 @@ class ImapConnector:
         status = self._session.login(self._account, token)
         print(status)
         count = self.count_messages()
-        print(count)
         
         return count
 
@@ -87,6 +89,33 @@ class ImapConnector:
         message = observ2.get_message_by_UID(self._session, uid)
         return message
 
+    def get_message_content(self, uid):
+        """
+
+        get_message_content() -> bytestring
+        
+        """
+        session = self._session
+        code, data = session.uid(constants.FETCH, uid, constants.RFC822)
+        response = data[0]
+        command = response[0]
+        content = response[1]
+
+        return content
+
+    def make_message(self, content, parser=Z_PARSER):
+        message = parser.parsebytes(content)
+        return message
+
+    def get_message_alt(self, uid):
+        """
+        -> EmailMessage
+
+        """
+        content = self.get_message_content(uid)
+        message = self.make_message(content)
+        return message
+
     def get_messages(self, offset=None, count=BATCH, trace=False):
         """
 
@@ -100,7 +129,7 @@ class ImapConnector:
             
         uniques = self.refresh(offset, count, increment=True)
         for uid in uniques:
-            message = self.get_message(uid)
+            message = self.get_message_alt(uid)
             messages.append(message)
         
         return messages
@@ -188,25 +217,32 @@ def unpack_response(response):
     
 # Testing
 url = constants.GMAIL
-def run_test(url, offset=-30):
+def _run_test1(url):
     guest, token = observ2.load_credentials()
     # The EmailObserver should pass those in. The Controller should send them
     # to EmailObserver.
     ct1 = ImapConnector(url=url, guest=guest)
-    print(ct1)
     count = ct1.connect(token)
     print("Count: ", count)
 
-    uniques1 = ct1.refresh(offset=offset, count=10)
-    print("Uniques #1: ", uniques1)
+    return ct1
 
-    msgs = ct1.get_messages()
-    print(msgs)
+def _run_test2(count, offset, connector): 
+    uniques1 = connector.refresh(offset=offset, count=10)
+    print("Uniques: ", uniques1)
     
-    return msgs
+    messages = connector.get_messages()
+    print(messages)
+    
+    return messages
+
+def _run_test(url, offset=-30):
+    connector = _run_test1(url)
+    messages = _run_test2(count=10, offset=-30, connector=connector)
+    return messages
 
 if __name__ == "__main__":
-    run_test(url)
+    _run_test(url)
 
 # figure out how to retrieve in batches only.
 # need a routine to go from uid to serial, so i can start looking up from there.

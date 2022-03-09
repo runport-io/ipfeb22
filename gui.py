@@ -142,6 +142,21 @@ def generate_views(string, width=80, raw=True):
     for substring in substrings:
         yield substring
 
+def generate_segments(string, size=16):
+    """
+
+    generate_scroll() -> generator
+
+    Function splits the string into lines. You get back a generator that 
+    """
+    lines = string.split("\n")
+    segments = cut_string_in_pieces(lines, size)
+    for segment in segments:
+        yield segment
+
+    # I should rework this to use the save method. 
+    
+
 def make_border(border_char=BORDER_CHAR):
     """
 
