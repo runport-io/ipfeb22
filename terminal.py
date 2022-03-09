@@ -10,6 +10,7 @@ import watchlist
 class Shell:
     def __init__(self):
         self._offset = 0
+        self._saved_offsets = list()
         self.alternator = alternator.Alternator()
         # manages the cycle for retrieval
         self.cache = cache.Cache()
@@ -54,13 +55,41 @@ class Shell:
     def get_offset(self):
         result = self._offset
         return result
-        
-    def load_events(self, count=20):
-        start = self.get_offset()
-        events = self.alternator.pull(count=count, offset=start)
+    
+    def get_saved_offsets(self):
+        result = self._saved_offsets
+        return result
+        # this whole thing should be moved to an offsets attribute.
+
+    def increment_offset(self, value):
+        old_offset = self.get_offset()
+        new_offset = old_offset + value
+        self.set_offset(new_offset)
+        return new_offset
+    
+    def load_events(self, count=20, offset=None):
+        if offset is None:
+            offset = self.get_offset()
+        events = self.alternator.pull(count=count, offset=offset)
         self.increment_offset(count)
         return events
         # check_brands?
+
+    def load_offset(self, i=-1, save=True):
+        saved_offsets = self.get_saved_offsets()
+        offset = saved_offsets[i]
+        self.set_offset(offset,save=save)
+        return offset
+    
+    def print_headlines(self, events):
+        """
+
+        print_headlines() -> None
+
+        Method prints the headline for each event.
+        """
+        for event in events:
+            print(event.get_headline())
         
     def refresh_brands(self):
         flat_watchlist = self.watchlist.flatten()
@@ -72,19 +101,19 @@ class Shell:
             # modifies event?
             # if not: event.brands.record_location(result)
 
-    def set_offset(self, value):
+    def reset_offset(self, save=True):
+        self.set_offset(0, save=save)
+        
+    def save_offset(self, value):
+        self._saved_offsets.append(value)
+        
+    def set_offset(self, value, save=True):
+        if save:
+            current = self.get_offset()
+            self._saved_offsets.append(current)
+
         self._offset = value
     
-    def increment_offset(self, value):
-        old_offset = self.get_offset()
-        new_offset = old_offset + value
-        self.set_offset(new_offset)
-        return new_offset
-        
-    def view_all(self):
-        # returns all events
-        pass
-
     def update(self):
         events = self.alternator.pull(n)
         # arrive inflated; should i do that here or there? let's say in there
@@ -97,6 +126,10 @@ class Shell:
         self.hp.print(branded_evens)
             # really want to see these as bars
         return branded_events
+        
+    def view_all(self):
+        # returns all events
+        pass
 
     def wrap_events(self, events):
         result = list()
@@ -186,7 +219,50 @@ def _print_as_tiles(shell, periods, rows=4):
 def run_test4(shell, periods):
     _print_as_dots(shell, periods)
     _print_as_tiles(shell, periods)
+
+def _test_batches(shell, count, offset, cycles):
+
+    existing_offset = self.get_offset()
+
+    print("\n\n")
+    print("Existing offset: ", existing_offset)
+
+    self.set_offset(offset)
+    print("Starting offset: ", offset)
     
+    batches = list()
+
+    for i in range(cycles):
+        print("Cycle #", str(i))
+        print("\n")
+        events = _test_batch(shell, count)
+        batches.append(events)
+    
+   return batches
+
+def _test_batch(shell, count):
+    offset = shell.get_offset()
+    print("**************************")
+    print("Starting offset: ", offset)
+    print("\n")
+
+    events = shell.load_events(count=count)
+    shell.print_headlines(more1)
+    
+    offset = shell.get_offset()
+    print("Offset after pull: ", offset)
+    print("\n")
+
+    return events
+
+def run_test5(shell):
+    batches = _test_batches(shell, count=4, offset=20, cycles=2)
+    return batches
+
+def run_test6(shell):
+    batches = _test_batches(shell, count=4, offset=-20, cycles=2)
+    return batches
+
 def run_test():
     shell = run_test1()
     filtered_events = run_test2(shell)
