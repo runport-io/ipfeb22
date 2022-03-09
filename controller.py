@@ -21,8 +21,9 @@ guest, token = observ2.load_credentials()
 marketing.activate(token)
 # need to have a flag of some sort here: marketing.is_active() -> bool
 
-def get_events(count):
-    events = marketing.get_events(offset=0, count=count)
+def get_events(count, offset):
+    events = marketing.get_events(offset=offset, count=count)
+    # < --- change this
     return events
     # list how many events, that kind of thing
 
@@ -30,10 +31,11 @@ def store_events(events):
     cache.add_events(events)
     # return length of cache
 
-def update(count=20):
-    events = get_events(count)
+def update(count=20, offset=0):
+    events = get_events(count, offset)
     offset = temp.add_events(events)
-    # offset is None, current implementation does not track offsets.
+    # offset is None, current implementation does not track offsets across
+    # channels.
     result = (offset, events)
     return result
 

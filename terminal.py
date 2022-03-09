@@ -9,13 +9,14 @@ import watchlist
 
 class Shell:
     def __init__(self):
+        self._offset = 0
         self.alternator = alternator.Alternator()
         # manages the cycle for retrieval
         self.cache = cache.Cache()
         self.scanner = scanner.Scanner()
         self.scheduler = scheduler.Scheduler()
         self.watchlist = watchlist.Watchlist()
-        
+       
     def brand_events(self, events):
         brands = self.watchlist.get_uniques()
         
@@ -28,31 +29,14 @@ class Shell:
 
         return events
 
-    def refresh_brands(self):
-        flat_watchlist = self.watchlist.flatten()
-        events = self.get_events()
-        for event in events:
-            new = event.brands.get_new(flat_watchlist)
-            # returns flat_watchlist - brands in index
-            result = self.scanner.scan(event, new)
-            # modifies event?
-            # if not: event.brands.record_location(result)
-
-    def load_events(self, count=20):
-        events = self.alternator.pull(count)
-        return events
-        # check_brands?
-
-    def wrap_events(self, events):
-        result = list()
-        for event in events:
-            wrapper = event_wrapper.EventWrapper(event)
-            result.append(wrapper)
-        return result
-
-    def view_all(self):
-        # returns all events
+    def exit(self):
         pass
+        # for event in cache:
+            # if event.has_metadata():
+            #   event.save
+            
+        # performs the burn operation
+        # clear cache completely
 
     def filter_events(self, events, brands=None):
         result = list()
@@ -67,6 +51,40 @@ class Shell:
 
         return result
 
+    def get_offset(self):
+        result = self._offset
+        return result
+        
+    def load_events(self, count=20):
+        start = self.get_offset()
+        events = self.alternator.pull(count=count, offset=start)
+        self.increment_offset(count)
+        return events
+        # check_brands?
+        
+    def refresh_brands(self):
+        flat_watchlist = self.watchlist.flatten()
+        events = self.get_events()
+        for event in events:
+            new = event.brands.get_new(flat_watchlist)
+            # returns flat_watchlist - brands in index
+            result = self.scanner.scan(event, new)
+            # modifies event?
+            # if not: event.brands.record_location(result)
+
+    def set_offset(self, value):
+        self._offset = value
+    
+    def increment_offset(self, value):
+        old_offset = self.get_offset()
+        new_offset = old_offset + value
+        self.set_offset(new_offset)
+        return new_offset
+        
+    def view_all(self):
+        # returns all events
+        pass
+
     def update(self):
         events = self.alternator.pull(n)
         # arrive inflated; should i do that here or there? let's say in there
@@ -79,15 +97,13 @@ class Shell:
         self.hp.print(branded_evens)
             # really want to see these as bars
         return branded_events
-    
-    def exit(self):
-        pass
-        # for event in cache:
-            # if event.has_metadata():
-            #   event.save
-            
-        # performs the burn operation
-        # clear cache completely
+
+    def wrap_events(self, events):
+        result = list()
+        for event in events:
+            wrapper = event_wrapper.EventWrapper(event)
+            result.append(wrapper)
+        return result
 
 # Testing
 

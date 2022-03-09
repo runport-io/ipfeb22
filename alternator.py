@@ -13,13 +13,13 @@ class Alternator:
         # delete the events that I didn't save
         # almost want to do something like keep the event id and the date.
 
-    def pull(self, count):
+    def pull(self, count, offset):
         """
         -> list
 
         pull events from controller.
         """
-        offset, events = controller.update(count)
+        offset, events = controller.update(count=count, offset=offset)
         return events
 
     def save(self):
