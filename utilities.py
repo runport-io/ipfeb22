@@ -1,6 +1,28 @@
-# Utilities
-# (c) Port. Prerogative Club 2022
+# Copyright Port. Prerogative Club ("the Club")
+#
+# 
+# This file is part of Port. 2 ("Port.")
+#
+# Port. is free software: you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# Port. is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# Port. If not, see <https://www.gnu.org/licenses/>.
+#
+# Questions? Contact hi@runport.io.
 
+# Imports
+# 1) Built-ins
+import os
+import webbrowser
+
+# 2) Port.
 import constants
 import exceptions
 
@@ -10,6 +32,19 @@ def add_attributes_to_skip(obj, name=None, value=None, override=False):
     if not value:
         value = list()
     set_with_override(obj, name=name, value=value, override=override)
+
+def clear_screen():
+    """
+
+    clear_screen() -> None
+
+    Function clears the screen.
+    """
+    # credit to link {1} 
+    command = "cls"
+    if os.name != "nt":
+        command = "clear"
+    os.system(command)
 
 def deepcopy(obj, recur=False):
     wip = obj.__dict__.copy()
@@ -127,6 +162,22 @@ def make_string(obj, glue=None):
         result = str(obj)
         
     return result
+
+def open_link(url, new_tab=True):
+    """
+
+    open_link() -> bool
+
+    Function opens the url in the browser. If you turn off "new_tab", you will
+    see the results in the window you have open.
+    """
+    result = False
+    if new_tab:
+        result = webbrowser.open_new_tab(url)
+    else:
+        result = webbrowser.open(url, new=0)
+
+    return result    
     
 def pretty_print(obj, glue=None):
     if not glue:
@@ -169,7 +220,7 @@ def set_with_override(obj, name, value, override=False):
 
 
 
-    
-    
-    
+     
 
+# Links
+# 1: https://stackoverflow.com/questions/517970/how-to-clear-the-interpreter-console

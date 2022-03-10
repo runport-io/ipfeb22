@@ -189,7 +189,46 @@ class Welder:
         event.record_receipt(timestamp)
         return event
 
+    def z_parse_body_by_line(self, msg, parser, trace=False):
+        # for parsing html
+        parser.reset()
+        # to avoid surprises
 
+        result = list()
+        
+        body = msg.get_body()
+        # EmailMessage object
+
+        body_string = body.as_string()
+        # long string, sometimes breaks parser.
+
+        body_lines = body_string.splitlines()
+        if trace:
+            print("Number of lines in body: ", len(body_lines))
+            print("\n")
+
+        for raw_line in body_lines():
+            output = ""
+            try:
+                output = parser.feed(raw_line)
+            except SomeTypeofException:
+                pass
+            if output:
+                result.append(output)
+
+        # go through lines, skip ones that we can't figure out
+
+        return result
+
+    def z_check_body(self, msg):
+        """
+
+        z_check_body() -> bool
+
+        Returns True if body has plain text, false otherwise.
+        """
+        result = False
+        
 # Testing
 _file_name = "emails.pkl"
 

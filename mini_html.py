@@ -28,7 +28,10 @@ import html.parser
 # N/A
 
 # 4) Functions
-class MiniParser(html.parser.HTMLParser):    
+class MiniParser(html.parser.HTMLParser):
+    def handle_comment(self, data):
+        pass
+    
     def handle_data(self, data):
         print(data)
 
