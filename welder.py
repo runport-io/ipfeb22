@@ -54,7 +54,7 @@ class Welder:
     def __init__(self):
         pass
 
-    def add_body(self, msg, event):
+    def add_body(self, msg, event, silence_exceptions=True, trace=False):
         """
 
         Welder.add_body(msg, event) -> event
@@ -66,8 +66,21 @@ class Welder:
         # change to a call to parser_for_email_body, remove import        
         
         if text:
+            data = dict()
             event.body.set_raw(text)
-            body, data = parser_for_email_body.parse_text(text)
+            try:
+                body, data = parser_for_email_body.parse_text(text)
+                
+            except Exception as e:
+                if silence_exceptions:
+                    body = text
+                    # if problem with parsing, add text as is
+                    
+                    if trace:
+                        print(e)
+                else:
+                    raise e
+                
         else:
             email_object = msg.get_body()
             html = email_object.as_string()
