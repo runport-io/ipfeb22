@@ -32,7 +32,7 @@ class MiniParser(html.parser.HTMLParser):
     def handle_comment(self, data):
         pass
     
-    def handle_data(self, data, print_data=True):
+    def handle_data(self, data, print_data=False):
         
         container = getattr(self, "container_for_text", None)
         if not container:
