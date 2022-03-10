@@ -174,13 +174,15 @@ def parse_lines_of_html(lines_of_html, parser=HTML_PARSER):
     #<-----------------------------------------------------------------! really need to make sure this is automatic
     
     for line_of_html in lines_of_html:
+        parser.container_for_text = ""
         line_of_output = ""
         try:
             line_of_output = parser.feed(line_of_html)
         except ParserError:
             pass
             # add to log?
-            
+
+        line_of_output = parser.container_for_text
         if line_of_output:
             result.append(line_of_output)
 

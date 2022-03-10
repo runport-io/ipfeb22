@@ -63,14 +63,15 @@ class Welder:
         body as html. You modify the event in place.
         """
         text = observ2.get_body(msg)
-        # change to a call to parser_for_email_body, remove import
+        # change to a call to parser_for_email_body, remove import        
+        
         if text:
             event.body.set_raw(text)
             body, data = parser_for_email_body.parse_text(text)
         else:
-            email_object = event.get_body()
+            email_object = msg.get_body()
             html = email_object.as_string()
-            body = parser_for_email_body.parse_html(html)
+            body, data = parser_for_email_body.parse_html(html)
 
         event.set_body(body)
         # I should make the set call consistent with the data call?
@@ -195,37 +196,6 @@ class Welder:
         # convert into what? integer?
         event.record_receipt(timestamp)
         return event
-
-    def z_parse_body_by_line(self, msg, parser, trace=False):
-        # for parsing html
-        parser.reset()
-        # to avoid surprises
-
-        result = list()
-        
-        body = msg.get_body()
-        # EmailMessage object
-
-        body_string = body.as_string()
-        # long string, sometimes breaks parser.
-
-        body_lines = body_string.splitlines()
-        if trace:
-            print("Number of lines in body: ", len(body_lines))
-            print("\n")
-
-        for raw_line in body_lines():
-            output = ""
-            try:
-                output = parser.feed(raw_line)
-            except SomeTypeofException:
-                pass
-            if output:
-                result.append(output)
-
-        # go through lines, skip ones that we can't figure out
-
-        return result
         
 # Testing
 _file_name = "emails.pkl"

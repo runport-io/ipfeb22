@@ -28,12 +28,22 @@ import html.parser
 # N/A
 
 # 4) Functions
-class MiniParser(html.parser.HTMLParser):
+class MiniParser(html.parser.HTMLParser):    
     def handle_comment(self, data):
         pass
     
-    def handle_data(self, data):
-        print(data)
+    def handle_data(self, data, print_data=True):
+        
+        container = getattr(self, "container_for_text", None)
+        if not container:
+            self.container_for_text = ""
+        if data:
+            self.container_for_text += str(data)
+
+        if print_data:
+            print(data)        
+        
+        return data
 
     def handle_decl(self, decl):
         pass

@@ -85,8 +85,6 @@ def run_test2(email_observer):
     Function expects an observer with a connection and authentication.
     """
     events = email_observer.get_events()
-    if trace:
-        print(events)
     return events
 
 def run_test3(email_observer):
