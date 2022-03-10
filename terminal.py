@@ -275,12 +275,12 @@ def run_test4(shell, periods):
 
 def _test_batches(shell, count, offset, cycles):
 
-    existing_offset = self.get_offset()
+    existing_offset = shell.get_offset()
 
     print("\n\n")
     print("Existing offset: ", existing_offset)
 
-    self.set_offset(offset)
+    shell.set_offset(offset)
     print("Starting offset: ", offset)
     
     batches = list()
@@ -300,7 +300,7 @@ def _test_batch(shell, count):
     print("\n")
 
     events = shell.load_events(count=count)
-    shell.print_headlines(more1)
+    shell.print_headlines(events)
     
     offset = shell.get_offset()
     print("Offset after pull: ", offset)
