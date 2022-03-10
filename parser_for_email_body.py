@@ -151,9 +151,7 @@ def parse_html(html):
     data = dict()
     # not assigned for now, later may contain links, etc.
     lines_of_html = html.splitlines()
-    lines_of_body = parse_lines_of_html(lines_of_html)
-
-    body = "".join(lines_of_body)
+    body = parse_lines_of_html(lines_of_html)
     # could potentially send this down to references for additional cleaning.
     
     result = (body, data)
@@ -164,27 +162,26 @@ def parse_html(html):
 def parse_lines_of_html(lines_of_html, parser=HTML_PARSER):
     """
 
-    parse_lines_of_html() -> list()
-
+    parse_lines_of_html() -> string
 
     Function returns a list of output from the parser, skipping exceptions.
     """
     result = list()
     parser.reset()
+    parser.container_for_text = ""
     #<-----------------------------------------------------------------! really need to make sure this is automatic
     
     for line_of_html in lines_of_html:
-        parser.container_for_text = ""
-        line_of_output = ""
         try:
-            line_of_output = parser.feed(line_of_html)
-        except ParserError:
+            parser.feed(line_of_html)
+        except Exception:
             pass
             # add to log?
 
-        line_of_output = parser.container_for_text
-        if line_of_output:
-            result.append(line_of_output)
+    wip = parser.container_for_text
+    wip = x_remove_space(wip)
+    
+    result = wip
 
     return result
 
