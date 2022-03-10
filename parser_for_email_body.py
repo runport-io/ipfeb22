@@ -299,6 +299,40 @@ def strip_links(string):
     c = "Have not built this functionality yet."
     raise exceptions.PlaceholderError(c)
 
+def x_remove_space(string, recur=False):
+    """
+
+    experimental
+    
+    removes triple spaces from strings.
+    """
+    spaces = {" ", "\t", "\r", "\n"}
+    string = string.strip()
+    i = 0
+    wip = ""
+    length = len(string)
+    while i < length:
+        char_1 = string[i]
+        if char_1 in spaces:
+            if i < (length - 2):
+                char_2 = string[i+1]
+                char_3 = string[i+2]
+                if char_2 in spaces and char_3 in spaces:
+                    pass
+                    # skip triple spaces
+                else:
+                    wip = wip + char_1
+        else:
+            wip = wip + char_1
+            # just take suffix as is
+    
+        i = i + 1
+
+    result = wip
+    return result
+
+# Testing
+
 s1 = """
 Content-Type: text/plain; charset=utf-8
 Content-Transfer-Encoding: quoted-printable
