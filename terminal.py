@@ -47,6 +47,12 @@ class Shell:
         self.watchlist = watchlist.Watchlist()
        
     def brand_events(self, events, trace=False):
+        """
+
+        Shell.brand_events() -> container
+
+        Method returns the container of events with brands attached to each one.
+        """
         brands = self.watchlist.get_uniques()
         
         for event in events:
@@ -69,8 +75,16 @@ class Shell:
             
         # performs the burn operation
         # clear cache completely
+        # <-------------------------------------------------------------------remove for now?
 
     def filter_events(self, events, brands=None):
+        """
+
+        Shell.filter_events() -> list
+
+        Method returns the subset of events, if any, that contain brands from
+        the watchlist. You should brand events before passing them in.
+        """
         result = list()
         if brands is None:
             brands = self.watchlist.get_uniques()
@@ -84,6 +98,12 @@ class Shell:
         return result
 
     def get_offset(self):
+        """
+
+        Shell.get_offset() -> int
+
+        Method returns the offset for the instance.
+        """
         result = self._offset
         return result
     

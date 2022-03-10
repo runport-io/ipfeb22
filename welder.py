@@ -54,21 +54,29 @@ class Welder:
     def __init__(self):
         pass
 
-    def add_body(self, msg, event, overwrite=False):
+    def add_body(self, msg, event):
         """
 
-        Welder.add_body(msg, event, overwrite=False) -> event
+        Welder.add_body(msg, event) -> event
 
-        Method adds the message body to the event. Method modifies event in
-        place.
+        Method first checks if the message has text, and if not, parses the
+        body as html. You modify the event in place.
         """
-        raw_body = observ2.get_body(msg)
-        event.body.set_raw(raw_body)
-        body, data = parser_for_email_body.parse_body(raw_body)
+        text = observ2.get_body(msg)
+        # change to a call to parser_for_email_body, remove import
+        if text:
+            event.body.set_raw(text)
+            body, data = parser_for_email_body.parse_text(text)
+        else:
+            email_object = event.get_body()
+            html = email_object.as_string()
+            body = parser_for_email_body.parse_html(html)
+
         event.set_body(body)
+        # I should make the set call consistent with the data call?
         event.body.set_data(data)
         
-        return event
+        return event      
     
     def add_headline(self, msg, event, force=False):
         """
@@ -87,7 +95,6 @@ class Welder:
     def add_headline_alt(self, msg, event, force=False):
         headline = msg.get(constants.EMAIL_LIB_SUBJECT)
         charsets = msg.get_charsets()
-        
 
     def add_original(self):
         pass
@@ -219,15 +226,6 @@ class Welder:
         # go through lines, skip ones that we can't figure out
 
         return result
-
-    def z_check_body(self, msg):
-        """
-
-        z_check_body() -> bool
-
-        Returns True if body has plain text, false otherwise.
-        """
-        result = False
         
 # Testing
 _file_name = "emails.pkl"
@@ -239,7 +237,7 @@ def _get_messages(file_name):
 
     return messages
   
-def _run_test(messages):    
+def _run_test1(messages):    
     w = Welder()
     result = list()
     for msg in messages:
@@ -253,13 +251,13 @@ def _run_test(messages):
         print(body)
         print("\n\n")
     
-    return result
+    return result   
 
-def _main():
+def _run_test():
     messages = _get_messages(_file_name)
-    events = _run_test(messages)
+    events = _run_test1(messages)
 
 if __name__ == "__main__":
-    _main()
+    _run_test()
 
 #*"Well done."

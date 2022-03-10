@@ -49,18 +49,57 @@ class EmailObserver:
 
 # Testing
 def run_test():
+    results = dict()
+    
+    e = run_test1()
+    results["test1"] = e
+    
+    batch1 = run_test2(e)
+    results["test2"] = batch1
+
+    two_batches = run_test3(e)
+    results["test3"] = two_batches
+
+    two_more = run_test4(e)
+    results["test4"] = two_more
+
+    return results
+
+def run_test1():
     e1 = EmailObserver()
     print("e1: ", e1)
     
     guest, token = observ2.load_credentials()
     print("token: ", token)
-    
     count = e1.activate(token)
     print("count: ", count)
-    
-    events = e1.get_events()
-    print(events)
+    #<---------------------------------------------------------------------- add a flag for this
+
+    return e1
+
+def run_test2(email_observer):
+    """
+
+    -> events
+
+    Function expects an observer with a connection and authentication.
+    """
+    events = email_observer.get_events()
+    if trace:
+        print(events)
     return events
+
+def run_test3(email_observer):
+    first_10 = email_observer.get_events(offset=0, count=10)
+    next_10 = email_observer.get_events(offset=10, count=10)
+    result = (first_10, next_10)
+    return result
+
+def run_test4(email_observer):
+    e = email_observer
+    second_to_last_events = e.get_events(offset=-20, count=10)
+    last_events = e.get_events(offset=-10, count=10)
+    return (second_to_last_events, last_events)
 
 if __name__ == "__main__":
     run_test()

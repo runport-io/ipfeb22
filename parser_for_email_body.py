@@ -48,10 +48,12 @@ import copy
 
 # 2) Port.
 import constants
+import mini_html
+import observ2
 import references
 
 # 3) Data
-# N/a
+HTML_PARSER = mini_html.MiniParser()
 
 # 4) Functions
 def casefold_items(iterable):
@@ -69,36 +71,35 @@ def casefold_items(iterable):
         
     return result
 
-def parse_body(string, trace=False):
+def get_body_as_text(msg):
     """
 
-    parse_body() -> string, dict
+    get_body_as_text() -> string
 
-    Function delivers a string and a data dictionary that represent the input.
-    If you set trace to "True", routine shows work.
+    Function returns the text content of the message, if any.
     """
-    body, data = prep_string(string)
-    if trace:
-        print("Input: ")
-        print(string)
+    raw = observ2.get_body(msg)
+    return raw
 
-        print("Data: ")
-        print(data)
-        
-    if body:
-        if data:    
-            charset = data[constants.CHARSET]
-            charset = charset.casefold()
-            if trace:
-                print("Charset:  ", charset)
+def make_alnum(string, include_chars=[constants.HYPHEN]):
+    """
 
-            if charset == constants.UTF8.casefold():
-                body = references.clean_string(body, trace=trace, encoding=charset)
-            if trace:
-                print("Body, cleaned: \n", body)
-                print("\n\n\n\n")
-    
-    return body, data
+    make_alnum -> string
+
+    Function strips string of characters that are not letters or numbers. You
+    can specify characters you want to keep in addition to these.
+    """
+    result = ""
+    for char in string:
+        if char.isalnum():
+            result = result + char
+        else:
+            if char in include_chars:
+                result = result + char
+            else:
+                pass
+            
+    return result
     
 def parse_header(header, match_case=False, strip_whitespace=True):
     """
@@ -139,6 +140,83 @@ def parse_header(header, match_case=False, strip_whitespace=True):
 
     return result
 
+def parse_html(html):
+    """
+
+    parse_html() -> string, dict
+
+    Function returns a tuple that represents the text inside the html and
+    information about that text. 
+    """
+    data = dict()
+    # not assigned for now, later may contain links, etc.
+    lines_of_html = html.splitlines()
+    lines_of_body = parse_lines_of_html(lines_of_html)
+
+    body = "".join(lines_of_body)
+    # could potentially send this down to references for additional cleaning.
+    
+    result = (body, data)
+    # I am using a placeholder for data to match signature from function for
+    # processing text.
+    return result
+
+def parse_lines_of_html(lines_of_html, parser=HTML_PARSER):
+    """
+
+    parse_lines_of_html() -> list()
+
+
+    Function returns a list of output from the parser, skipping exceptions.
+    """
+    result = list()
+    parser.reset()
+    #<-----------------------------------------------------------------! really need to make sure this is automatic
+    
+    for line_of_html in lines_of_html:
+        line_of_output = ""
+        try:
+            line_of_output = parser.feed(line_of_html)
+        except ParserError:
+            pass
+            # add to log?
+            
+        if line_of_output:
+            result.append(line_of_output)
+
+    return result
+
+def parse_text(string, trace=False):
+    """
+
+    parse_text() -> string, dict
+
+    Function attempts to turn the text into a string without headers or
+    escapes. You can use this to clean plain text emails.
+    """
+    body, data = prep_string(string)
+    if trace:
+        print("Input: ")
+        print(string)
+
+        print("Data: ")
+        print(data)
+        
+    if body:
+        if data:    
+            charset = data[constants.CHARSET]
+            charset = charset.casefold()
+            if trace:
+                print("Charset:  ", charset)
+
+            if charset == constants.UTF8.casefold():
+                body = references.clean_string(body, trace=trace, encoding=charset)
+            if trace:
+                print("Body, cleaned: \n", body)
+                print("\n\n\n\n")
+    
+    return body, data
+
 def prep_string(string, strip_whitespace=True):
     """
 
@@ -162,26 +240,6 @@ def prep_string(string, strip_whitespace=True):
         data = parse_header(header)
     
     return (body, data)
-
-def make_alnum(string, include_chars=[constants.HYPHEN]):
-    """
-
-    make_alnum -> string
-
-    Function strips string of characters that are not letters or numbers. You
-    can specify characters you want to keep in addition to these.
-    """
-    result = ""
-    for char in string:
-        if char.isalnum():
-            result = result + char
-        else:
-            if char in include_chars:
-                result = result + char
-            else:
-                pass
-            
-    return result    
 
 def strip_header(string):
     """
@@ -502,7 +560,7 @@ https://subscribe.wordpress.com/?key=1c4097fb88eec03ccd4ac5fa30b77b88&email=put%
 """
 
 def run_test(string):    
-    body, data = parse_body(string, trace=True)
+    body, data = parse_text(string, trace=True)
 
 if __name__ == "__main__":
     run_test(s1)
