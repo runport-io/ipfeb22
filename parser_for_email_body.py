@@ -296,7 +296,7 @@ def strip_links(string):
     c = "Have not built this functionality yet."
     raise exceptions.PlaceholderError(c)
 
-def x_remove_space(string, recur=False):
+def x_remove_space(string):
     """
 
     experimental

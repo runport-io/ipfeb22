@@ -67,15 +67,15 @@ class Shell:
 
         return events
 
-    def exit(self):
-        pass
-        # for event in cache:
-            # if event.has_metadata():
-            #   event.save
-            
-        # performs the burn operation
-        # clear cache completely
-        # <-------------------------------------------------------------------remove for now?
+##    def exit(self):
+##        pass
+##        # for event in cache:
+##            # if event.has_metadata():
+##            #   event.save
+##            
+##        # performs the burn operation
+##        # clear cache completely
+##        # <----------------------------------------------------remove for now?
 
     def filter_events(self, events, brands=None):
         """
@@ -108,25 +108,50 @@ class Shell:
         return result
     
     def get_saved_offsets(self):
+        """
+
+        Shell.get_saved_offsets() -> list
+
+        Method returns a list of offsets from the past.
+        """        
         result = self._saved_offsets
         return result
         # this whole thing should be moved to an offsets attribute.
 
     def increment_offset(self, value):
+        """
+
+        Shell.increment_offset() -> int
+
+        Method increases the offset by the value and returns the result.
+        """
         old_offset = self.get_offset()
         new_offset = old_offset + value
         self.set_offset(new_offset)
         return new_offset
     
     def load_events(self, count=20, offset=None):
+        """
+
+        Shell.load_events() -> list
+
+        Method returns a list of events from the alternator.
+        """
         if offset is None:
             offset = self.get_offset()
         events = self.alternator.pull(count=count, offset=offset)
         self.increment_offset(count)
         return events
-        # check_brands?
+        # <---------------------------------check_brands?
 
     def load_offset(self, i=-1, save=True):
+        """
+
+        Shell.load_offset() -> 
+
+        Method reverts the shell to an offset. By default, you go back to the
+        last offset.
+        """
         saved_offsets = self.get_saved_offsets()
         offset = saved_offsets[i]
         self.set_offset(offset,save=save)
@@ -135,7 +160,7 @@ class Shell:
     def print_headlines(self, events):
         """
 
-        print_headlines() -> None
+        Shell.print_headlines() -> None
 
         Method prints the headline for each event.
         """
@@ -143,6 +168,14 @@ class Shell:
             print(event.get_headline())
         
     def refresh_brands(self):
+        """
+        NOT DONE
+
+        Shell.refresh_brands() -> ?
+
+        Method updates each event to match the watchlist. You run this after
+        you make changes to the watchlist.
+        """
         flat_watchlist = self.watchlist.flatten()
         events = self.get_events()
         for event in events:
@@ -153,12 +186,31 @@ class Shell:
             # if not: event.brands.record_location(result)
 
     def reset_offset(self, save=True):
+        """
+
+        Shell.reset_offset() -> None
+
+        Method sets the offset to 0.
+        """
         self.set_offset(0, save=save)
         
     def save_offset(self, value):
+        """
+
+        Shell.save_offset() -> None
+
+        Method saves the value in the container for offsets.        
+        """
         self._saved_offsets.append(value)
         
     def set_offset(self, value, save=True):
+        """
+
+        Shell.set_offset() -> None
+
+        Method sets the offset to the value. You can specify whether you want to
+        remember the value that was in place before the change. 
+        """
         if save:
             current = self.get_offset()
             self._saved_offsets.append(current)
@@ -166,6 +218,13 @@ class Shell:
         self._offset = value
     
     def update(self):
+        """
+        NOT DONE
+
+        Shell.update() -> list
+
+        Method pulls in events and checks them against the watchlist.
+        """
         events = self.alternator.pull(n)
         # arrive inflated; should i do that here or there? let's say in there
         branded_events = self.iron(events)
@@ -179,10 +238,23 @@ class Shell:
         return branded_events
         
     def view_all(self):
+        """
+        NOT DONE
+
+        Shell.view_all() -> ?
+
+        Method shows all events.
+        """
         # returns all events
         pass
 
     def wrap_events(self, events):
+        """
+
+        Shell.wrap_events() -> list
+
+        Method wraps each event in events in an EventWrapper.
+        """
         result = list()
         for event in events:
             wrapper = event_wrapper.EventWrapper(event)
@@ -225,7 +297,7 @@ def run_test3(shell, events, trace=False):
         print(periods[0])
     return periods
     
-    # events come presorted by time. <----------------------------- i ruin that
+    # events come presorted by time. <-------------------------------- preserve?
 
 def _print_as_dots(shell, periods, rows=4):
     """
@@ -266,7 +338,7 @@ def _print_as_tiles(shell, periods, rows=4):
         events = period.get_contents()            
         lines = gui.render_row(*events)
         # row will be longer than 80 characters
-        # need to manage that somehow <---------------------------------------------------------
+        # need to manage that somehow <-----------------------------------------
         for line in lines: print(line)
 
 def run_test4(shell, periods):
@@ -319,7 +391,7 @@ def run_test6(shell):
 def run_test():
     shell = run_test1()
     filtered_events = run_test2(shell)
-    # populates cache #<--------------------------------------------------------------- refactor
+    # populates cache #<----------------------------------------------- refactor
     events = shell.cache.get_events()
     periods = run_test3(shell, events)
     lines = run_test4(shell, periods)    
