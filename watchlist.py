@@ -167,7 +167,7 @@ class Watchlist:
         its name.
         """
 
-        data = csv_loader.load(path)
+        data = reader.load(path)
         if not keep_data:
             data = reader.simplify(data)
 
@@ -216,6 +216,7 @@ def run_test1():
 
 def run_test2(path):
     w = Watchlist.load(path)
+    return w
 
 def run_test(path=_LOCATION):
     run_test1()
