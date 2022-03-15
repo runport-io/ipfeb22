@@ -263,7 +263,7 @@ def simplify_group(group):
     return result
     
 # Testing    
-location = r"C:\Users\Ilya\Dropbox\Club\Product\Watchlist CSV.csv"
+_LOCATION = r"C:\Users\Ilya\Dropbox\Club\Product\Watchlist CSV.csv"
 
 def run_test1(path):
     rows = read_rows(path)
@@ -299,7 +299,7 @@ def run_test(path):
     return full
 
 if __name__ == "__main__":
-    run_test(location)
+    run_test(_LOCATION)
 
 
 

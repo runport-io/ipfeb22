@@ -17,43 +17,86 @@
 #
 # Questions? Contact hi@runport.io.
 
-def generate_rows(group, sort=False):
+# imports
+# 1) Built-ins
+import csv
+import json
+
+# 2) Port.
+import list_reader
+
+def make_row(group_name, brand_name, data=None, flatten=True):
     """
 
-    generate_rows() -> list
+    make_row() -> list()
 
-    Function generates a list of rows (lists) for each brand in the group. If
-    you specify sort, the order of the rows is stable. 
+    Function returns a list that represents a row associated with the inputs.
     """
-    result = list()
+    if flatten:
+        data = json.dumps(data)
+    row = [brand_name, group_name, data]
+    # this should run on a layout object of some sort
+    
+    return row
+
+def make_rows_for_group(group_name, group, sort=False):
+    """
+
+    make_rows() -> list
+
+    Function returns a list of rows, where each row represents the brand in the
+    group. 
+    """
+    rows = list()
     
     brand_names = group.keys()
     if sort:
         brand_names = sorted(brand_names)
 
-    for brand in brand_names:
-        data = group[brand]
-        flat = json.dumps(data)
-        row = [brand, group, flat]
-        result.append(row)
+    for brand_name in brand_names:
+        data = group[brand_name]
+        row = make_row(group_name, brand_name, data)
+        rows.append(row)
 
-    return result
+    return rows
 
-def export2(watchlist, path, sort=False):
+def make_rows(watchlist, sort=False):
+    """
+
+    make_rows() -> list
+
+    Function returns a list of rows for each brand in the watchlist. 
+    """
+    result = list()
+
     group_names = watchlist.keys()
     if sort:
         group_names = sorted(group_names)
 
-    rows = list()
     for group_name in group_names:
         group = watchlist[group_name]
-        rows_for_group = generate_rows(group, sort=sort)
-        rows.extend(rows_for_group)
+        rows_for_group = make_rows_for_group(group_name, group, sort=sort)
+        result.extend(rows_for_group)
 
+    return result
+
+def save(path, watchlist):
+    """
+
+    save() -> list
+
+    Function saves the watchlist to a file as CSV.
+    """
+    
     file = open(path, "w")
+    # add some safety to avoid overwrites?   
     writer = csv.writer(file)
+
+    rows = make_rows(watchlist)
     writer.writerows(rows)
+    
     file.close()
+    return rows
 
 # make the result readable in excel
 def convert_to_column_index(number):
@@ -82,3 +125,18 @@ def convert_to_column_index(number):
     return result
 
 # Testing
+_LOCATION_2 = r"C:\Users\Ilya\Dropbox\Club\Product\Watchlist CSV2.csv"
+
+def run_test1(path, trace=True):
+    data = list_reader.run_test4(list_reader._LOCATION)
+    
+    if trace:
+        print(data)
+        
+    save(path, data)
+
+def run_test():
+    run_test1(_LOCATION_2)
+
+if __name__ == "__main__":
+    run_test()
