@@ -23,7 +23,7 @@
 
 # 2) Port.
 import constants
-import list_reader
+import list_reader as reader
 import serializer
 import utilities as up
 
@@ -169,7 +169,7 @@ class Watchlist:
 
         data = csv_loader.load(path)
         if not keep_data:
-            data = list_reader.simplify(data)
+            data = reader.simplify(data)
 
         result = cls()
         result.update(data)
