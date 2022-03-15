@@ -23,6 +23,7 @@
 
 # 2) Port.
 import constants
+import csv_loader
 import serializer
 import utilities as up
 
@@ -142,7 +143,7 @@ class Watchlist:
         return result
         
     @classmethod
-    def from_flat(cls, data):
+    def from_flat(cls, data, keep_data=False):
         """
 
         Watchlist.from_flat() -> Watchlist
@@ -152,6 +153,28 @@ class Watchlist:
         new = cls()
         new.update(data)
         return new
+
+    @classmethod
+    def load(cls, path, keep_data=False):
+        """
+
+        Watchlist.load() -> Watchlist
+
+        **Class Method**
+        
+        Method populates an instance with data from a file. If you turn off
+        keep_data, method will discard any details about each brand other than
+        its name.
+        """
+
+        data = csv_loader.load(path)
+        if not keep_data:
+            data = csv_loader.simplify(data)
+
+        result = cls()
+        result.update(data)
+
+        return result
 
     def update(self, data):
         """
@@ -163,7 +186,9 @@ class Watchlist:
         self._groups.update(data)
 
 # Testing
-def run_test():
+_LOCATION = r"C:\Users\Ilya\Dropbox\Club\Product\Watchlist CSV.csv"
+
+def run_test1():
     w = Watchlist()
     print(w)
 
@@ -188,6 +213,16 @@ def run_test():
     print(new)
 
     # adjust pretty print to show the group name in line, or something
+
+def run_test2(path):
+    w = Watchlist.load(path)
+
+def run_test(path=_LOCATION):
+    run_test1()
+
+    result = run_test2(path)
+    print(result)
+    return result
 
 if __name__ == "__main__":
     run_test()

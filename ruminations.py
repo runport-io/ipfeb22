@@ -137,7 +137,7 @@ class Chartist:
         starting_length = len(container)
         gap = length - starting_length
         if gap < 0:
-            c = "Container is shorter than length."
+            c = "Container is longer than length."
             raise exceptions.ParameterError(c)
 
         i = 0
