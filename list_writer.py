@@ -148,8 +148,9 @@ def make_row_per_layout(data, layout, flatten=True, field_for_remainder=DATA):
     for i in range(field_count):
         field = layout[i]
         if field == field_for_remainder:
-            row.append(None)
             remainder_position = i
+            row.append(None)
+            # placeholder value
             continue
         else:
             value = wip.pop(field, None)
@@ -159,14 +160,16 @@ def make_row_per_layout(data, layout, flatten=True, field_for_remainder=DATA):
     if flatten:
         rem = json.dumps(rem)
 
-    if remainder_position is None:
-        remainder_position = field_count
-        # attach to end if you don't find the field
-    row.insert(remainder_position, rem)
+    if remainder_position is not None:
+        row[remainder_position] = rem
+    else:
+        row.append(rem)
+
+    return row
     # <----------------------------------------------- or just automatically
     # flatten and don't discard if the rem_field is not in the layout?
     
-    return row
+    
     # what do i want? i want:
     # a) make a 3 column thing, wehre it goes brand, group, data, and data picks
     # up anything that's not in brand or group
@@ -210,18 +213,23 @@ def make_rows_for_group(group_name, group, sort=False, header=HEADER):
     group. 
     """
     rows = list()
+    wip = group.copy()
     
-    brand_names = group.keys()
+    brand_names = wip.keys()
     if sort:
         brand_names = sorted(brand_names)
 
     for brand_name in brand_names:
-        data = group[brand_name]
+        data = dict()
+        known = wip[brand_name]
+        data.update(known)
+        # need to avoid modifications of input. 
+        
         data[BRAND] = brand_name
         data[GROUP] = group_name
-        # row = make_row(group_name, brand_name, data)
-        row = make_row_per_layout(data, header)
+        # enrich data here
         
+        row = make_row_per_layout(data, header)
         rows.append(row)
 
     return rows
@@ -287,7 +295,7 @@ _LOCATION_1 = r"C:\Users\Ilya\Dropbox\Club\Product\Watchlist CSV2.csv"
 _LOCATION_2 = r"C:\Users\Ilya\Dropbox\Club\Product\Watchlist CSV3.csv"
 
 def _run_test1(path, trace=True):
-    data = list_reader.run_test4(list_reader._LOCATION)
+    data = list_reader.load(list_reader._LOCATION)
     
     if trace:
         print(data)
@@ -307,8 +315,16 @@ def _clean_results(*paths):
     for p in paths:
         os.remove(p)
 
-def _run_test4():
-    _clean_results(_LOCATION_2)
+def _run_test4(path, data):
+    recorded = list_reader.load(path)
+    if recorded == data:
+        _clean_results(path)
+    else:
+        c = "Recorded does not match data"
+        raise exceptions.OperationError(c)
+        # should define an equivalence error and return it with the args
+
+    return recorded
 
 def _run_test(clean=True):
     data = _run_test1(_LOCATION_1)
@@ -317,7 +333,8 @@ def _run_test(clean=True):
         _clean_results(_LOCATION_1, backup)
     
     _run_test3(_LOCATION_2, data)
-    # _run_test4()
+    recorded = _run_test4(_LOCATION_2, data)
+    return recorded
 
 if __name__ == "__main__":
     _run_test()
