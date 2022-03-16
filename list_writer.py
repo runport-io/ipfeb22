@@ -258,7 +258,7 @@ def remove_blanks_and_copy(src, dst, blank=BLANK):
 
     return counter
 
-def save(path, watchlist, clean=False, overwrite=False):
+def save(path, watchlist, clean=True, overwrite=False):
     """
 
     save() -> None
@@ -294,13 +294,13 @@ def swap_names(original, replica):
 _LOCATION_1 = r"C:\Users\Ilya\Dropbox\Club\Product\Watchlist CSV2.csv"
 _LOCATION_2 = r"C:\Users\Ilya\Dropbox\Club\Product\Watchlist CSV3.csv"
 
-def _run_test1(path, trace=True):
+def _run_test1(path, trace=False):
     data = list_reader.load(list_reader._LOCATION)
     
     if trace:
         print(data)
         
-    save(path, data)
+    save(path, data, clean=False)
 
     return data
 
@@ -326,14 +326,30 @@ def _run_test4(path, data):
 
     return recorded
 
-def _run_test(clean=True):
+def _run_test(clean=True, trace=True):
     data = _run_test1(_LOCATION_1)
+
+    if trace:
+        print("Test 1: passed.")
+    
     backup = _run_test2(_LOCATION_1)
+    if trace:
+        print("Test 2: passed.")
+        
     if clean:
         _clean_results(_LOCATION_1, backup)
     
     _run_test3(_LOCATION_2, data)
+    if trace:
+        print("Test 3: passed.")
+        
     recorded = _run_test4(_LOCATION_2, data)
+    if trace:
+        print("Test 4: passed.")
+        print("Tests completed.")
+        print("Data recorded: ")
+        print(recorded)
+
     return recorded
 
 if __name__ == "__main__":
