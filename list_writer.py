@@ -28,6 +28,8 @@ import list_reader
 
 # 3) Constants
 BLANK = "\n"
+COPY_PREFIX = "z_"
+COPY_SUFFIX = ""
 
 def make_row(group_name, brand_name, data=None, flatten=True):
     """
@@ -119,9 +121,10 @@ def get_non_blanks_alt(path, blank=BLANK):
 def remove_blanks_and_copy(src, dst, blank=BLANK):
     """
 
-    -> int
+    remove_blanks_and_copy() -> int
 
-    Function copies lines that do not match blank from src to dst. 
+    Function copies lines that do not match blank from src to dst. You get the
+    number of lines removed back.
     """
     src_file = open(src, "r")
     dst_file = open(dst, "w")
@@ -138,6 +141,40 @@ def remove_blanks_and_copy(src, dst, blank=BLANK):
     dst_file.close()
 
     return counter
+
+def make_path_for_copy(path, filename=None, prefix=COPY_PREFIX,
+                       suffix=COPY_SUFFIX):
+    """
+
+    -> string
+
+    Function generates a path for copying a file on the basis of the input. If
+    you leave the parameters as is, you will get something like
+    dir\\filename_copy.ext.
+    """
+    result = ""
+    # let's say path is "c:\\fruit\\bananas\\yellow.py"
+    head, tail = os.path.split(path)
+    # head is "c:\\fruit\\bananas\\", tail is "yellow.py"
+    result += head
+
+    t_name, ext = os.path.splitext(tail)
+    # "name" is "yellow", ext is ".py"
+    if not filename:
+        filename = t_name
+
+    file = prefix + filename + suffix + ext
+    result = os.path.join(result, file)
+    
+    return result
+
+def swap_names():
+    # takes a file 
+    pass
+
+def clean_lines(path, overwrite=False):
+    # if not overwrite, saves a copy of the old file
+    pass
 
 def save(path, watchlist):
     """
