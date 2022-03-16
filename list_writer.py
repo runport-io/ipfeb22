@@ -17,7 +17,11 @@
 #
 # Questions? Contact hi@runport.io.
 
-# imports
+"""
+Module defines functionality for saving lists to CSV.
+"""
+
+# Imports
 # 1) Built-ins
 import csv
 import json
@@ -126,20 +130,6 @@ def make_path_for_copy(path, filename=None, prefix=COPY_PREFIX,
     
     return result
 
-def make_row(group_name, brand_name, data=None, flatten=True):
-    """
-
-    make_row() -> list()
-
-    Function returns a list that represents a row associated with the inputs.
-    """
-    if flatten:
-        data = json.dumps(data)
-    row = [brand_name, group_name, data]
-    # this should run on a layout object of some sort
-    
-    return row
-
 def make_row_per_layout(data, layout, flatten=True, field_for_remainder=DATA):
     """
 
@@ -187,6 +177,29 @@ def make_row_per_layout(data, layout, flatten=True, field_for_remainder=DATA):
     # picks up everything that's left over
     #  - layout = ["Brand", "Group", "Data", "On"]
     #  - entry = ["Piccolina", "Consumer", "{...}", "True"]
+    
+def make_rows(watchlist, sort=False):
+    """
+
+    make_rows() -> list
+
+    Function returns a list of rows for each brand in the watchlist. 
+    """
+    result = list()
+    header = make_header(*HEADER)
+    result.append(header)
+
+    group_names = watchlist.keys()
+    if sort:
+        group_names = sorted(group_names)
+
+    for group_name in group_names:
+        group = watchlist[group_name]
+        rows_for_group = make_rows_for_group(group_name, group, sort=sort,
+                                             header=header)
+        result.extend(rows_for_group)
+
+    return result
 
 def make_rows_for_group(group_name, group, sort=False, header=HEADER):
     """
@@ -212,29 +225,6 @@ def make_rows_for_group(group_name, group, sort=False, header=HEADER):
         rows.append(row)
 
     return rows
-
-def make_rows(watchlist, sort=False):
-    """
-
-    make_rows() -> list
-
-    Function returns a list of rows for each brand in the watchlist. 
-    """
-    result = list()
-    header = make_header(*HEADER)
-    result.append(header)
-
-    group_names = watchlist.keys()
-    if sort:
-        group_names = sorted(group_names)
-
-    for group_name in group_names:
-        group = watchlist[group_name]
-        rows_for_group = make_rows_for_group(group_name, group, sort=sort,
-                                             header=header)
-        result.extend(rows_for_group)
-
-    return result
 
 def remove_blanks_and_copy(src, dst, blank=BLANK):
     """
@@ -296,7 +286,7 @@ def swap_names(original, replica):
 _LOCATION_1 = r"C:\Users\Ilya\Dropbox\Club\Product\Watchlist CSV2.csv"
 _LOCATION_2 = r"C:\Users\Ilya\Dropbox\Club\Product\Watchlist CSV3.csv"
 
-def run_test1(path, trace=True):
+def _run_test1(path, trace=True):
     data = list_reader.run_test4(list_reader._LOCATION)
     
     if trace:
@@ -306,24 +296,28 @@ def run_test1(path, trace=True):
 
     return data
 
-def run_test2(path):
+def _run_test2(path):
     backup = clean_lines(path, overwrite=False)
     return backup
 
-def run_test3(path, data):
+def _run_test3(path, data):
     save(path, data, clean=True, overwrite=True)
 
-def clean_results(*paths):
+def _clean_results(*paths):
     for p in paths:
         os.remove(p)
 
-def run_test(clean=True):
-    data = run_test1(_LOCATION_1)
-    backup = run_test2(_LOCATION_1)
+def _run_test4():
+    _clean_results(_LOCATION_2)
+
+def _run_test(clean=True):
+    data = _run_test1(_LOCATION_1)
+    backup = _run_test2(_LOCATION_1)
     if clean:
-        clean_results(_LOCATION_1, backup)
+        _clean_results(_LOCATION_1, backup)
     
-    run_test3(_LOCATION_2, data)
+    _run_test3(_LOCATION_2, data)
+    # _run_test4()
 
 if __name__ == "__main__":
-    run_test()
+    _run_test()
