@@ -24,6 +24,7 @@ import json
 import os
 
 # 2) Port.
+import exceptions
 import list_reader
 
 # 3) Constants
@@ -86,38 +87,6 @@ def make_rows(watchlist, sort=False):
 
     return result
 
-def remove_blanks(path, prefix="z_"):
-    directory = os.path.dirname(path)
-    base = os.path.basename(path)
-    file_name, extension = os.path.splitext(base)
-    new_name = prefix + file_name + extension
-    new_path = os.path.join(base, new_name)   
-
-    os.rename(path, new_path)
-
-    file_start = open(new_path, "r")
-    file_end = open(path, "w")
-
-    for line in file_start:
-        if line == "\n":
-            continue
-        else:
-            file_end.writeline(line)
-
-    # removes all blanks.
-
-def get_non_blanks_alt(path, blank=BLANK):
-    lines = list()
-    f = open(path, "r")
-    for line in f:
-        if line == blank:
-            continue
-        else:
-            lines.append(line)
-
-    f.close()
-    return lines
-
 def remove_blanks_and_copy(src, dst, blank=BLANK):
     """
 
@@ -146,7 +115,7 @@ def make_path_for_copy(path, filename=None, prefix=COPY_PREFIX,
                        suffix=COPY_SUFFIX):
     """
 
-    -> string
+    make_path_for_copy() -> string
 
     Function generates a path for copying a file on the basis of the input. If
     you leave the parameters as is, you will get something like
@@ -165,21 +134,53 @@ def make_path_for_copy(path, filename=None, prefix=COPY_PREFIX,
 
     file = prefix + filename + suffix + ext
     result = os.path.join(result, file)
+    if os.path.exists(result):
+        c = "A file exists at the path you built."
+        raise exceptions.OperationError(c)
     
     return result
 
-def swap_names():
-    # takes a file 
-    pass
-
-def clean_lines(path, overwrite=False):
-    # if not overwrite, saves a copy of the old file
-    pass
-
-def save(path, watchlist):
+def swap_names(original, replica):
     """
 
-    save() -> list
+    swap_names() -> None
+
+    Function renames the original path as the replica and vice versa.
+    """
+    placeholder = make_path_for_copy(original, suffix=" temp")
+    os.rename(original, placeholder)
+
+    os.rename(replica, original)
+    os.rename(placeholder, replica)    
+
+def clean_lines(path, overwrite=False):
+    """
+
+    clean_lines() -> string
+
+    Function removes blank lines from a file. If you turn off "overwrite", you
+    get back a path to the old file.
+    """
+    # if not overwrite, saves a copy of the old file
+    result = ""
+    original = path
+    cleaned = make_path_for_copy(path)
+
+    remove_blanks_and_copy(original, cleaned)
+
+    swap_names(original, cleaned)
+    
+    if overwrite:
+        os.remove(cleaned)
+    else:
+        result = cleaned
+
+    return result
+    
+def save(path, watchlist, clean=False, overwrite=False):
+    """
+
+    save() -> None
 
     Function saves the watchlist to a file as CSV.
     """
@@ -192,9 +193,8 @@ def save(path, watchlist):
     writer.writerows(rows)
     file.close()
 
-    remove_blanks(path)
-
-    return rows
+    if clean:
+        clean_lines(path, overwrite=overwrite)
 
 # make the result readable in excel
 def convert_to_column_index(number):
@@ -233,8 +233,20 @@ def run_test1(path, trace=True):
         
     save(path, data)
 
-def run_test():
-    run_test1(_LOCATION_2)
+    return data
+
+def run_test2(path):
+    backup = clean_lines(path, overwrite=False)
+    return backup
+
+def run_test3(path):
+    pass
+    
+def run_test(clean=True):
+    data = run_test1(_LOCATION_2)
+    backup = run_test2(_LOCATION_2)
+    os.remove(_LOCATION_2)
+    os.remove(backup)   
 
 if __name__ == "__main__":
     run_test()
