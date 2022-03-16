@@ -223,7 +223,8 @@ def convert_to_column_index(number):
     return result
 
 # Testing
-_LOCATION_2 = r"C:\Users\Ilya\Dropbox\Club\Product\Watchlist CSV2.csv"
+_LOCATION_1 = r"C:\Users\Ilya\Dropbox\Club\Product\Watchlist CSV2.csv"
+_LOCATION_2 = r"C:\Users\Ilya\Dropbox\Club\Product\Watchlist CSV3.csv"
 
 def run_test1(path, trace=True):
     data = list_reader.run_test4(list_reader._LOCATION)
@@ -239,14 +240,22 @@ def run_test2(path):
     backup = clean_lines(path, overwrite=False)
     return backup
 
-def run_test3(path):
-    pass
+def run_test3(path, data):
+    save(path, data, clean=True, overwrite=True)
+
+def clean_results(*paths):
+    for p in paths:
+        os.remove(p)
     
 def run_test(clean=True):
-    data = run_test1(_LOCATION_2)
-    backup = run_test2(_LOCATION_2)
-    os.remove(_LOCATION_2)
-    os.remove(backup)   
+    data = run_test1(_LOCATION_1)
+    backup = run_test2(_LOCATION_1)
+    if clean:
+        clean_results(_LOCATION_1, backup)
+    
+    run_test3(_LOCATION_2, data)
+    if clean:
+        clean_results(_LOCATION_2)
 
 if __name__ == "__main__":
     run_test()
