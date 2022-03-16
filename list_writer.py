@@ -21,9 +21,13 @@
 # 1) Built-ins
 import csv
 import json
+import os
 
 # 2) Port.
 import list_reader
+
+# 3) Constants
+BLANK = "\n"
 
 def make_row(group_name, brand_name, data=None, flatten=True):
     """
@@ -80,6 +84,61 @@ def make_rows(watchlist, sort=False):
 
     return result
 
+def remove_blanks(path, prefix="z_"):
+    directory = os.path.dirname(path)
+    base = os.path.basename(path)
+    file_name, extension = os.path.splitext(base)
+    new_name = prefix + file_name + extension
+    new_path = os.path.join(base, new_name)   
+
+    os.rename(path, new_path)
+
+    file_start = open(new_path, "r")
+    file_end = open(path, "w")
+
+    for line in file_start:
+        if line == "\n":
+            continue
+        else:
+            file_end.writeline(line)
+
+    # removes all blanks.
+
+def get_non_blanks_alt(path, blank=BLANK):
+    lines = list()
+    f = open(path, "r")
+    for line in f:
+        if line == blank:
+            continue
+        else:
+            lines.append(line)
+
+    f.close()
+    return lines
+
+def remove_blanks_and_copy(src, dst, blank=BLANK):
+    """
+
+    -> int
+
+    Function copies lines that do not match blank from src to dst. 
+    """
+    src_file = open(src, "r")
+    dst_file = open(dst, "w")
+
+    counter = 0
+    for line in src_file:
+        if line == blank:
+            counter += 1
+            continue
+        else:
+            dst_file.write(line)
+
+    src_file.close()
+    dst_file.close()
+
+    return counter
+
 def save(path, watchlist):
     """
 
@@ -94,8 +153,10 @@ def save(path, watchlist):
 
     rows = make_rows(watchlist)
     writer.writerows(rows)
-    
     file.close()
+
+    remove_blanks(path)
+
     return rows
 
 # make the result readable in excel
