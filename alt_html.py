@@ -31,14 +31,32 @@ HTML_END = "</html>"
 
 STYLE_START = "<style"
 STYLE_END = "</style>"
+TABLE
 
 # 4) Functions
 def parse_body_as_html(string):
-    pass
-    # returns body, data
+    html = extract_html(string)
+    # pass
+    # extract html
+    # extract style
+    # extract table
 
 def do_nothing(element):
     result = element
+    return result
+
+def construct_start(element):
+    result = "<" + element
+    return result
+
+def construct_end(element):
+    result = "</element>"
+    return result
+
+def remove_tag(string, tag):
+    start_tag = construct_start(tag)
+    end_tag = construct_end(tag)
+    result = remove_elements(string, start_tag, end_tag)
     return result
 
 def extract_html(string):
@@ -132,6 +150,12 @@ def _run_test1(string, trace=True):
 def _run_test2(html):
     print("Starting length: %s" % len(html))
     string, data = remove_elements(html, STYLE_START, STYLE_END)
+    print("Ending length: %s" % len(string))
+    return (string, data)
+
+def _run_test3(html):
+    print("Starting length: %s" % len(html))
+    string, data = remove_tag(html, TABLE)
     print("Ending length: %s" % len(string))
     return (string, data)
 
