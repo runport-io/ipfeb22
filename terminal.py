@@ -388,6 +388,10 @@ def run_test6(shell):
     batches = _test_batches(shell, count=4, offset=-20, cycles=2)
     return batches
 
+def _run_test7():
+    pass
+    # load real watchlist, go through 100 events, see what comes up
+
 def run_test():
     shell = run_test1()
     filtered_events = run_test2(shell)

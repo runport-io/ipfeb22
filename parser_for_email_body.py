@@ -139,7 +139,7 @@ def parse_header(header, match_case=False, strip_whitespace=True):
         result = wip
 
     return result
-
+   
 def parse_html(html):
     """
 
@@ -150,6 +150,7 @@ def parse_html(html):
     """
     data = dict()
     # not assigned for now, later may contain links, etc.
+    
     lines_of_html = html.splitlines()
     body = parse_lines_of_html(lines_of_html)
     # could potentially send this down to references for additional cleaning.
