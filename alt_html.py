@@ -51,88 +51,13 @@ def parse_body_as_html(string):
     # extract style
     # extract table
 
-def do_nothing(element):
-    result = element
+def construct_end(element):
+    result = ARROW_LEFT + SLASH + element + ARROW_RIGHT
     return result
 
 def construct_start(element):
     result = ARROW_LEFT + element
     return result
-
-def construct_end(element):
-    result = ARROW_LEFT + SLASH + element + ARROW_RIGHT
-    return result
-
-def remove_tag(string, tag):
-    start_tag = construct_start(tag)
-    end_tag = construct_end(tag)
-    result = remove_elements(string, start_tag, end_tag)
-    return result
-
-def parse_image(element):
-    """
-    -> 
-    """
-    pass
-
-def parse_tag(tag):
-    """
-    -> dict
-
-    Function returns a dictionary of attributes. 
-    """
-    # let's say I only get here with the substantive tag, so <table ... >
-    # or <img ...>. I have to remove the closing tag, if any, elsewhere.
-
-    # should I return the tag plus the data? I think so.
-
-    result = dict()
-    adj_tag = references.clean_string(tag) #<--------------------------------------- moved lower
-    # I do this now because otherwise, the colons may be escaped. I am removing
-    # any embedded, escaped new lines here.
-    contents = remove_arrows(adj_tag)
-    # keep this
-
-    pairs = contents.split()
-    for pair in pairs:
-        if pair.startswith(EXCLAMATION_MARK):
-            data = parse_comment(pair)
-            result.update(data)
-        elif EQUALS in pair:
-            attribute, value = pair.split(EQUALS)
-            result[attribute] = value
-            # need to protect against implicit overwrites.
-        else:
-            attribute = pair
-            # for the tag itself
-            result[attribute] = None
-            
-    return result
-    
-    # to do:
-    ## 1) strip arrows - done
-    ## 2) strip quotes
-    ## 3) do something with comments, either take them as is, or replace. <--------------------------------------------
-        ## for comments, I want to take them out before I break the escapes
-        ## that is, while the new lines are still in
-        ## cause then I can take any comments that are in a line?
-        
-    ## 4) add logic to detect if this is a single tag or an open / closed pair.
-
-def remove_quotes(string):
-    result = string
-    if result.startswith(QUOTATION):
-        result = result[1:]
-    if result.endswith(QUOTATION):
-        result = result[:-1]
-    # can replace logic with detection of the char, etc. 
-    
-    return result
-    
-
-    # I can also take a shortcut and parse "style" separately. So find "style",
-    # then take =, then start parsing and keep going until I reach the quote
-    # again. Extract that. then split remainder.
 
 def detect_tokens(string):
     """
@@ -175,44 +100,41 @@ def detect_tokens(string):
                     
     return tokens
 
-def parse_element(element):
-    """
-
-
-    """
-    pass   
-
-def parse_tag2(tag):
-    """
-    -> tuple
-
-    returns a tuple of name, attributes
-    """
-    cleaned = references.clean_string(tag) #<--------------- consider cleaning element? 
-    content = remove_arrows(cleaned)
-    name, remainder = extract_name(content)
-    attributes = parse_attributes(remainder)
-
-    return name, attributes
-
-def parse_attributes(string, strip_quotes=True):
-    """
-
-    -> dict
-
-    Function returns a map of names to values.
-    """
-    result = dict()
-    tokens = detect_tokens(string)
-    for token in tokens:
-        attr, value = token.split(EQUALS)
-
-        if strip_quotes:
-            value = remove_quotes(value)
-        
-        result[attr] = value
-        
+def do_nothing(element):
+    result = element
     return result
+
+def extract_content(element):
+    """
+
+    -> content, start, end
+    
+    Removes one layer of tag, returns the inside 
+    """
+    start_tag, remainder = find_first(element)
+    remainder, end_tag = find_last(remainder)
+
+    result = (remainder, start_tag, end_tag)
+    return result
+
+    # find_first() -> tag, remainder
+    # find_last() -> tag, remainder
+    # return ((first, last), remainder)
+
+def extract_html(string):
+    """
+
+    -> string
+    
+    """
+    html_start = HTML_START
+    html_end = HTML_END
+
+    start = string.find(html_start)
+    end = string.rfind(html_end)
+
+    result = string[start:end]
+    return result  
 
 def extract_name(string):
     """
@@ -236,22 +158,6 @@ def extract_name(string):
     return (name, remainder)
     # should work on <br> and <td>, and so forth.
     # consider skipping the first slash
-
-def extract_content(element):
-    """
-
-    -> content, start, end
-    Removes one layer of tag, returns the inside 
-    """
-    start_tag, remainder = find_first(element)
-    remainder, end_tag = find_last(remainder)
-
-    result = (remainder, start_tag, end_tag)
-    return result
-
-    # find_first() -> tag, remainder
-    # find_last() -> tag, remainder
-    # return ((first, last), remainder)
 
 def find_first(string):
     """
@@ -291,6 +197,67 @@ def find_last(string):
             remainder = remainder[:start]
 
     return remainder, tag
+
+    # to do:
+    ## 1) strip arrows - done
+    ## 2) strip quotes - done
+    ## 3) do something with comments, either take them as is, or replace. <--------------------------------------------
+        ## for comments, I want to take them out before I break the escapes
+        ## that is, while the new lines are still in
+        ## cause then I can take any comments that are in a line?
+        
+    ## 4) add logic to detect if this is a single tag or an open / closed pair.
+
+def parse_attributes(string, strip_quotes=True):
+    """
+
+    -> dict
+
+    Function returns a map of names to values.
+    """
+    result = dict()
+    tokens = detect_tokens(string)
+    for token in tokens:
+        attr, value = token.split(EQUALS)
+
+        if strip_quotes:
+            value = remove_quotes(value)
+        
+        result[attr] = value
+        
+    return result
+
+def parse_comment(comment):
+    result = dict()
+    key = comment[:1]
+    value = comment[1:]
+    result[key] = value
+    return result
+
+def parse_element(element):
+    """
+
+    -> content, tag_name, tag_data, match
+
+    Gets the first tag and content. Returns the data for the tag.
+    """
+    pass
+    
+    # this should probably return the inside of the element with formatting, if
+    # any. the formatting should come from the tags: images, etc.
+
+def parse_tag(tag):
+    """
+    -> tuple
+
+    returns a tuple of name, attributes
+    """
+    cleaned = references.clean_string(tag) #<--------------- consider cleaning element? 
+    content = remove_arrows(cleaned)
+    name, remainder = extract_name(content)
+    attributes = parse_attributes(remainder)
+
+    return name, attributes
     
 def remove_arrows(string, remove_slash=False):
     """
@@ -311,44 +278,6 @@ def remove_arrows(string, remove_slash=False):
             result = result[:-1]
 
     return result    
-
-def parse_comment(comment):
-    result = dict()
-    key = comment[:1]
-    value = comment[1:]
-    result[key] = value
-    return result
-
-def extract_html(string):
-    """
-
-    -> string
-    
-    """
-    html_start = HTML_START
-    html_end = HTML_END
-
-    start = string.find(html_start)
-    end = string.rfind(html_end)
-
-    result = string[start:end]
-    return result
-
-def render_image(image_tag):
-    """
-    
-    """
-    pass
-    # should take the tag, pull out alt, and then print it
-    # *\nIMAGE: {desc} {Link: x}*\n"
-    
-def render_link(link_tag):
-    """
-    """
-    pass
-    # make "{Caption}{Link: x}", return data of v.
-    # How to handle text? # How to handle empty links?
-    
     
 def remove_elements(string, start, end=ARROW_RIGHT, handler=do_nothing):
     """
@@ -384,8 +313,9 @@ def remove_elements(string, start, end=ARROW_RIGHT, handler=do_nothing):
         after = wip[end_position:]
 
         cleaned += before
-        processed_element = handler(element)
-        elements.append(processed_element)        
+        if element:
+            processed_element = handler(element)
+            elements.append(processed_element)        
 
         wip = after
         # repeat
@@ -395,6 +325,37 @@ def remove_elements(string, start, end=ARROW_RIGHT, handler=do_nothing):
 
     result = (cleaned, elements)
     return result
+
+def remove_quotes(string):
+    result = string
+    if result.startswith(QUOTATION):
+        result = result[1:]
+    if result.endswith(QUOTATION):
+        result = result[:-1]
+    # can replace logic with detection of the char, etc. 
+    
+    return result
+
+def remove_tag(string, tag):
+    start_tag = construct_start(tag)
+    end_tag = construct_end(tag)
+    result = remove_elements(string, start_tag, end_tag)
+    return result
+
+def render_image(image_tag):
+    """
+    
+    """
+    pass
+    # should take the tag, pull out alt, and then print it
+    # *\nIMAGE: {desc} {Link: x}*\n"
+    
+def render_link(link_tag):
+    """
+    """
+    pass
+    # make "{Caption}{Link: x}", return data of v.
+    # How to handle text? # How to handle empty links?
 
 # can and probably should refactor this to generate coordinates, then do with
 # those as i wish. almost like a tag type, coordinates. 
@@ -408,7 +369,6 @@ def remove_elements(string, start, end=ARROW_RIGHT, handler=do_nothing):
 
 # what I really want to do is get rid of all the tabs and new lines, probably,
 # and rely only on the html formatting: pars, breaks, etc.
-
 
 # Tests
 p = "ubs_body.pkl"
@@ -448,16 +408,36 @@ def _run_test3(html):
     print("Ending length: %s" % len(string))
     return (string, data)
 
-def _run_test4(tags):
+def _run_test4(elements, trace=True):
     """
 
     _run_test4(html) -> list()
 
+    see if the tag parsing works. #<--------------------------------------------- improve
+
     """
     result = list()
-    for tag in tags:
-        data = parse_tag(tag)
-        result.append(data)
+
+    if trace:
+        print("Starting test 4....")
+    
+    for i, element in enumerate(elements):
+        if trace:
+            print("Element #%s" % i)
+            print(element)
+        
+        content, tag_start, tag_end = extract_content(element)
+        if trace:
+            print("Start: %s\n" % tag_start)
+            print("Content: \n%s\n" % content)
+            print("End: %s\n" % tag_end)
+
+        tag_name, tag_data = parse_tag(tag_start)
+        if trace:
+            print("Tag name: %s" % tag_name)
+            print("Tag data: %s\n\n" % sorted(tag_data.items()))
+        item = (tag_name, tag_data)
+        result.append(item)
 
     return result
 
@@ -481,9 +461,11 @@ def _run_test(string):
     s2, d2 = _run_test3(s1)
     print("Completed test 3.")
     print("String: \n%s\n\n" % s2)
-    print("Data: \n%s\n\n" % d2)    
+    print("Data: \n%s\n\n" % d2)
 
-    data = _run_test4(d2)
+    elements = d2
+    # elements contains a list of the tables I pulled out in test 3
+    data = _run_test4(elements)
     print("Completed test 4: parsing tags")
     for i in enumerate(data):
         print(i)
