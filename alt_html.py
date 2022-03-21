@@ -112,64 +112,36 @@ def parse_tag(tag):
     # to do:
     ## 1) strip arrows - done
     ## 2) strip quotes
-    ## 3) do something with comments, either take them as is, or replace.
+    ## 3) do something with comments, either take them as is, or replace. <--------------------------------------------
+        ## for comments, I want to take them out before I break the escapes
+        ## that is, while the new lines are still in
+        ## cause then I can take any comments that are in a line?
+        
     ## 4) add logic to detect if this is a single tag or an open / closed pair.
 
 def remove_quotes(string):
-    pass
-
-def extract_tokens(tag):
-    """
-    -> list
-
-    Function picks out each token in the tag. 
-    """
-    result = list()
+    result = string
+    if result.startswith(QUOTATION):
+        result = result[1:]
+    if result.endswith(QUOTATION):
+        result = result[:-1]
+    # can replace logic with detection of the char, etc. 
     
-    adj_tag = remove_arrows(tag)
-    # get rid of "<" and ">"
-    contents = references.clean_string(tag)
-    # remove escapes
-
-    # i need to pick out things like the tag name
-    # that's the first token, I should strip out left of first space
-    name = contents
-    # should work for <br>, <td>, and so on
+    return result
     
-    first_space = contents.find(SPACE)
-    # -1 here means that I did not find the query. 
-    if first_space != -1:
-        name = contents[:first_space]
-        contents = contents[first_space:]
-    name_token = (name, None)
-    result.append(name_token)
-    # should be its own routine. extract_name
-
-    attrs = list()
-    for i in range(len(contents)):
-        pass
-        # here, i have to attr to attr, and keep parsing until i hit the quote
-        char = contents[i]
-          
-        if char is SPACE:
-            continue
-        else:
-            pass
-            # add to token if it exists
-            # start new token if it does not
-
-            # if char is alphanumeric:
-                # if i haven't finished the attr_name, then this is part of the
-                # attr_name
-
-                # if i have finished the attr_name, then this is the value until
-                # i hit the end quote.
 
     # I can also take a shortcut and parse "style" separately. So find "style",
     # then take =, then start parsing and keep going until I reach the quote
     # again. Extract that. then split remainder.
 
-def parse_string(string):
+def detect_tokens(string):
+    """
+
+    -> list
+
+    Returns a list of tokens in the string, where the string follows the
+    convention for assigning values in HTML (ie, 'key1="value1" key2="value2"').
+    """
     tokens = list()
     wip = string
     length = len(wip)
@@ -203,6 +175,123 @@ def parse_string(string):
                     
     return tokens
 
+def parse_element(element):
+    """
+
+
+    """
+    pass   
+
+def parse_tag2(tag):
+    """
+    -> tuple
+
+    returns a tuple of name, attributes
+    """
+    cleaned = references.clean_string(tag) #<--------------- consider cleaning element? 
+    content = remove_arrows(cleaned)
+    name, remainder = extract_name(content)
+    attributes = parse_attributes(remainder)
+
+    return name, attributes
+
+def parse_attributes(string, strip_quotes=True):
+    """
+
+    -> dict
+
+    Function returns a map of names to values.
+    """
+    result = dict()
+    tokens = detect_tokens(string)
+    for token in tokens:
+        attr, value = token.split(EQUALS)
+
+        if strip_quotes:
+            value = remove_quotes(value)
+        
+        result[attr] = value
+        
+    return result
+
+def extract_name(string):
+    """
+    -> string, string
+
+    Expects a tag without arrows
+    """
+    wip = string
+    name = wip
+    remainder = ""
+
+    first_space = name.find(SPACE)
+    if first_space == -1:
+        pass
+        # no spaces found, the entire string is the name (e.g., "br").
+    else:
+        name = wip[:first_space]
+        start = first_space + len(SPACE)
+        remainder = wip[start:]
+
+    return (name, remainder)
+    # should work on <br> and <td>, and so forth.
+    # consider skipping the first slash
+
+def extract_content(element):
+    """
+
+    -> content, start, end
+    Removes one layer of tag, returns the inside 
+    """
+    start_tag, remainder = find_first(element)
+    remainder, end_tag = find_last(remainder)
+
+    result = (remainder, start_tag, end_tag)
+    return result
+
+    # find_first() -> tag, remainder
+    # find_last() -> tag, remainder
+    # return ((first, last), remainder)
+
+def find_first(string):
+    """
+
+    -> string, string
+
+    Function returns a tuple of the tag and the remainder. 
+    """
+    tag = ""
+    remainder = string
+
+    if remainder.startswith(ARROW_LEFT):
+        end = len(remainder)
+        if ARROW_RIGHT in remainder:
+            location = remainder.find(ARROW_RIGHT)
+            end = location + 1
+            
+        tag = remainder[:end]
+        remainder = remainder[end:]
+
+    return tag, remainder
+
+def find_last(string):
+    """
+
+    -> string, string
+
+    Function returns the remainder and the last tag. 
+    """
+    tag = ""
+    remainder = string
+
+    if remainder[-1] == ARROW_RIGHT:
+        if ARROW_LEFT in remainder:
+            start = remainder.rfind(ARROW_LEFT)
+            tag = remainder[start:]
+            remainder = remainder[:start]
+
+    return remainder, tag
+    
 def remove_arrows(string, remove_slash=False):
     """
 
@@ -399,7 +488,6 @@ def _run_test(string):
     for i in enumerate(data):
         print(i)
     
-
 if __name__ == "__main__":
     _run_test(ubs_body)
     
