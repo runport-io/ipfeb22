@@ -34,6 +34,7 @@ STYLE_END = "</style>"
 TABLE = "table"
 ARROW_LEFT = "<"
 ARROW_RIGHT = ">"
+SLASH = "/"
 
 # 4) Functions
 def parse_body_as_html(string):
@@ -48,11 +49,11 @@ def do_nothing(element):
     return result
 
 def construct_start(element):
-    result = "<" + element
+    result = ARROW_LEFT + element
     return result
 
 def construct_end(element):
-    result = ARROW_LEFT + element + ARROW_RIGHT
+    result = ARROW_LEFT + SLASH + element + ARROW_RIGHT
     return result
 
 def remove_tag(string, tag):
