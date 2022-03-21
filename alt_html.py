@@ -22,19 +22,26 @@
 import pickle
 
 # 2) Port.
-##import email_observer
-# For testing <-------------------------------------------------------------------- remove dependency
+import references
 
 # 3) Constants
+ARROW_LEFT = "<"
+ARROW_RIGHT = ">"
+
+COLON = ":"
+EQUALS = "="
+
 HTML_START = "<html>"
 HTML_END = "</html>"
 
+QUOTATION = '"'
+
+SLASH = "/"
+SPACE = " "
 STYLE_START = "<style"
 STYLE_END = "</style>"
 TABLE = "table"
-ARROW_LEFT = "<"
-ARROW_RIGHT = ">"
-SLASH = "/"
+
 
 # 4) Functions
 def parse_body_as_html(string):
@@ -71,25 +78,157 @@ def parse_image(element):
 def parse_tag(tag):
     """
     -> dict
-    
+
+    Function returns a dictionary of attributes. 
     """
-    pass
+    # let's say I only get here with the substantive tag, so <table ... >
+    # or <img ...>. I have to remove the closing tag, if any, elsewhere.
+
+    # should I return the tag plus the data? I think so.
+
     result = dict()
-    adj_tag = references.clean_html(tag)
-    attrs = adj_tag.split()
-    for attr in attrs:
-        if COLON in attr:
-            k, v = attr.split(COLON)
-            result[k] = v
+    adj_tag = references.clean_string(tag) #<--------------------------------------- moved lower
+    # I do this now because otherwise, the colons may be escaped. I am removing
+    # any embedded, escaped new lines here.
+    contents = remove_arrows(adj_tag)
+    # keep this
+
+    pairs = contents.split()
+    for pair in pairs:
+        if pair.startswith(EXCLAMATION_MARK):
+            data = parse_comment(pair)
+            result.update(data)
+        elif EQUALS in pair:
+            attribute, value = pair.split(EQUALS)
+            result[attribute] = value
             # need to protect against implicit overwrites.
+        else:
+            attribute = pair
+            # for the tag itself
+            result[attribute] = None
             
     return result
     
+    # to do:
+    ## 1) strip arrows - done
+    ## 2) strip quotes
+    ## 3) do something with comments, either take them as is, or replace.
+    ## 4) add logic to detect if this is a single tag or an open / closed pair.
+
+def remove_quotes(string):
+    pass
+
+def extract_tokens(tag):
+    """
+    -> list
+
+    Function picks out each token in the tag. 
+    """
+    result = list()
     
-    # pass to the clean html
-    # split by space
-    # built attr dict by splitting by colon
-    # return 
+    adj_tag = remove_arrows(tag)
+    # get rid of "<" and ">"
+    contents = references.clean_string(tag)
+    # remove escapes
+
+    # i need to pick out things like the tag name
+    # that's the first token, I should strip out left of first space
+    name = contents
+    # should work for <br>, <td>, and so on
+    
+    first_space = contents.find(SPACE)
+    # -1 here means that I did not find the query. 
+    if first_space != -1:
+        name = contents[:first_space]
+        contents = contents[first_space:]
+    name_token = (name, None)
+    result.append(name_token)
+    # should be its own routine. extract_name
+
+    attrs = list()
+    for i in range(len(contents)):
+        pass
+        # here, i have to attr to attr, and keep parsing until i hit the quote
+        char = contents[i]
+          
+        if char is SPACE:
+            continue
+        else:
+            pass
+            # add to token if it exists
+            # start new token if it does not
+
+            # if char is alphanumeric:
+                # if i haven't finished the attr_name, then this is part of the
+                # attr_name
+
+                # if i have finished the attr_name, then this is the value until
+                # i hit the end quote.
+
+    # I can also take a shortcut and parse "style" separately. So find "style",
+    # then take =, then start parsing and keep going until I reach the quote
+    # again. Extract that. then split remainder.
+
+def parse_string(string):
+    tokens = list()
+    wip = string
+    length = len(wip)
+
+    parsing = False
+    token = ""
+    quotes = 0 #I don't use this
+    
+    for i in range(length):
+        char = wip[i]
+        if not parsing:
+            if char == SPACE:
+                continue
+            else:
+                parsing = True
+                # start parsing
+                token += char
+                # simple, won't differentiate
+                continue
+        else:
+            token += char
+            if char == QUOTATION:
+                quotes += 1
+                if quotes == 2:
+                    
+                    parsing = False
+                    tokens.append(token)
+                    quotes = 0
+                    token = ""
+                    # can move the append and token reset to the start op
+                    
+    return tokens
+
+def remove_arrows(string, remove_slash=False):
+    """
+
+    remove_arrows() -> string
+
+    Function removes arrows from a tag. If remove_slash is True, function also
+    removes the slash that closes tags like "img".
+    """
+    result = string
+    if result.startswith(ARROW_LEFT):
+        result = result[1:]
+    if result.endswith(ARROW_RIGHT):
+        result = result[:-1]
+
+    if remove_slash:
+        if result.endswith(SLASH):
+            result = result[:-1]
+
+    return result    
+
+def parse_comment(comment):
+    result = dict()
+    key = comment[:1]
+    value = comment[1:]
+    result[key] = value
+    return result
 
 def extract_html(string):
     """
@@ -181,13 +320,8 @@ def remove_elements(string, start, end=ARROW_RIGHT, handler=do_nothing):
 # what I really want to do is get rid of all the tabs and new lines, probably,
 # and rely only on the html formatting: pars, breaks, etc.
 
-# Tests
-##E = email_observer.run_test1()
-##messages = E.connector.get_messages(offset=0, count=10)
-##m2 = messages[2]
-##h2 = m2.get("subject")
-##print(h2)
 
+# Tests
 p = "ubs_body.pkl"
 f = open(p, "rb")
 ubs_body = pickle.load(f)
@@ -225,15 +359,24 @@ def _run_test3(html):
     print("Ending length: %s" % len(string))
     return (string, data)
 
-def _run_test4(html):
+def _run_test4(tags):
     """
 
-    _run_test4(html) ->
+    _run_test4(html) -> list()
 
-    Pull out all images. Return a string with images replaced by some sort of a
-    placeholder for images. 
     """
+    result = list()
+    for tag in tags:
+        data = parse_tag(tag)
+        result.append(data)
+
+    return result
+
+def _run_test5():
     pass
+
+##  Pull out all images. Return a string with images replaced by some sort of a
+##  placeholder for images. 
 
 # next, strip out all tables.
 def _run_test(string):
@@ -251,7 +394,11 @@ def _run_test(string):
     print("String: \n%s\n\n" % s2)
     print("Data: \n%s\n\n" % d2)    
 
-    return s2, d2
+    data = _run_test4(d2)
+    print("Completed test 4: parsing tags")
+    for i in enumerate(data):
+        print(i)
+    
 
 if __name__ == "__main__":
     _run_test(ubs_body)
