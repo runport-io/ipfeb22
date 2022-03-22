@@ -33,6 +33,7 @@ EQUALS = "="
 
 HTML_START = "<html>"
 HTML_END = "</html>"
+LINK = "a"
 
 QUOTATION = '"'
 
@@ -73,7 +74,7 @@ def detect_tokens(string):
 
     parsing = False
     token = ""
-    quotes = 0 #I don't use this
+    quotes = 0
     
     for i in range(length):
         char = wip[i]
@@ -279,7 +280,7 @@ def remove_arrows(string, remove_slash=False):
 
     return result    
     
-def remove_elements(string, start, end=ARROW_RIGHT, handler=do_nothing):
+def remove_elements(string, start, end=ARROW_RIGHT, replace=False):
     """
 
     -> (string, list)
@@ -300,23 +301,40 @@ def remove_elements(string, start, end=ARROW_RIGHT, handler=do_nothing):
     
     while start in wip:
         start_position = wip.find(start)
+        start_ends = start_position + start_length
         
-        end_begins = wip.find(end)
-        end_position = end_begins + end_length
-        # if start = "<table", this moves forward 6 characters
+        end_begins = wip.find(end, start_ends)
+        if end_begins != -1:
+            end_position = end_begins + end_length
+            # if start = "<table", this moves forward 6 characters
+        else:
+            end_position = end_begins
+            # "end_begins" comes back as -1, meaning it is not in the string.
+            # I want to avoid wrapping around, which would happen if I turn the
+            # -1 into a positive integer by adding a length, and return an empty
+            # slice when the start_position > end_position
 
         element = wip[start_position:end_position]
+        if not element:
+            c = "element is empty"
+            print("Elements has a length of %s" % len(elements))
+            raise exceptions.OperationError(c)
+        
         if trace:
             print(element)
-            
+
+        elements.append(element)
+        
         before = wip[:start_position]
         after = wip[end_position:]
 
-        cleaned += before
-        if element:
-            processed_element = handler(element)
-            elements.append(processed_element)        
+        if replace:
+            template = "{{%s}}"
+            placeholder = template % len(elements)
+            before = before + placeholder
 
+        cleaned += before
+        
         wip = after
         # repeat
 
@@ -325,6 +343,8 @@ def remove_elements(string, start, end=ARROW_RIGHT, handler=do_nothing):
 
     result = (cleaned, elements)
     return result
+
+
 
 def remove_quotes(string):
     result = string
@@ -427,6 +447,7 @@ def _run_test4(elements, trace=True):
             print(element)
         
         content, tag_start, tag_end = extract_content(element)
+        #<----------------------------------------------------------------------- consider taking out the escapes and tabs in content here
         if trace:
             print("Start: %s\n" % tag_start)
             print("Content: \n%s\n" % content)
@@ -441,13 +462,55 @@ def _run_test4(elements, trace=True):
 
     return result
 
-def _run_test5():
+def _run_test5(string):
+    link_start = construct_start(LINK)
+    link_end = construct_end(LINK)
+    result = remove_elements(string, link_start, link_end, replace=True)
+    return result
+
+# figure out how to deal with links
+# as i parse a string:
+# find all instances of links
+# replace with "-Text- (Link: AA)"
+# this requires me to keep track of positions?
+# and to modify the extraction logic to deliver those positions
+# I also need a second piece of state called "links", that's a dictionary that
+# I pass in. It should key by ref to support things like "-here-, -here-, and
+# -here-"
+
+# how do i implement:
+# when I pass in a link element and a links object, I should add the link to the
+# links object
+
+# so I'd have something like parse_links(html) that finds the links and parses
+# them, as well as an add_link() that delivers a substring?
+
+# question: what to do about links that are embedded, such as with images?
+
+# plan: start with a basic element
+# make a pretty thing out of it
+# deliver the string and the url
+# let the client fill in the string with the right ref, such as RR
+
+# then make the parse_links routine if you can. that should go through
+# and substitute any links in the whole thing with a clean format?
+
+# really, at that point, i need to make the comprehensive rendering.
+# what's my most basic comprehensive rendering:
+# new lines for br and p (and a tab)
+# parse links and images
+# ignore everything else, meaning just drill down to data and show that
+# raw.
+
+def _run_test6():
     pass
-
 ##  Pull out all images. Return a string with images replaced by some sort of a
-##  placeholder for images. 
+##  placeholder for images.
 
-# next, strip out all tables.
+# next:
+# - better table analysis: for each item that's in a table, get the contents.
+# -- will require me to parse rows.
+
 def _run_test(string):
     html = _run_test1(string)
     print("Completed test 1.")
@@ -469,6 +532,16 @@ def _run_test(string):
     print("Completed test 4: parsing tags")
     for i in enumerate(data):
         print(i)
+
+    sample = html[:10000]
+    print("Sample: \n%s" % sample)
+    
+    result = _run_test5(sample)
+    print("Completed test 5: remove and replace")
+    print("String: \n%s\n" % result[0])
+    print("Links: \n%s\n\n" % result[1])
+    
+    return result
     
 if __name__ == "__main__":
     _run_test(ubs_body)
