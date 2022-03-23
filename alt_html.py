@@ -344,8 +344,6 @@ def remove_elements(string, start, end=ARROW_RIGHT, replace=False):
     result = (cleaned, elements)
     return result
 
-
-
 def remove_quotes(string):
     result = string
     if result.startswith(QUOTATION):
@@ -366,16 +364,133 @@ def render_image(image_tag):
     """
     
     """
-    pass
+    line_1 = "\n"
+    line_2 = " Image " # or something like "@-/-"
+    line_3 = "" # alt text goes here
+    line_4 = "" # link goes here
+    line_5 = "***"
+    line_6 = "\n"
+
     # should take the tag, pull out alt, and then print it
     # *\nIMAGE: {desc} {Link: x}*\n"
+
+    # Let's say I have a state. What do I want to track:
+    #   The counter for links
+    #   The format for the counter
+    #   The links themselves: the ref to the url
+    # The images?
+
+    # I should also design this logic so that I can use it to replace links in
+    # plain text emails, where they are just http:// or https://
+
+    # so there, I should run an re to detect http things, based on alphanum +
+    # /n but not including space.
     
-def render_link(link_tag):
+def render_link(counter, caption=""):
     """
+
+    -> string, data
+
+    
     """
-    pass
+    # This is a function for rendering, not for parsing. The parsing functions
+    # are separate. This function should work for rendering things like src in
+    # images.
+    link_template = "{Link: %s}"
+    caption_template = "~%s~"
+    result = link_template
+    if caption:
+        result = caption_template + link_template
+
+    return result
+    
     # make "{Caption}{Link: x}", return data of v.
     # How to handle text? # How to handle empty links?
+
+    # I should have a stateful container for rendering
+    #   I can keep a record of the index, though arguably, that's not ideal
+
+# Refactoring
+def e_find(string, regex):
+    """
+
+    -> iterable
+
+    Function returns an iterable from re that returns spans. 
+    """
+    result = regex.finditer(string)
+    return result
+
+images = re.compile("<img.*?>", re.DOTALL)
+    
+def e_replace(matches, handler=do_nothing, i=0, data=dict()):
+    """
+
+    -> string, index
+    """
+    result = ""
+    source = ""    
+    offset = 0
+    
+    for match in matches:
+        
+        if not source:
+            source = match.string
+            # runs once, source is attached to every match
+
+        element = match.group()
+        replacement, data = handler(element, i)
+        # handler functions should always return this signature
+        # <------------------------------------------------------ consider pulling the handlers out into a module
+
+        start, end = match.span()
+        # these are coordinates in source, not in result, since result varies
+        # in length. 
+
+        prelude = source[offset:start]
+        offset = end
+
+        addition = prelude + replacement
+        result += addition
+
+    return result, data
+
+
+    # I could also:
+        # precompute replacements and zip them with the matches
+        # that also would require a handler function and a counter.
+    
+    # go through the iterable
+    # for span in iterable
+    #   match = span.group()
+    #   image = render_image(match)
+    #   template = blah
+    #   replacement = template % counter
+    #   string = replace(string, start, end, replacement)
+    # The issue is that the locations change once I execute the replacement
+    # To mitigate that, I can:
+    #   # adjust the position as i go
+    #   # execute the replacement one at a time
+    #   # compute the location on each iteration through string.find(match)
+    #   # do some kind of a modified iteration, though that's like (2)
+
+    # how will this look for tags then:
+    #   find a tag
+    #   replace the tag
+    #   repeat
+
+    # what about paragraphs and breaks
+    #   same
+    #   what's different:
+    #       the replacement
+
+    # so the idea of a replacement function actually makes sense
+    # but if i want to find all, I should keep a copy, and copy into that.
+    # so as i iterate, i keep track of the last offset. then, I can find all
+    # at first.
+    #
+
+
 
 # can and probably should refactor this to generate coordinates, then do with
 # those as i wish. almost like a tag type, coordinates. 
@@ -467,6 +582,8 @@ def _run_test5(string):
     link_end = construct_end(LINK)
     result = remove_elements(string, link_start, link_end, replace=True)
     return result
+
+
 
 # figure out how to deal with links
 # as i parse a string:
