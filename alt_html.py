@@ -20,6 +20,7 @@
 # Imports
 # 1) Built-ins
 import pickle
+import re
 
 # 2) Port.
 import references
@@ -365,12 +366,56 @@ def render_image(image_tag):
     
     """
     line_1 = "\n"
-    line_2 = " Image " # or something like "@-/-"
+    line_2 = "Image" # or something like "@-/-"
     line_3 = "" # alt text goes here
     line_4 = "" # link goes here
     line_5 = "***"
     line_6 = "\n"
 
+    # two possibilities: 1) have alt text, 2) don't have alt text
+    # 1)
+    #
+    # "Image: "two cats" {aa}"
+    #
+    # 2)
+    #
+    # "Image: {aa}"
+    #
+    # Ideally, this would be centered.
+
+def draw_image(image_tag):
+    result = ""
+    image_template = "Image: {alt}"
+    name, attributes = parse_attributes(image_tag)
+    # wrong place, should go in after
+    
+    result = image_template.format(attributes)
+    url = attributes.get(SOURCE, None)
+    if url:
+        # add link to the data dictionary?
+        result = result + draw_link(url)
+        # but link is the url
+        # I need to get the index and return the url
+        # I would also like to check if the url is unique
+
+    return result, url
+
+def draw_link(target, caption=None):
+    result = ""
+    template = "~{caption}~ {counter}"
+    if target:
+        result = result + caption
+        result.format(caption=caption)
+    pointer = "{{caption}}"
+    return result
+
+    # this is kind of dumb
+    
+    
+
+    
+        
+    
     # should take the tag, pull out alt, and then print it
     # *\nIMAGE: {desc} {Link: x}*\n"
 
@@ -385,6 +430,11 @@ def render_image(image_tag):
 
     # so there, I should run an re to detect http things, based on alphanum +
     # /n but not including space.
+
+# mini goal:
+# render all the images cleanly
+
+    
     
 def render_link(counter, caption=""):
     """
