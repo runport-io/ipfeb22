@@ -1,5 +1,10 @@
 # link manager
 
+# Imports
+# Port.
+import list_writer
+
+
 class LinkManager:
     def __init__(self):
         self._by_ref = dict()
@@ -129,8 +134,15 @@ class LinkManager:
 
         return url
 
-    def generate_index(urls, uniques=False, starting=0):
-        pass
+    def generate_index(self, urls, uniques=False, starting=0):
+        result = list()
+        if uniques:
+            result, lookup = self.get_uniques(urls, starting)
+        else:
+            result, lookup = self.get_repeats(urls, starting)
+            
+        return result
+        
 
     def get_uniques(self, urls, starting=0):
         
@@ -165,6 +177,19 @@ class LinkManager:
 
         return result, i_to_url
 
+    def encode_index_as_alpha(self, index):
+        """
+
+        return a list of strings. 
+        """
+        result = list()
+        for i in index:
+            caps = list_writer.convert_to_column_index(i)
+            ref = caps.lower()
+            result.append(ref)
+            
+        return result
+
     # Non-public
     def _append_ref(self, ref):
         result = len(self._refs)
@@ -196,14 +221,32 @@ def _run_test2(lm, links):
     print("Repeats: \n%s\n" % repeats)
     print("Lookup:  \n%s\n" % lookup2)
     
-    print("Build passed Test 4.")
+    print("Build passed Test 2.")
 
     result = [(uniques, lookup1), (repeats, lookup2)]
     return result
 
+def _run_test3(lm, *indeces):
+    result = list()
+    for index in indeces:
+        
+        print("Index:   \n%s\n" % index)
+        
+        encoded = lm.encode_index_as_alpha(index)
+        print("Encoded: \n%s\n" % encoded)
+        
+        result.append(encoded)
+        
+    print("Build passed Test 3.")
+
+    return result
+
 def run_test():
     lm = _run_test1()
-    _run_test2(lm, links)
+    stuff = _run_test2(lm, links)
+    indeces = [stuff[0][0], stuff[1][0]]
+    print("Indeces: \n%s\n" % indeces)
+    encodings = _run_test3(lm, *indeces)
     
 if __name__ == "__main__":
     run_test()
