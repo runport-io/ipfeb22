@@ -162,13 +162,22 @@ def turn_int_into_column(number, trace=True):
     
     if number > cutoff:
         n = n + 1
+    # There is a chance I could get rid of this block.
+    
 
     rem = number
     while n >= 0:
+        
         if trace:
             print("Rem:    %s" % rem)
             print("n:      %s" % n)
+            print("cut:    %s\n" % cutoff)
             
+        if rem <= base:
+            n = 0
+        # defensive logic, I am trying to start counting in units of 26**0 for
+        # 26, not 26**1
+        
         unit = base**n
         count = rem // unit
         count = int(count)
@@ -178,7 +187,7 @@ def turn_int_into_column(number, trace=True):
             print("Unit:   %s" % unit)
             print("Count:  %s" % count)
             print("Type:   %s" % type(count))
-            print("i:      %s" % i)    
+            print("i:      %s\n" % i)    
         
         symbol = lows[i]
         result = result + symbol
@@ -193,7 +202,7 @@ def turn_int_into_column(number, trace=True):
             print("Result: %s" % result)
             print("Acct'd: %s" % accounted)
             print("Rem:    %s" % rem)
-            print("n:      %s" % n)
+            print("n:      %s\n\n" % n)
         
     else:
         if rem != 0:
