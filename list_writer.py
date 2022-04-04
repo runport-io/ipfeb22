@@ -26,6 +26,7 @@ Module defines functionality for saving lists to CSV.
 import csv
 import json
 import os
+import math
 
 # 2) Port.
 import exceptions
@@ -82,7 +83,7 @@ def convert_to_column_index(number):
         digits = str(quotient)
         for digit in digits:
             # digit is a string
-            i = int(digit)
+            i = int(digit) - 1
             char = caps[i]
             result += char
 
@@ -91,6 +92,136 @@ def convert_to_column_index(number):
 
     return result
 
+def turn_column_into_int(string):
+    """
+    -> int
+
+    assumes string is in "aaa" format. 
+    """
+    result = 0
+    
+    caps = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    lows = caps.lower()
+    #in "bac", the left-most position is in 26^2 units, the middle is in
+    # 26^1 units, and the bottom is in 26^0 units.
+
+    base = len(lows)
+    highest_exp = len(string) - 1
+    
+    exp = highest_exp
+    
+    for char in string:
+        # parses left to right
+        multiplier = base**exp
+        count = lows.find(char) + 1
+        # probably should be gone
+        value = count * multiplier
+        
+        result = result + value
+        exp = exp - 1
+
+    return result
+
+def turn_int_into_column(number, trace=True):
+    """
+    -> string
+
+    String comes back in "aaa" format.
+    
+    """
+    result = ""
+    
+    caps = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    lows = caps.lower()
+
+    base = len(lows)
+
+    # if number is lower than base ^ n + base ^ (n-1)
+    # then you use n - 1 digits, else you use n digits
+    # then you just go through units.
+
+    # x = base ^ n + base ^ (n-1), solve for n <-- can make this prettier. 
+
+    # so do it once for the difference. while n >= 0.
+    # if rem, raise error.
+
+    crude = math.log(number, base)
+    if trace:
+        print("Crude raw: %s" % crude)
+    n = math.ceil(crude)
+    if trace:
+        print("Crude:     %s" % n)
+
+    cutoff = base**n + base**(n-1)
+    # cutoffs
+    # 26:  for 1 digit (26^1)
+    # 702: for 2 digits (26^2 + 26)
+    #   for 3 digits (26^3 + 702)
+
+    # compute cutoff: floor of log + preceeding cutoff
+    # I am going to make this recursive. no i won't
+    # compute_cutoff: if log 0, base
+    
+    if number < cutoff:
+        n = n - 1
+
+    rem = number
+    while n >= 0:
+        if trace:
+            print("Rem:    %s" % rem)
+            print("n:      %s" % n)
+            
+        unit = base**n
+        count = rem // unit
+        count = int(count)
+        i = count - 1
+        
+        if trace:
+            print("Unit:   %s" % unit)
+            print("Count:  %s" % count)
+            print("Type:   %s" % type(count))
+            print("i:      %s" % i)    
+        
+        symbol = lows[i]
+        result = result + symbol
+
+        accounted = count * unit
+        rem = rem - accounted            
+
+        n = n - 1
+
+        if trace:
+            print("Symbol: %s" % symbol)
+            print("Result: %s" % result)
+            print("Acct'd: %s" % accounted)
+            print("Rem:    %s" % rem)
+            print("n:      %s" % n)
+        
+    else:
+        if rem != 0:
+            print(rem)
+            raise exceptions.OperationError("should have 0 rem")   
+    
+    return result
+
+def compute_cutoff(log, base=26):
+    """
+    -> int
+
+    Returns a base-10 integer. 
+    """
+    result = 0
+    exp = math.ceil(log)
+    # round down to the nearest integer.
+    for i in range(exp):
+        increment = base ** i
+        result += increment
+
+    result += base ** exp
+    # range(2) is [0, 1], so i need to pick up the 2 itself.
+
+    return result
+    
 def make_header(*fields):
     """
 

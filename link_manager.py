@@ -135,13 +135,14 @@ class LinkManager:
         return url
 
     def generate_index(self, urls, uniques=False, starting=0):
+        # rename
         result = list()
         if uniques:
             result, lookup = self.get_uniques(urls, starting)
         else:
             result, lookup = self.get_repeats(urls, starting)
             
-        return result
+        return result, lookup
         
 
     def get_uniques(self, urls, starting=0):
@@ -189,17 +190,14 @@ class LinkManager:
             result.append(ref)
             
         return result
-
+        
     # Non-public
     def _append_ref(self, ref):
         result = len(self._refs)
         self._refs.append(ref)
         return result
 
-# now what:
-# assign refs -> encode
-## generate encoding
-# invert -> take a dictionary of indexes to urls and change that to urls to is
+# invert -> take a dictionary of indexes to urls and change that to urls to is   
 
 
 yahoo = "www.yahoo.com"
@@ -238,15 +236,36 @@ def _run_test3(lm, *indeces):
         result.append(encoded)
         
     print("Build passed Test 3.")
-
     return result
+
+def _run_test4(lm, links):
+    print("Running Test 4, links with offsets.")
+    repeats, lookup = lm.generate_index(links, starting=36)
+    print("Repeats: \n%s\n" % repeats)
+    print("Lookup:  \n%s\n" % lookup)
+
+    encoding = lm.encode_index_as_alpha(repeats)
+    print("Encoding:  \n%s\n" % encoding)
+
+    print("Build passed Test 4.")
+    return encoding
+
+# what am I thinking after this runs:
+#  remove stuff i dont use
+#  make the encode routine return a lookup
+#  add the invert function
+#  add the routine to go from refs to links?
 
 def run_test():
     lm = _run_test1()
     stuff = _run_test2(lm, links)
     indeces = [stuff[0][0], stuff[1][0]]
     print("Indeces: \n%s\n" % indeces)
+
     encodings = _run_test3(lm, *indeces)
+
+    shifted = _run_test4(lm, links)
+    
     
 if __name__ == "__main__":
     run_test()
