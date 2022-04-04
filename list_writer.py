@@ -127,7 +127,6 @@ def turn_int_into_column(number, trace=True):
     -> string
 
     String comes back in "aaa" format.
-    
     """
     result = ""
     
@@ -145,25 +144,24 @@ def turn_int_into_column(number, trace=True):
     # so do it once for the difference. while n >= 0.
     # if rem, raise error.
 
-    crude = math.log(number, base)
+    log = math.log(number, base)
+    
     if trace:
-        print("Crude raw: %s" % crude)
-    n = math.ceil(crude)
+        print("Crude raw: %s" % log)
+        
+    n = math.floor(log)
+    # I assume I need the rounded-down number of symbols to represent the
+    # number, unless I find out otherwise below
+    
     if trace:
         print("Crude:     %s" % n)
 
-    cutoff = base**n + base**(n-1)
-    # cutoffs
-    # 26:  for 1 digit (26^1)
-    # 702: for 2 digits (26^2 + 26)
-    #   for 3 digits (26^3 + 702)
-
-    # compute cutoff: floor of log + preceeding cutoff
-    # I am going to make this recursive. no i won't
-    # compute_cutoff: if log 0, base
+    cutoff = compute_cutoff(log, base)
+    # there is probably some equation I can solve to get this without a
+    # function call
     
-    if number < cutoff:
-        n = n - 1
+    if number > cutoff:
+        n = n + 1
 
     rem = number
     while n >= 0:
@@ -206,9 +204,13 @@ def turn_int_into_column(number, trace=True):
 
 def compute_cutoff(log, base=26):
     """
+
     -> int
 
-    Returns a base-10 integer. 
+    Returns a base-10 integer that represents the first number that requires
+    floor(log) + 1 symbols in the base. For example, if log is 1.25 and the base
+    is 26, the function will return 703, the first number that requires 3
+    symbols.
     """
     result = 0
     exp = math.ceil(log)
