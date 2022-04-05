@@ -95,16 +95,19 @@ def convert_to_column_index(number):
 
     return result
 
-def turn_column_into_int(string):
-    """
-    -> int
+#<---------------------------------------------------------------------------------------------------------------- check usage!
 
-    assumes string is in "aaa" format. 
+def turn_column_into_int(string, symbols=LOWS):
+    """
+
+    turn_column_into_int() -> int
+
+    Function returns the integer that the string corresponds to if you use
+    symbols for numbering. 
     """
     result = 0
     
-    caps = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-    lows = caps.lower()
+    lows = symbols
     #in "bac", the left-most position is in 26^2 units, the middle is in
     # 26^1 units, and the bottom is in 26^0 units.
 
@@ -125,14 +128,13 @@ def turn_column_into_int(string):
 
     return result
 
-def again(number, base=26):
+def convert_base(number, base=26):
     """
 
-    -> list
+    convert_base() -> list
 
-    Function returns a list of integers. If youuse each integer as the index
-    of a string that contains the symbols you use to express the base, you will
-    get a string that represents the number.
+    Function converts a base-10 integer into a list of symbols in the base you
+    specify. Number should be an integer. 
     """
     result = list()
     
@@ -160,9 +162,11 @@ def again(number, base=26):
 def map_to_symbols(positions, symbols=LOWS):
     """
 
-    -> string
+    map_to_symbols() -> string
 
-    Function returns a string that maps the positions to the symbols. 
+    Function maps a list of positions to a symbols for a string. You use this to
+    convert a list of positions in a base to a view of that number using the
+    base's symbols. 
     """
     result = ""
     
@@ -172,15 +176,16 @@ def map_to_symbols(positions, symbols=LOWS):
         
     return result
 
-def to_col(number, symbols=LOWS):
+def turn_int_into_col(number, symbols=LOWS):
     """
 
-    -> string
+    turn_int_into_col() -> string
 
-    Returns a string that represents the number in the symbols provided.
+    Function returns a string that represents the number in the symbols you
+    provide.
     """
     base = len(symbols)
-    positions = again(number, base)
+    positions = convert_base(number, base)
     result = map_to_symbols(positions, symbols)
     return result
 
@@ -195,28 +200,6 @@ def measure_tail(exp, base=26):
     for i in range(exp):
         increment = base ** i
         result = result + increment
-
-    return result
-
-def compute_cutoff(log, base=26):
-    """
-
-    -> int
-
-    Returns a base-10 integer that represents the first number that requires
-    floor(log) + 1 symbols in the base. For example, if log is 1.25 and the base
-    is 26, the function will return 703, the first number that requires 3
-    symbols.
-    """
-    result = 0
-    exp = math.ceil(log)
-    # round down to the nearest integer.
-    for i in range(exp):
-        increment = base ** i
-        result += increment
-
-    result += base ** exp
-    # range(2) is [0, 1], so i need to pick up the 2 itself.
 
     return result
     
@@ -459,7 +442,7 @@ def _run_test4(path, data):
 def _run_test5(numbers, trace=True):
     result = dict()
     for n in numbers:
-        string = to_col(n)
+        string = turn_int_into_col(n)
         alt = turn_column_into_int(string)
         if alt != n:
             raise exceptions.OperationError(n)
