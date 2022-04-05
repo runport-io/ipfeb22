@@ -42,6 +42,9 @@ GROUP = list_reader.GROUP
 DATA = "Data"
 HEADER = [BRAND, GROUP, DATA]
 
+CAPS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+LOWS = CAPS.lower()
+
 # make the result readable in excel
 def clean_lines(path, overwrite=False):
     """
@@ -209,6 +212,162 @@ def turn_int_into_column(number, trace=True):
             print(rem)
             raise exceptions.OperationError("should have 0 rem")   
     
+    return result
+
+def so_alt(num):
+    pass
+    # result = ""
+    # exp = log(num, 26)
+
+    # rem = num
+    # for i in range(exp):
+    #   # see how many you can account for in this unit
+    #   # do a rem
+    #   # can almost cycle up and cycle down
+    #   # cycle up: max out, add a whatever
+
+    # # number of singles (for btwn 27 and 52)
+    # n - 26^0.
+    # n - 26^0 + 26^1 -> if 0, then i get a
+    
+    # 26^0 = 1 # first number that's one symbol
+    # 26^0 + 26^1 = 27 # first numnber thats two symboles
+    # 26^0 + 26^1 + 26^2 = 703 # first number that's three symbols
+    # 26^0 + 26^1 + 26^2 + 26^3 = x # first number that four symbols
+    # distance from first number: n - that chunk
+    # for twos:
+    #   subtract 27
+    #   if 0, you get a
+
+    # so i take the log
+    # i start going through it
+    # i subtract 26 (26^1) to show it in a through z,
+    # 26 are accounted for
+    # then i divide the rest by 26    
+
+def inefficient(num):
+    pass
+    # i take the number
+    # i check if its < 26, if so i do one thing
+    # I check if its < 702, i do another thing
+    # I check if its < whatever, i do a third thing
+
+    # I take the number, I check its log
+    # I subtract the base ** floor(log)
+    # I check the remainder vs the cutoff for log-1
+    # if its less, i put the remainder through
+    # if its more, i need one more char
+
+    # or as i had it above
+    #  get the log
+    #  check if i am above or below the cutoff for that log
+    #  if above, number of symbols is rounded up
+    #  else, number of symbols is rounded down
+    #  then start calculating
+    # start with the number of symbols
+    #  subtract the cutoff for that cutoff - 1
+    #  divide the diff by the unit
+    #  round up
+    #  that's my index for the first char
+    
+    # repeat until done
+
+    # may be i should make this recursive
+    # may be it is easier to understand this way
+
+def yo(number, symbols=LOWS):
+    """
+
+    -> string
+
+    Return a string that translates a number into a string of symbols. 
+    """
+    result = ""
+    number = int(number)
+    # Will throw an exception if number is float. Floats don't work right now.
+    
+    base = len(symbols)
+    log = math.log(number, base)
+
+    # determine number of digits
+    cutoff = compute_cutoff(log, base)
+    if number < cutoff:
+        n = math.floor(log)
+    else:
+        n = math.ceil(log)
+
+    # get digits
+    tail_length = max(n - 1, 0)
+    
+    max_tail = compute_cutoff(tail_length) - 1
+    diff = number - max_tail
+
+    unit = base**n
+    count = diff // unit
+    # this this should be in [0,base] by virtue of starting from a log
+    count = int(count)
+    position = count - 1
+
+    head = symbols[position]
+    result += head
+
+    rem = number - count * unit
+    # with <=26, rem should be 0 because units are 1
+    if rem: 
+        tail = yo(rem)
+        result += tail
+
+    return result
+
+# if number < len(symbols), get the i
+# else, go through the power stuff
+# can be refactored as, generate a tuple of digits
+# map tuple to symbols
+
+def again(number, base=26):
+    """
+
+    -> list
+
+    Function returns a list of integers. If youuse each integer as the index
+    of a string that contains the symbols you use to express the base, you will
+    get a string that represents the number.
+    """
+    result = list()
+    
+    log = math.log(number, base)
+    exp = math.floor(log)
+
+    rem = number
+    for i in range(exp, -1, -1):
+        # list(range(1,-1,-1)) generates [1, 0]
+        unit = base**i
+        
+        tail = measure_tail(i, base)
+        # tail is the max value that can be expressed by fewer than i chars
+        
+        amount = rem - tail        
+        count = amount // unit
+        
+        if count:
+            result.insert(1, count)
+
+        rem = rem - count * unit
+
+    return result
+
+def measure_tail(exp, base=26):
+    """
+
+    -> int
+
+    Returns the max number that can be expressed in 1 fewer than the exponent.    
+    """
+    result = 0
+    for i in range(exp):
+        increment = base ** i
+        result = result + increment
+
     return result
 
 def compute_cutoff(log, base=26):
