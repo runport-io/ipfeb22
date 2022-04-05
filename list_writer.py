@@ -71,6 +71,7 @@ def clean_lines(path, overwrite=False):
     return result
 
 def BAD_convert_to_column_index(number):
+    #<---------------------------------------------------------------------------------------------------------------- check usage!
     """
 
     convert_to_column_index() -> str
@@ -92,39 +93,6 @@ def BAD_convert_to_column_index(number):
 
     rem = number - quotient * base
     result += caps[rem]
-
-    return result
-
-#<---------------------------------------------------------------------------------------------------------------- check usage!
-
-def turn_column_into_int(string, symbols=LOWS):
-    """
-
-    turn_column_into_int() -> int
-
-    Function returns the integer that the string corresponds to if you use
-    symbols for numbering. 
-    """
-    result = 0
-    
-    lows = symbols
-    #in "bac", the left-most position is in 26^2 units, the middle is in
-    # 26^1 units, and the bottom is in 26^0 units.
-
-    base = len(lows)
-    highest_exp = len(string) - 1
-    
-    exp = highest_exp
-    
-    for char in string:
-        # parses left to right
-        multiplier = base**exp
-        count = lows.find(char) + 1
-        # probably should be gone
-        value = count * multiplier
-        
-        result = result + value
-        exp = exp - 1
 
     return result
 
@@ -159,50 +127,6 @@ def convert_base(number, base=26):
 
     return result
 
-def map_to_symbols(positions, symbols=LOWS):
-    """
-
-    map_to_symbols() -> string
-
-    Function maps a list of positions to a symbols for a string. You use this to
-    convert a list of positions in a base to a view of that number using the
-    base's symbols. 
-    """
-    result = ""
-    
-    for i in positions:
-        symbol = symbols[(i - 1)]
-        result = result + symbol
-        
-    return result
-
-def turn_int_into_column(number, symbols=LOWS):
-    """
-
-    turn_int_into_column() -> string
-
-    Function returns a string that represents the number in the symbols you
-    provide.
-    """
-    base = len(symbols)
-    positions = convert_base(number, base)
-    result = map_to_symbols(positions, symbols)
-    return result
-
-def measure_tail(exp, base=26):
-    """
-
-    -> int
-
-    Returns the max number that can be expressed in 1 fewer than the exponent.    
-    """
-    result = 0
-    for i in range(exp):
-        increment = base ** i
-        result = result + increment
-
-    return result
-    
 def make_header(*fields):
     """
 
@@ -346,6 +270,37 @@ def make_rows_for_group(group_name, group, sort=False, header=HEADER):
 
     return rows
 
+def map_to_symbols(positions, symbols=LOWS):
+    """
+
+    map_to_symbols() -> string
+
+    Function maps a list of positions to a symbols for a string. You use this to
+    convert a list of positions in a base to a view of that number using the
+    base's symbols. 
+    """
+    result = ""
+    
+    for i in positions:
+        symbol = symbols[(i - 1)]
+        result = result + symbol
+        
+    return result
+
+def measure_tail(exp, base=26):
+    """
+
+    -> int
+
+    Returns the max number that can be expressed in 1 fewer than the exponent.    
+    """
+    result = 0
+    for i in range(exp):
+        increment = base ** i
+        result = result + increment
+
+    return result
+
 def remove_blanks_and_copy(src, dst, blank=BLANK):
     """
 
@@ -400,7 +355,51 @@ def swap_names(original, replica):
     os.rename(original, placeholder)
 
     os.rename(replica, original)
-    os.rename(placeholder, replica)    
+    os.rename(placeholder, replica)
+
+def turn_column_into_int(string, symbols=LOWS):
+    """
+
+    turn_column_into_int() -> int
+
+    Function returns the integer that the string corresponds to if you use
+    symbols for numbering. 
+    """
+    result = 0
+    
+    lows = symbols
+    #in "bac", the left-most position is in 26^2 units, the middle is in
+    # 26^1 units, and the bottom is in 26^0 units.
+
+    base = len(lows)
+    highest_exp = len(string) - 1
+    
+    exp = highest_exp
+    
+    for char in string:
+        # parses left to right
+        multiplier = base**exp
+        count = lows.find(char) + 1
+        # probably should be gone
+        value = count * multiplier
+        
+        result = result + value
+        exp = exp - 1
+
+    return result
+
+def turn_int_into_column(number, symbols=LOWS):
+    """
+
+    turn_int_into_column() -> string
+
+    Function returns a string that represents the number in the symbols you
+    provide.
+    """
+    base = len(symbols)
+    positions = convert_base(number, base)
+    result = map_to_symbols(positions, symbols)
+    return result
 
 # Testing
 _LOCATION_1 = r"C:\Users\Ilya\Dropbox\Club\Product\Watchlist CSV2.csv"
