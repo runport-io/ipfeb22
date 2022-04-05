@@ -134,7 +134,7 @@ class LinkManager:
 
         return url
 
-    def generate_index(self, urls, uniques=False, starting=0):
+    def generate_index(self, urls, uniques=False, starting=1):
         # rename
         result = list()
         if uniques:
@@ -145,7 +145,7 @@ class LinkManager:
         return result, lookup
         
 
-    def get_uniques(self, urls, starting=0):
+    def get_uniques(self, urls, starting=1):
         
         result = list()
         lookup = dict()
@@ -157,7 +157,7 @@ class LinkManager:
 
         return result, lookup
 
-    def get_repeats(self, urls, starting=0):
+    def get_repeats(self, urls, starting=1):
         result = list()
         i_to_url = dict()
         url_to_i = dict()
@@ -185,7 +185,7 @@ class LinkManager:
         """
         result = list()
         for i in index:
-            caps = list_writer.convert_to_column_index(i)
+            caps = list_writer.turn_int_into_column(i)
             ref = caps.lower()
             result.append(ref)
             
