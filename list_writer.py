@@ -350,10 +350,38 @@ def again(number, base=26):
         count = amount // unit
         
         if count:
-            result.insert(1, count)
+##            result.insert(1, count)
+            result.append(count)
 
         rem = rem - count * unit
 
+    return result
+
+def map_to_symbols(positions, symbols=LOWS):
+    """
+
+    -> string
+
+    Function returns a string that maps the positions to the symbols. 
+    """
+    result = ""
+    
+    for i in positions:
+        symbol = symbols[(i - 1)]
+        result = result + symbol
+        
+    return result
+
+def to_col(number, symbols=LOWS):
+    """
+
+    -> string
+
+    Returns a string that represents the number in the symbols provided.
+    """
+    base = len(symbols)
+    positions = again(number, base)
+    result = map_to_symbols(positions, symbols)
     return result
 
 def measure_tail(exp, base=26):
