@@ -350,7 +350,6 @@ def again(number, base=26):
         count = amount // unit
         
         if count:
-##            result.insert(1, count)
             result.append(count)
 
         rem = rem - count * unit
@@ -622,6 +621,7 @@ def swap_names(original, replica):
 # Testing
 _LOCATION_1 = r"C:\Users\Ilya\Dropbox\Club\Product\Watchlist CSV2.csv"
 _LOCATION_2 = r"C:\Users\Ilya\Dropbox\Club\Product\Watchlist CSV3.csv"
+_NUMBERS = [1, 2, 3, 25, 26, 27, 28, 52, 53, 675, 676, 677, 702, 703, 704, 705, 900]
 
 def _run_test1(path, trace=False):
     data = list_reader.load(list_reader._LOCATION)
@@ -655,6 +655,22 @@ def _run_test4(path, data):
 
     return recorded
 
+def _run_test5(numbers, trace=True):
+    result = dict()
+    for n in numbers:
+        string = to_col(n)
+        alt = turn_column_into_int(string)
+        if alt != n:
+            raise exceptions.OperationError(n)
+
+        result[n] = string
+
+    if trace:
+        print("Test 5 (to columns and back): completed.")
+        print("Result: \n%s\n" % result)
+
+    return result
+
 def _run_test(clean=True, trace=True):
     data = _run_test1(_LOCATION_1)
 
@@ -675,11 +691,12 @@ def _run_test(clean=True, trace=True):
     recorded = _run_test4(_LOCATION_2, data)
     if trace:
         print("Test 4: passed.")
-        print("Tests completed.")
-        print("Data recorded: ")
-        print(recorded)
+        print("Data recorded: \n%s\n" % recorded)
 
-    return recorded
+    columns = _run_test5(_NUMBERS)
+    return columns
+
+    print("Tests completed.")
 
 if __name__ == "__main__":
     _run_test()
