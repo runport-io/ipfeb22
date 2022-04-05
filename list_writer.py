@@ -70,7 +70,7 @@ def clean_lines(path, overwrite=False):
 
     return result
 
-def convert_to_column_index(number):
+def BAD_convert_to_column_index(number):
     """
 
     convert_to_column_index() -> str
@@ -176,10 +176,10 @@ def map_to_symbols(positions, symbols=LOWS):
         
     return result
 
-def turn_int_into_col(number, symbols=LOWS):
+def turn_int_into_column(number, symbols=LOWS):
     """
 
-    turn_int_into_col() -> string
+    turn_int_into_column() -> string
 
     Function returns a string that represents the number in the symbols you
     provide.
@@ -442,7 +442,7 @@ def _run_test4(path, data):
 def _run_test5(numbers, trace=True):
     result = dict()
     for n in numbers:
-        string = turn_int_into_col(n)
+        string = turn_int_into_column(n)
         alt = turn_column_into_int(string)
         if alt != n:
             raise exceptions.OperationError(n)
