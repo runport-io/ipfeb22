@@ -6,6 +6,7 @@ import list_writer
 
 
 class LinkManager:
+    
     def __init__(self):
         self._by_ref = dict()
         # k is a string, v is the url
@@ -89,7 +90,6 @@ class LinkManager:
         # can also make this a batch process
 
         return refs
-            
     
     def get_first_ref(self, url):
         result = self._by_url.get(url, None)
@@ -255,6 +255,8 @@ def _run_test4(lm, links):
 #  make the encode routine return a lookup
 #  add the invert function
 #  add the routine to go from refs to links?
+
+
 
 def run_test():
     lm = _run_test1()

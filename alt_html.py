@@ -46,13 +46,6 @@ TABLE = "table"
 
 
 # 4) Functions
-def parse_body_as_html(string):
-    html = extract_html(string)
-    # pass
-    # extract html
-    # extract style
-    # extract table
-
 def construct_end(element):
     result = ARROW_LEFT + SLASH + element + ARROW_RIGHT
     return result
@@ -118,10 +111,6 @@ def extract_content(element):
 
     result = (remainder, start_tag, end_tag)
     return result
-
-    # find_first() -> tag, remainder
-    # find_last() -> tag, remainder
-    # return ((first, last), remainder)
 
 def extract_html(string):
     """
@@ -383,6 +372,8 @@ def render_image(image_tag):
     #
     # Ideally, this would be centered.
 
+    # <--------------------------------------------------------------- make an img object
+
 def draw_image(image_tag):
     result = ""
     image_template = "Image: {alt}"
@@ -399,23 +390,7 @@ def draw_image(image_tag):
         # I would also like to check if the url is unique
 
     return result, url
-
-def draw_link(target, caption=None):
-    result = ""
-    template = "~{caption}~ {counter}"
-    if target:
-        result = result + caption
-        result.format(caption=caption)
-    pointer = "{{caption}}"
-    return result
-
-    # this is kind of dumb
-    
-    
-
-    
         
-    
     # should take the tag, pull out alt, and then print it
     # *\nIMAGE: {desc} {Link: x}*\n"
 
@@ -433,33 +408,7 @@ def draw_link(target, caption=None):
 
 # mini goal:
 # render all the images cleanly
-
     
-    
-def render_link(counter, caption=""):
-    """
-
-    -> string, data
-
-    
-    """
-    # This is a function for rendering, not for parsing. The parsing functions
-    # are separate. This function should work for rendering things like src in
-    # images.
-    link_template = "{Link: %s}"
-    caption_template = "~%s~"
-    result = link_template
-    if caption:
-        result = caption_template + link_template
-
-    return result
-    
-    # make "{Caption}{Link: x}", return data of v.
-    # How to handle text? # How to handle empty links?
-
-    # I should have a stateful container for rendering
-    #   I can keep a record of the index, though arguably, that's not ideal
-
 # Refactoring
 def e_find(string, regex):
     """
@@ -472,7 +421,76 @@ def e_find(string, regex):
     return result
 
 images = re.compile("<img.*?>", re.DOTALL)
+re_link = re.compile("<a.*?/a>", re.DOTALL)
+re_link2 = re.compile("<a.*?>.*?</a>", re.DOTALL)
+
+def replace_links(string, unique=False):
+    """
+
+    -> string
+
     
+    """
+    matches = e_find(string, re_link2)
+    # matches is an iterable, returns a Match object
+    lm = LinkManager
+    if unique:
+        lm.set_unique()
+        # enforce uniqueness
+    
+    updated = string
+    for match in matches:
+        span = match.span()
+        element = match.group()
+        link = construct_link(element)
+        # later i should do this automatically
+            
+        link = lm.add_link(element)
+        # think about this interface; i think LM should construct a link object
+        # and return it to me. the link object should have data? alternatively,
+        # I can construct the link object here and pass it to LM. probably
+        # better.
+
+        # i don't want to rely on inplace changes though, need to add the ref and position and stuff.
+        # so may be I do some prelim parsing and then send it over to lm
+
+        replacement = link.view()
+        updated = replace(updated, span, replacement)
+
+    return updated
+    
+# what do I need to do:
+# I have the matches
+
+# run matches on cleaned?
+
+# for each match
+#   clean it
+#   parse it: get the caption, get the link
+#   assign the link a ref
+#   replace the match with the pretty view
+#   problems: sometimes the data is a tag; i don't have the storage worked out
+#   for links, I could use a link object.
+
+# later: review
+# add link._data: placeholder for what's inside the link
+# can add a constructor: link.construct() returns the HTML element.
+
+
+def replace(string, span, replacement):
+    """
+
+    -> string
+
+    Function returns a string where the span has been replaced with the replacement.
+    """
+    prefix = string[:span[0]]
+    suffix = string[span[1]:]
+    result = prefix + replacement + suffix
+    return result
+    # this should work <---------------------------------------------------------------
+    
+
 def e_replace(matches, handler=do_nothing, i=0, data=dict()):
     """
 
