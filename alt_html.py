@@ -225,17 +225,29 @@ def parse_comment(comment):
     result[key] = value
     return result
 
-def parse_element(element):
+def parse_element(string, clean=True):
     """
 
-    -> start, end, attrs, content
+    -> element
 
-    Gets the first tag and content. Returns the data for the tag.
+    Function expects to receive a string that starts with "<x" and ends with
+    "/x>".
     """
-    pass
+    result = browser.element.Element()
+    wip = string
+    if clean:
+        wip = references.clean_string(wip)
+        # this removes all line breaks, meaning that if the element contains a
+        # lot of information, I cannot then view the formatted results, so I
+        # should do this carefully. E.g., in tables. 
+
     
-    # this should probably return the inside of the element with formatting, if
-    # any. the formatting should come from the tags: images, etc.
+    # get the start, end, and contents
+    # store them
+    # parse the attributes in the start, store them
+    # do something to the data? probably not
+
+    # Will need to rework to handle images and </br> things?
 
 def parse_tag(tag):
     """
@@ -367,6 +379,7 @@ def e_find(string, regex):
 images = re.compile("<img.*?>", re.DOTALL)
 re_link = re.compile("<a.*?/a>", re.DOTALL)
 re_link2 = re.compile("<a.*?>.*?</a>", re.DOTALL)
+re_link3 = re.compile("(?P<start><a(?P<attrs>.*?)>)(?P<data>.*?)(?P<end></a>)", re.DOTALL)
 
 def replace_links(string, unique=False):
     """

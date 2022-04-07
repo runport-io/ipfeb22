@@ -17,6 +17,12 @@
 #
 # Questions? Contact hi@runport.io.
 
+"""
+
+Module defines a class for storing a segment of HTML.
+
+"""
+
 class Element:
     def __init__(self):
         
