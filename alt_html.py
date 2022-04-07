@@ -228,7 +228,7 @@ def parse_comment(comment):
 def parse_element(element):
     """
 
-    -> content, tag_name, tag_data, match
+    -> start, end, attrs, content
 
     Gets the first tag and content. Returns the data for the tag.
     """
@@ -239,6 +239,7 @@ def parse_element(element):
 
 def parse_tag(tag):
     """
+
     -> tuple
 
     returns a tuple of name, attributes
@@ -350,63 +351,6 @@ def remove_tag(string, tag):
     result = remove_elements(string, start_tag, end_tag)
     return result
 
-def render_image(image_tag):
-    """
-    
-    """
-    line_1 = "\n"
-    line_2 = "Image" # or something like "@-/-"
-    line_3 = "" # alt text goes here
-    line_4 = "" # link goes here
-    line_5 = "***"
-    line_6 = "\n"
-
-    # two possibilities: 1) have alt text, 2) don't have alt text
-    # 1)
-    #
-    # "Image: "two cats" {aa}"
-    #
-    # 2)
-    #
-    # "Image: {aa}"
-    #
-    # Ideally, this would be centered.
-
-    # <--------------------------------------------------------------- make an img object
-
-def draw_image(image_tag):
-    result = ""
-    image_template = "Image: {alt}"
-    name, attributes = parse_attributes(image_tag)
-    # wrong place, should go in after
-    
-    result = image_template.format(attributes)
-    url = attributes.get(SOURCE, None)
-    if url:
-        # add link to the data dictionary?
-        result = result + draw_link(url)
-        # but link is the url
-        # I need to get the index and return the url
-        # I would also like to check if the url is unique
-
-    return result, url
-        
-    # should take the tag, pull out alt, and then print it
-    # *\nIMAGE: {desc} {Link: x}*\n"
-
-    # Let's say I have a state. What do I want to track:
-    #   The counter for links
-    #   The format for the counter
-    #   The links themselves: the ref to the url
-    # The images?
-
-    # I should also design this logic so that I can use it to replace links in
-    # plain text emails, where they are just http:// or https://
-
-    # so there, I should run an re to detect http things, based on alphanum +
-    # /n but not including space.
-
-# mini goal:
 # render all the images cleanly
     
 # Refactoring
@@ -429,21 +373,19 @@ def replace_links(string, unique=False):
 
     -> string
 
-    
     """
     matches = e_find(string, re_link2)
     # matches is an iterable, returns a Match object
     lm = LinkManager
     if unique:
-        lm.set_unique()
-        # enforce uniqueness
+        lm.disable_repeats()
     
     updated = string
     for match in matches:
         span = match.span()
         element = match.group()
         link = construct_link(element)
-        # later i should do this automatically
+        # later i should do this automatically, based on the data in the tag
             
         link = lm.add_link(element)
         # think about this interface; i think LM should construct a link object
