@@ -379,7 +379,15 @@ def e_find(string, regex):
 images = re.compile("<img.*?>", re.DOTALL)
 re_link = re.compile("<a.*?/a>", re.DOTALL)
 re_link2 = re.compile("<a.*?>.*?</a>", re.DOTALL)
-re_link3 = re.compile("(?P<start><a(?P<attrs>.*?)>)(?P<data>.*?)(?P<end></a>)", re.DOTALL)
+re_link3 = re.compile("(?P<start><a(?P<attrs>.*?)>)(?P<data>.*?)(?P<end></a>)",
+                      re.DOTALL)
+re_link4 = re.compile(r"(?P<start><(?P<name>\ba\b)(?P<attrs>.*?)>)(?P<data>.*?)(?P<end></a>)",
+                      re.DOTALL)
+re_link4b = re.compile(r"(?P<start><(?P<name>a)(?P<attrs>.*?)>)(?P<data>.*?)(?P<end></a>)",
+                      re.DOTALL)
+
+# For more on RE, review this:
+# https://docs.python.org/3.8/howto/regex.html#regex-howto
 
 def replace_links(string, unique=False):
     """
