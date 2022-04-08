@@ -27,10 +27,15 @@ class Link:
     VIEW = "~{caption} {pointer}~"
        
     def __init__(self, url="", caption=""):
+        self._attrs = None
         self._caption = caption
-        self._position = None
+        self._data = None
+        self._end = None
         self._ref = ""
-        self._url = url        
+        self._start = None
+        
+        self._url = url
+        
         self._view = None
 
     def get_caption(self):
@@ -42,17 +47,11 @@ class Link:
         """    
         result = self._caption
         return result
-
-    def get_position(self):
-        """
-
-        -> int
-
-        Returns the position assigned to the link in the body.
-        """
-        result = self._position
-        return result
     
+    def get_raw(self):        
+        result = self._start + self._data + self._end
+        return result
+        
     def get_ref(self):
         """
 
@@ -83,14 +82,14 @@ class Link:
         """
         self._caption = caption
 
-    def set_position(self, i):
-        """
+    def set_attrs(self, attrs):
+        self._attrs = attrs
 
-        -> None
+    def set_data(self, data):
+        self._data = data
 
-        Method specifies the position of the instance. 
-        """
-        self._position = i
+    def set_end(self, end):
+        self._end = end
 
     def set_ref(self, ref):
         """
@@ -99,7 +98,10 @@ class Link:
 
         Method sets the ref for the instance. 
         """
-        self._ref = ref       
+        self._ref = ref
+
+    def set_start(self, start):
+        self._start = start
 
     def set_url(self, url):
         """

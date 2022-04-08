@@ -23,6 +23,7 @@ import pickle
 import re
 
 # 2) Port.
+import browser.link
 import references
 
 # 3) Constants
@@ -485,8 +486,45 @@ def replace_links(string, unique=False):
 
     return updated
 
-# when to clean? last?
+def make_link(span):
+    """
 
+    -> Link
+
+    Function returns a link object.
+    """
+    if not span.group("name").casefold() == "a":
+        c = "This object is not a link."
+        raise exceptions.OperationError(c, span)
+    
+    result = browser.link.Link()
+
+    raw_attrs = span.group("attrs")
+    attrs = parse_attributes2(raw_attrs)
+    result.set_attrs(attrs)
+    
+    url = attrs["href"]
+    result.set_url(url)
+    
+    data = span.group("data")
+    result.set_data(data)
+
+    # check if data is a caption or something else
+    # <------------------------------------------------------------ probably by using re or something
+    caption = data
+    
+    result.set_caption(caption)
+    # should clean?
+    
+    start = span.group("start")
+    result.set_start(start)
+    
+    end = span.group("end")
+    result.set_end(end)
+
+    return result    
+
+# when to clean? last?
 # run matches on cleaned?
 
 # for each match
