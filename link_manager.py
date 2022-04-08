@@ -81,6 +81,7 @@ class LinkManager:
         # and only one location.
 
         # <----------------------------------------------------------------------------- I should consider simplifying this logic and enforcing repetition.
+    
 
     def check_url(self, url):
         result = False

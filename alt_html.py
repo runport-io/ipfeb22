@@ -771,6 +771,23 @@ def _run_test6(html):
     print("Completed test 6: extract links using re.")
     return backup
 
+def _run_test7(matches):
+    links = list()
+    for match in matches:
+        link = make_link(match)
+        links.append(link)
+
+    return links
+
+def _run_test8(links):
+    lm2 = browser.lm2.LM2()
+    for i in range(4):
+        link = links[i]
+        ref = lm2.register(link)
+        link.set_ref(ref)
+        view = link.view()
+        print(view)        
+
 def run_test_something(string):
     # this should be a way of being smart.
     # pull html out, then pull body out
