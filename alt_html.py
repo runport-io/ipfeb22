@@ -23,8 +23,10 @@ import pickle
 import re
 
 # 2) Port.
-import browser.link
 import references
+
+import browser.link
+import browser.url_manager
 
 # 3) Constants
 ARROW_LEFT = "<"
@@ -454,7 +456,7 @@ def find_links(string):
     result = e_find(string, re_link5)
     return result
 
-def replace_links(string, unique=False):
+def replace_links(string):
     """
 
     -> string
@@ -463,9 +465,7 @@ def replace_links(string, unique=False):
 
     matches = find_links(string)
     
-    lm = LinkManager
-    if unique:
-        lm.disable_repeats()
+    um = browser.url_manager.UrlManager()
     
     updated = string
     for match in matches:
@@ -473,13 +473,14 @@ def replace_links(string, unique=False):
         span = match.span()
         # where it is
         
-        link = make_link(element)
+        link = make_link(match)
         # later i should do this automatically, based on the data in the tag
+        url = link.get_url()
         
-        ref = lm.register(link)
+        ref = um.get_ref(url)
         # remove position from link object
 
-        replacement = link.view(ref)
+        replacement = link.view()
         # modify signature
         
         updated = replace(updated, span, replacement)
@@ -779,14 +780,23 @@ def _run_test7(matches):
 
     return links
 
-def _run_test8(links):
-    lm2 = browser.lm2.LM2()
-    for i in range(4):
-        link = links[i]
-        ref = lm2.register(link)
+def _run_test8(links, count=4):
+    um = browser.url_manager.UrlManager()
+    
+    i = 0
+    for link in links:
+        url = link.get_url()
+        ref = um.get_ref(url)
         link.set_ref(ref)
         view = link.view()
-        print(view)        
+
+        if i < count:
+            print(view)
+            print("\n")
+
+        i = i + 1
+    
+    return um
 
 def run_test_something(string):
     # this should be a way of being smart.

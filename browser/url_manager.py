@@ -20,7 +20,7 @@ class UrlManager:
         
         if not result:
             result = self.make_ref()
-            self.record_url(url, ref)
+            self.record_url(url, result)
 
         return result
                 
@@ -30,7 +30,8 @@ class UrlManager:
         -> string
         """
         i = len(self.refs)
-        ref = self.encode(i)
+        j = i + 1
+        ref = self.encode(j)
         self.refs.append(ref)
 
         return ref
@@ -38,7 +39,7 @@ class UrlManager:
     # consider adding get_ref()
 
     def record_url(self, url, ref):
-        self.by_ref[ref] = link
+        self.by_ref[ref] = url
         self.by_url[url] = ref
         
 

@@ -122,7 +122,7 @@ class Link:
         """
         pointer = self.view_pointer()
         caption = self.get_caption()
-        result = self.view.format(caption=caption, pointer=pointer)
+        result = self.VIEW.format(caption=caption, pointer=pointer)
         return result
 
     def view_pointer(self):
