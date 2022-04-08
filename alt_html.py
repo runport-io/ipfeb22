@@ -218,6 +218,34 @@ def parse_attributes(string, strip_quotes=True):
         
     return result
 
+def parse_attributes2(string, strip_quotes=True):
+    """
+
+    parse_attributes2() -> dict
+
+    Function uses re to parse attributes. You should use modify the re if you
+    expect to use assignment other than through "=" or other than double quotes
+    around the attribute values.
+    """
+    result = dict()
+    cleaned = references.clean_string(string)
+    # without cleaning the re doesn't work as well. I use the re to look for
+    # equals signs, and some of those appear more than once in escapes.
+    
+    attributes = re_attr.finditer(cleaned)
+    # single use iterator
+    #<----------------------------------------------------------------------------------------- improve re to include single quotes.
+    
+    for attribute in attributes:
+        key = attribute.group("key") #embedded into re
+        value = attribute.group("value")
+        if strip_quotes:
+            value = remove_quotes(value)
+
+        result[key] = value
+
+    return result
+
 def parse_comment(comment):
     result = dict()
     key = comment[:1]
@@ -376,6 +404,7 @@ def e_find(string, regex):
     result = regex.finditer(string)
     return result
 
+# Regular expressions
 images = re.compile("<img.*?>", re.DOTALL)
 re_link = re.compile("<a.*?/a>", re.DOTALL)
 re_link2 = re.compile("<a.*?>.*?</a>", re.DOTALL)
@@ -389,41 +418,74 @@ re_link4b = re.compile(r"(?P<start><(?P<name>a)(?P<attrs>.*?)>)(?P<data>.*?)(?P<
 # For more on RE, review this:
 # https://docs.python.org/3.8/howto/regex.html#regex-howto
 
+re_link5 = re.compile(r"(?P<element>(?P<start><(?P<name>a)(?P<attrs>.*?)>)(?P<data>.*?)(?P<end></a>))",
+                      re.DOTALL)
+
+re_element = re.compile(r'(?P<element>'
+                        r'(?P<start><(?P<name>\b\w+\b)(?P<attrs>.*?)>)'
+                        r'(?P<data>.*?)'
+                        r'(?P<end></\b(?P=name)\b>))',
+                        re.DOTALL)
+
+# this pulls out body and then stops
+
+re_element2 = re.compile(r'(?P<element>'
+                        r'(?P<start><(?P<name>\b\w+\b)(?P<attrs>.*?)>)'
+                        r'(?P<data>.*?)'
+                        r'(?P<end></(?P=name)>))',
+                        re.DOTALL)
+
+# This works very well recursively. Difference vs re_element is that the closing
+# tag does not have to be separated by a word.
+
+re_attr = re.compile(r'(?P<key>\b\w+?\b)'
+                     r'(?P<equals>=)'
+                     r'(?P<value>".*?")', re.DOTALL)
+
+def find_links(string):
+    """
+
+    find_links() -> iter
+
+    Function returns an iterator that contains Matches. Each Match should cover
+    a link.
+    """
+    result = e_find(string, re_link5)
+    return result
+
 def replace_links(string, unique=False):
     """
 
     -> string
 
     """
-    matches = e_find(string, re_link2)
-    # matches is an iterable, returns a Match object
+
+    matches = find_links(string)
+    
     lm = LinkManager
     if unique:
         lm.disable_repeats()
     
     updated = string
     for match in matches:
+
         span = match.span()
-        element = match.group()
-        link = construct_link(element)
+        # where it is
+        
+        link = make_link(element)
         # later i should do this automatically, based on the data in the tag
-            
-        link = lm.add_link(element)
-        # think about this interface; i think LM should construct a link object
-        # and return it to me. the link object should have data? alternatively,
-        # I can construct the link object here and pass it to LM. probably
-        # better.
+        
+        ref = lm.register(link)
+        # remove position from link object
 
-        # i don't want to rely on inplace changes though, need to add the ref and position and stuff.
-        # so may be I do some prelim parsing and then send it over to lm
-
-        replacement = link.view()
+        replacement = link.view(ref)
+        # modify signature
+        
         updated = replace(updated, span, replacement)
 
     return updated
-    
-# what do I need to do:
-# I have the matches
+
+# when to clean? last?
 
 # run matches on cleaned?
 
@@ -439,6 +501,8 @@ def replace_links(string, unique=False):
 # add link._data: placeholder for what's inside the link
 # can add a constructor: link.construct() returns the HTML element.
 
+# more later:
+# Page object should have control for whether you have a unique refs or not? 
 
 def replace(string, span, replacement):
     """
@@ -650,7 +714,33 @@ def _run_test5(string):
 # ignore everything else, meaning just drill down to data and show that
 # raw.
 
-def _run_test6():
+def _run_test6(html):
+    links = e_find(html, re_link5)
+    # single use iterator
+    
+    for i in range(4):
+        link = next(links)
+        print(link.group("name"))
+        print(link.group())
+        print("\n")
+        print(link.group("start"))
+        print("Attrs: %s" % link.group("attrs"))
+        print(link.group("data"))
+        print(link.group("end"))
+
+    backup = e_find(html, re_link5)
+
+    print("Completed test 6: extract links using re.")
+    return backup
+
+def run_test_something(string):
+    # this should be a way of being smart.
+    # pull html out, then pull body out
+    # in body, keep going in one level ("data")
+    # printing and doing something else.
+    pass
+
+def _run_testx():
     pass
 ##  Pull out all images. Return a string with images replaced by some sort of a
 ##  placeholder for images.
@@ -684,12 +774,13 @@ def _run_test(string):
     sample = html[:10000]
     print("Sample: \n%s" % sample)
     
-    result = _run_test5(sample)
+    cleaned = _run_test5(sample)
     print("Completed test 5: remove and replace")
     print("String: \n%s\n" % result[0])
     print("Links: \n%s\n\n" % result[1])
     
-    return result
+    links = _run_test6(ubs_body)
+    
     
 if __name__ == "__main__":
     _run_test(ubs_body)

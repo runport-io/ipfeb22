@@ -139,6 +139,7 @@ class LinkManager:
         return result
 
     def change_ref(self, old, new):
+        
         # in the ref:url dictionary, i need to remove the old and replace it
         # with the new
         # i then need to go through each place where the ref takes place and
@@ -275,8 +276,6 @@ def _run_test4(lm, links):
 #  make the encode routine return a lookup
 #  add the invert function
 #  add the routine to go from refs to links?
-
-
 
 def run_test():
     lm = _run_test1()
