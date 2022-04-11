@@ -18,7 +18,9 @@
 # Questions? Contact hi@runport.io.
 
 """
+
 This module defines an object to store information about links.
+
 """
 
 class Link:

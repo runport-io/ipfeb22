@@ -291,9 +291,15 @@ def turn_tokens_into_strings(tokens, prefix=HEX_PREFIX, encoding=constants.UTF8,
     """
     result = dict()
     for token in tokens:
-        wip = get_bytes(token, prefix=prefix)
-        value = wip.decode(encoding=encoding, errors=errors)
+
+        value = ""
+        if token:
+            if token[0]:
+                wip = get_bytes(token, prefix=prefix)
+                value = wip.decode(encoding=encoding, errors=errors)
+    
         result[token] = value
+        
     return result
 
 def unescape_chars(string, escape=constants.EQUALS, chars=constants.BREAKS,

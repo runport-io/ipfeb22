@@ -424,6 +424,9 @@ re_link4b = re.compile(r"(?P<start><(?P<name>a)(?P<attrs>.*?)>)(?P<data>.*?)(?P<
 re_link5 = re.compile(r"(?P<element>(?P<start><(?P<name>a)(?P<attrs>.*?)>)(?P<data>.*?)(?P<end></a>))",
                       re.DOTALL)
 
+# to improve this: permit whitespace between "<" and "a"
+# also permit whitespace in the end tag
+
 re_element = re.compile(r'(?P<element>'
                         r'(?P<start><(?P<name>\b\w+\b)(?P<attrs>.*?)>)'
                         r'(?P<data>.*?)'
@@ -487,7 +490,9 @@ def replace_links(string):
 
     return updated
 
-def make_link(span):
+# could make this into a view object
+
+def make_link(span, trace=True):
     """
 
     -> Link
@@ -510,20 +515,52 @@ def make_link(span):
     data = span.group("data")
     result.set_data(data)
 
-    # check if data is a caption or something else
-    # <------------------------------------------------------------ probably by using re or something
-    caption = data
-    
+    # Add a caption to the link
+    caption = ""
+    wip = data.strip()
+
+    if wip.startswith(ARROW_LEFT):
+        pass
+        # do nothing for now, next check if image
+        
+    else:
+        print(span)
+        print(wip, "\n")
+        caption = references.clean_string(wip)
+
     result.set_caption(caption)
-    # should clean?
     
+    # Fill in other attributes
     start = span.group("start")
     result.set_start(start)
     
     end = span.group("end")
     result.set_end(end)
 
-    return result    
+    return result
+
+def check_element(string):
+    """
+
+    -> match or None
+
+    Function identifies whether the string starts with an element of html. If
+    so, it returns the first element in the form of a match object.
+    """
+    result = None
+    wip = string.strip()
+    if wip.startswith(ARROWLEFT):
+        matches = re_element2.finditer(wip)
+        result = next(matches)
+
+    return result
+        
+    # run the element against data
+    # strip whitespace
+    # if data starts with "<", get the name
+    # otherwise, do nothing
+
+# ---- 
 
 # when to clean? last?
 # run matches on cleaned?
@@ -543,6 +580,18 @@ def make_link(span):
 # more later:
 # Page object should have control for whether you have a unique refs or not? 
 
+# ---
+# extract_data(string):
+#   pass
+#   # if string is html, returns the data if any
+#   # else...
+
+# keep it simple stupid
+# render contents
+# if this is a string, clean it
+# if it is a picture, draw the picture thing
+# otherwise, do nothing. 
+
 def replace(string, span, replacement):
     """
 
@@ -556,7 +605,6 @@ def replace(string, span, replacement):
     return result
     # this should work <---------------------------------------------------------------
     
-
 def e_replace(matches, handler=do_nothing, i=0, data=dict()):
     """
 
@@ -716,8 +764,6 @@ def _run_test5(string):
     link_end = construct_end(LINK)
     result = remove_elements(string, link_start, link_end, replace=True)
     return result
-
-
 
 # figure out how to deal with links
 # as i parse a string:
