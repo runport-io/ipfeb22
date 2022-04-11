@@ -473,8 +473,8 @@ def replace_links(string):
     updated = string
     for match in matches:
 
-        span = match.span()
-        # Figure out where the link is located.
+        # span = match.span()
+        ## Figure out where the link is located.
         
         link = make_link(match)
         # later i should do this automatically, based on the data in the tag
@@ -483,7 +483,11 @@ def replace_links(string):
         link.set_ref(ref)
 
         replacement = link.view()
-        # modify signature
+        
+        target = match.group()
+        start = updated.find(target)
+        end = start + len(target)
+        span = (start, end)
         
         updated = replace(updated, span, replacement)
 
