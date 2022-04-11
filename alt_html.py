@@ -474,25 +474,24 @@ def replace_links(string):
     for match in matches:
 
         span = match.span()
-        # where it is
+        # Figure out where the link is located.
         
         link = make_link(match)
         # later i should do this automatically, based on the data in the tag
         url = link.get_url()
-        
         ref = um.get_ref(url)
-        # remove position from link object
+        link.set_ref(ref)
 
         replacement = link.view()
         # modify signature
         
         updated = replace(updated, span, replacement)
 
-    return updated
+    return updated, um
 
 # could make this into a view object
 
-def make_link(span, trace=True):
+def make_link(span, trace=False):
     """
 
     -> Link
@@ -524,9 +523,12 @@ def make_link(span, trace=True):
         # do nothing for now, next check if image
         
     else:
-        print(span)
-        print(wip, "\n")
-        caption = references.clean_string(wip)
+        if trace:
+            print(span)
+            print(wip, "\n")
+            
+        caption = references.clean_string(data)
+        # I want to clean the original, I believe.
 
     result.set_caption(caption)
     

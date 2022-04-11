@@ -25,8 +25,10 @@ This module defines an object to store information about links.
 
 class Link:
 
+    LEFT = " ~"
     POINTER = "{Link: %s}"
-    VIEW = "~{caption} {pointer}~"
+    RIGHT = "~ "
+    VIEW = " ~{caption} {pointer}~ "
        
     def __init__(self, url="", caption=""):
         self._attrs = None
@@ -39,7 +41,17 @@ class Link:
         self._url = url
         
         self._view = None
+    
+    def add_decoration(self, string):
+        """
 
+        add_decoration() -> string
+
+        Method adds squiggly lines to the beginning and end of the string.
+        """
+        result = self.LEFT + string + self.RIGHT
+        return result
+    
     def get_caption(self):
         """
 
@@ -124,9 +136,15 @@ class Link:
         """
         pointer = self.view_pointer()
         caption = self.get_caption()
-        result = self.VIEW.format(caption=caption, pointer=pointer)
-        return result
+        
+        if pointer and caption:
+            wip = caption + " " + pointer
+        else:
+            wip = caption or pointer
 
+        result = self.add_decoration(wip)
+        return result
+    
     def view_pointer(self):
         """
 
