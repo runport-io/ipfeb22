@@ -23,24 +23,53 @@ Module defines a class for storing a segment of HTML.
 
 """
 
+# Imports
+# 1) Built-ins
+# 2) Port.
+
+# 3) Constants
+ATTRS = "attrs"
+ELEMENT = "element"
+
+# 4) Functions
 class Element:
-    def __init__(self):
+    def __init__(self, match=None):
         
-        self._attrs = dict()
-        self._comments = None
+        self._attrs = None
         self._data = ""
         self._end = None
+        self._raw = None
         self._start = None
 
-    def get_attrs(self, copy=True):
+        if match:
+            self.apply_match(match)
+
+    def apply_match(self, match):
         """
 
-        get_attrs() -> dict
+        apply_match() -> None
 
-        Method returns a dictionary of the attributes for the element. To avoid
-        in place changes, you get a copy back by default. 
+        Method populates the instance on the basis of groups in the match.
         """
-        result = self._attrs.copy()
+        wip = match.groupdict().copy()
+        raw = wip.pop(ELEMENT)
+        self.set_raw(raw)
+        
+        alt = dict()    
+        for key, value in wip.items():
+            adj_key = "_" + key
+            alt[adj_key] = value
+    
+        self.__attrs__.update(alt)
+        
+    def get_attrs(self):
+        """
+
+        get_attrs() -> str or None
+
+        Method returns the attributes for the element.
+        """
+        result = self._attrs
         return result
 
     def get_comments(self):
@@ -74,6 +103,16 @@ class Element:
         result = self._end
         return result
 
+    def get_raw(self):
+        """
+
+        get_raw() -> str or None
+
+        Method returns the string that the instance used as input.
+        """        
+        result = self._raw
+        return result
+    
     def get_start(self):
         """
 
@@ -137,3 +176,23 @@ class Element:
         '<a href="www.yahoo.com">'. You can retrieve the tag using get_start().
         """
         self._start = start_tag
+
+    def set_raw(self, raw):
+        """
+
+        set_raw() -> None
+
+        Method stores the string that the element used as input.
+        """
+        self._raw = raw        
+
+    def view(self):
+        """
+
+        view() -> string
+
+        Method returns the data for the element, replicates the interface for
+        tags like image and link.
+        """
+        result = self.get_data()
+        return result

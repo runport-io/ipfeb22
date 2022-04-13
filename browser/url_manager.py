@@ -13,6 +13,7 @@ class UrlManager:
         self.by_ref = dict()
         self.by_url = dict()
         self.refs = list()
+        
         self.encode = list_writer.turn_int_into_column
 
     def get_ref(self, url):

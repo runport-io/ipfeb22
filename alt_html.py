@@ -471,10 +471,11 @@ def replace_links(string):
     um = browser.url_manager.UrlManager()
     
     updated = string
-    for match in matches:
+    chars_deleted = 0
 
-        # span = match.span()
-        ## Figure out where the link is located.
+    link_objects = dict()
+    
+    for match in matches:
         
         link = make_link(match)
         # later i should do this automatically, based on the data in the tag
@@ -482,16 +483,34 @@ def replace_links(string):
         ref = um.get_ref(url)
         link.set_ref(ref)
 
-        replacement = link.view()
-        
+        link_objects[ref] = link
+        # I am pretending that this implementation is so ugly I will have to
+        # think of something better next.
+        # <------------------------------------------------------------------------------------------ Refactor!
+
+        replacement = link.view()        
         target = match.group()
-        start = updated.find(target)
-        end = start + len(target)
-        span = (start, end)
+
+        stated_start = match.span()[0]
+        adjusted_start = stated_start - chars_deleted
+    
+        if adjusted_start < 0:
+            c = "Something went wrong with finding a location on this string."
+            raise exceptions.OperationError(c, match)
+
+        target_length = len(target)
+        
+        end = adjusted_start + target_length
+        span = (adjusted_start, end)
         
         updated = replace(updated, span, replacement)
 
-    return updated, um
+        abbreviation = target_length - len(replacement)
+        chars_deleted = chars_deleted + abbreviation
+        # Increase the counter of how much I shortened the string by this
+        # iteration.
+
+    return updated, um, link_objects
 
 # could make this into a view object
 
