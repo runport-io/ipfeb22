@@ -47,7 +47,6 @@ STYLE_START = "<style"
 STYLE_END = "</style>"
 TABLE = "table"
 
-
 # 4) Functions
 def construct_end(element):
     result = ARROW_LEFT + SLASH + element + ARROW_RIGHT
