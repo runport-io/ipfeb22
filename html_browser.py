@@ -35,6 +35,7 @@ re_single = re.compile(r'(?P<element>'
                        re.DOTALL)
 
 ARROW_LEFT = "<"
+ATTRS = "attrs"
 IMAGE = "img"
 NAME = "name"
 
@@ -42,7 +43,6 @@ PROCESSORS = dict()
 PROCESSORS[IMAGE] = image.Image
 # PROCESSORS[BOLD] = make_bold
 ## This should take the data and add two dots around it
-
 
 def check_element(string):
     """
@@ -72,16 +72,21 @@ def check_startend(string):
 
     return result
 
-def make_element(match):
+def make_element(data, default_processor=element.Element):
     """
-    -> obj
+
+    make_element() -> Element
+
+    Function constructs a class on the basis of data. 
     """
-    name = match.group(NAME)
-    processor = element.Element
+    name = data.get(NAME)
+    
+    processor = default_processor
     if name in PROCESSORS:
         processor = PROCESSORS[name]
 
-    result = processor(match)
+    result = processor(data)
+
     return result
 
 def make_image(span, page):
@@ -98,13 +103,14 @@ def make_image(span, page):
 
     return result
     
-def parse_element(string):
+def parse_string(string):
     """
 
-    -> element
+    -> Match
 
-    Function returns an object that represents the string and supports the
-    element interface.
+    Function returns an re.Match that contains groups that correspond to parts
+    of the string. You can use that match to manipulate the string, such as by
+    turning it into data or an object.
     """
     re = select_re(string)
     iterable = re.finditer(string)
@@ -115,9 +121,32 @@ def parse_element(string):
         raise exceptions.OperationError(c)
 
     match = matches[0]
-    element = make_element(match)
+    return match
 
-    return element   
+def extract_data(match):
+    """
+
+    extract_data() -> dict
+
+    Function takes the dictionary of groups from an re.Match and prepares its
+    contents for consumption by routines that build elements. For example,
+    this routine parses the value for attributes in the group. 
+    """
+    result = dict()
+    wip = match.groupdict()
+
+    attr_string = wip.get(ATTRS, None)
+    attrs = dict()
+
+    if attr_string:
+        attrs = alt_html.parse_attributes2(attr_string)
+
+    wip[ATTRS] = attrs
+    result.update(wip)
+
+    return result
+    # Can add the underscore here so I don't have to do annoying stuff in apply_match()
+    # logic. Then apply_match() becomes apply_data()<--------------------------------------------------------------------
 
 def select_re(html):
     """
@@ -143,16 +172,18 @@ def view2(string):
     result = string
 
     if check_element(string):
-        element = parse_element(string)
-        tag = make(element)
-        result = tag.view()
+        match = parse_string(string)
+        data = extract_data(match)
+        obj = make_element(data)
+        result = obj.view()
 
     return result
 
 # Refactor:
-# parse_element returns a match
-# extact_data(match) -> dict
-# make_element(dict) -> obj
+# - web_page should have a catalog of all the objects.
+# - all objects should have an id
+# - should one object contain other objects? may be. think about that. 
+
 
 # Testing
 

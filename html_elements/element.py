@@ -33,7 +33,7 @@ ELEMENT = "element"
 
 # 4) Functions
 class Element:
-    def __init__(self, match=None):
+    def __init__(self, data=None):
         
         self._attrs = None
         self._data = ""
@@ -41,26 +41,8 @@ class Element:
         self._raw = None
         self._start = None
 
-        if match:
-            self.apply_match(match)
-
-    def apply_match(self, match):
-        """
-
-        apply_match() -> None
-
-        Method populates the instance on the basis of groups in the match.
-        """
-        wip = match.groupdict().copy()
-        raw = wip.pop(ELEMENT)
-        self.set_raw(raw)
-        
-        alt = dict()    
-        for key, value in wip.items():
-            adj_key = "_" + key
-            alt[adj_key] = value
-    
-        self.__dict__.update(alt)
+        if data:
+            self.update(data)
         
     def get_attrs(self):
         """
@@ -184,7 +166,26 @@ class Element:
 
         Method stores the string that the element used as input.
         """
-        self._raw = raw        
+        self._raw = raw
+
+    def update(self, data):
+        """
+
+        update() -> None
+
+        Method expects data to support the interface of a dictionary and updates
+        the instance on that basis. 
+        """
+        wip = data.copy()
+        raw = wip.pop(ELEMENT)
+        self.set_raw(raw)
+        
+        for key, value in wip.items():
+            adj_key = "_" + key
+            self.__dict__[adj_key] = value
+
+        # <-------------------------------------------------------------------------------------------------------------- refactor!!!
+        # move the underscore management out. 
 
     def view(self):
         """

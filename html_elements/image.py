@@ -20,28 +20,29 @@
 # Imports
 # 1) Built-ins
 # n/a
+
 # 2) Port.
 from . import element
 from . import link
 
 # 3) Constants
-#Image
-ALT = "alt"
+ALT_TEXT = "alt"
+SOURCE = "src"
 
 # 4) Functions
 class Image:
 
     CAPTION = "| Image: {alt} |"
     
-    def __init__(self, match=None):
+    def __init__(self, data=None):
         self.element = element.Element()
         self.link = link.Link()
         
         self._alt = None
         self._source = None
 
-        if match:
-            self.apply_match(match)
+        if data:
+            self.update(data)
         
     def get_alt(self):
         result = self._alt
@@ -58,15 +59,27 @@ class Image:
         self.link.set_url(source)
 
     def view(self):
+        """
+
+        view() -> string
+
+        """
         caption = self.get_alt()
         self.link.set_caption(caption)
         
         result = self.link.view()
         return result
 
-    def apply_match(self, match):
+    # will need to decorate, because this is going to come back looking like a link <---------------------------------------------------
+    
+    def update(self, data):
+        """
 
-        self.element.apply_match(match)        
+        update() -> None
+
+        Method updates the instance on the basis of the dictionary you supply. 
+        """
+        self.element.update(data)        
 
         attrs = self.element.get_attrs()
         alt = attrs.get(ALT_TEXT)
