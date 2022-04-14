@@ -1,27 +1,42 @@
-#Parser
+# Copyright Port. Prerogative Club ("the Club")
+#
+# 
+# This file is part of Port. 2.0. ("Port.")
+#
+# Port. is free software: you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# Port. is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# Port. If not, see <https://www.gnu.org/licenses/>.
+#
+# Questions? Contact hi@runport.io.
 
 # Imports
 # 1) Built-ins
 import re
 
 # 2) Port.
-from . import element
-from . import image
+import alt_html
+
+import html_elements.element as element
+import html_elements.image as image
+
 
 # 3) Constants
-re_double = re.compile(r'(?P<element>'
-                        r'(?P<start><(?P<name>\b\w+\b)(?P<attrs>.*?)>)'
-                        r'(?P<data>.*?)'
-                        r'(?P<end></(?P=name)>))',
-                        re.DOTALL)
-
+re_double = alt_html.re_element2
 re_single = re.compile(r'(?P<element>'
                        r'(?P<start><(?P<name>\b\w+\b)(?P<attrs>.*?)>))',
                        re.DOTALL)
 
 ARROW_LEFT = "<"
 IMAGE = "img"
-GROUP_NAME = "name"
+NAME = "name"
 
 PROCESSORS = dict()
 PROCESSORS[IMAGE] = image.Image
@@ -61,7 +76,7 @@ def make_element(match):
     """
     -> obj
     """
-    name = match.group(GROUP_NAME)
+    name = match.group(NAME)
     processor = element.Element
     if name in PROCESSORS:
         processor = PROCESSORS[name]
@@ -87,9 +102,13 @@ def parse_element(string):
     """
 
     -> element
+
+    Function returns an object that represents the string and supports the
+    element interface.
     """
     re = select_re(string)
-    matches = re.findall(string)
+    iterable = re.finditer(string)
+    matches = list(iterable)
 
     if len(matches) != 1:
         c = "May be losing data"
@@ -129,6 +148,11 @@ def view2(string):
         result = tag.view()
 
     return result
+
+# Refactor:
+# parse_element returns a match
+# extact_data(match) -> dict
+# make_element(dict) -> obj
 
 # Testing
 

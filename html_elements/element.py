@@ -60,7 +60,7 @@ class Element:
             adj_key = "_" + key
             alt[adj_key] = value
     
-        self.__attrs__.update(alt)
+        self.__dict__.update(alt)
         
     def get_attrs(self):
         """

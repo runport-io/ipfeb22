@@ -25,8 +25,8 @@ import re
 # 2) Port.
 import references
 
-import browser.link
-import browser.url_manager
+import html_elements.link
+import url_manager
 
 # 3) Constants
 ARROW_LEFT = "<"
@@ -467,7 +467,7 @@ def replace_links(string):
 
     matches = find_links(string)
     
-    um = browser.url_manager.UrlManager()
+    um = url_manager.UrlManager()
     
     updated = string
     chars_deleted = 0
@@ -524,7 +524,7 @@ def make_link(span, trace=False):
         c = "This object is not a link."
         raise exceptions.OperationError(c, span)
     
-    result = browser.link.Link()
+    result = html_elements.link.Link()
 
     raw_attrs = span.group("attrs")
     attrs = parse_attributes2(raw_attrs)
