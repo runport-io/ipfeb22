@@ -126,7 +126,7 @@ class Link:
         """
         self._url = url      
 
-    def view(self):
+    def view(self, decorate=True):
         """
 
         -> string
@@ -141,8 +141,11 @@ class Link:
             wip = caption + " " + pointer
         else:
             wip = caption or pointer
-
-        result = self.add_decoration(wip)
+        result = wip
+        
+        if decorate:
+            result = self.add_decoration(wip)
+            
         return result
     
     def view_pointer(self):

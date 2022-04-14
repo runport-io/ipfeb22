@@ -32,7 +32,10 @@ SOURCE = "src"
 # 4) Functions
 class Image:
 
-    CAPTION = "| Image: {alt} |"
+    VIEW = "Image: {alt} {pointer}"
+    LEFT = " |"
+    RIGHT = "| "
+    #< ----------------------------------------------------------------- consider moving these to element
     
     def __init__(self, data=None):
         self.element = element.Element()
@@ -43,6 +46,16 @@ class Image:
 
         if data:
             self.update(data)
+        
+    def add_decoration(self, string):
+        """
+
+        -> string
+
+        Method adds decoration to the string. 
+        """
+        result = self.LEFT + string + self.RIGHT
+        return result
         
     def get_alt(self):
         result = self._alt
@@ -57,21 +70,24 @@ class Image:
 
     def set_source(self, source):
         self.link.set_url(source)
-
-    def view(self):
+    
+    def view(self, decorate=True):
         """
 
         view() -> string
 
+        Method returns a string that represents the instance. You can turn off
+        decoration if you want to include the result in some other object.
         """
-        caption = self.get_alt()
-        self.link.set_caption(caption)
+        alt = self.get_alt()
+        pointer = self.link.view_pointer()
         
-        result = self.link.view()
+        result = self.VIEW.format(alt=alt, pointer=pointer)
+        if decorate:
+            result = self.add_decoration(result)
+        
         return result
-
-    # will need to decorate, because this is going to come back looking like a link <---------------------------------------------------
-    
+        
     def update(self, data):
         """
 
