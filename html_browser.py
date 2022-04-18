@@ -148,6 +148,107 @@ def extract_data(match):
     # Can add the underscore here so I don't have to do annoying stuff in apply_match()
     # logic. Then apply_match() becomes apply_data()<--------------------------------------------------------------------
 
+def replace_images(html, trace=True):
+    """
+
+    -> str
+
+    Function finds and replaces images on the page.
+    """
+    result = html
+    matches = re_single.finditer(html)
+    
+    for match in matches:
+        if trace:
+            print(match.group())
+            print(match.group(NAME))
+            
+        if match.group(NAME) == IMAGE:
+            original = match.group()
+            replacement = view2(original)
+            if trace:
+                print("replacing")
+                print(replacement)
+                print("\n\n")
+                
+            improved = replace2(result, original, replacement)
+            result = improved
+        else:
+            if trace:
+                print("skip\n")
+
+    return result
+
+    # When I refactor, I should do this through type detection? Or
+    # or potentially turn the view function into multiple copies. Figure
+    # out what to do with all the objects I make.
+
+    # pass in the um to track links and refs. 
+
+def get_span(string, target):
+    """
+    -> tuple
+
+    Function finds the target in the string.
+    """
+    start = string.find(target)
+    if start == -1:
+        c = "Not found"
+        raise exceptions.OperationError(c)
+    else:
+        end = start + len(target)
+
+    result = (start, end)
+    return result
+
+def replace2(string, target, replacement):
+    """
+    -> str
+
+    Function replaces the target in the string
+    """
+    start, end = get_span(string, target)
+
+    prefix = string[:start]
+    suffix = string[end:]
+    result = prefix + replacement + suffix
+
+    return result    
+    
+def replace_pictures(html):
+    """
+
+    -> string
+
+    Function walks the html and replaces any image tag with its string
+    representation.
+    """
+    result = html
+    matches = re_element2.finditer(html)
+    recompute = False
+    
+    for match in matches:
+        if recompute:
+            matches = re_element2.finditer(result)
+            recompute = False
+            
+        if match.group("name") == IMAGE:
+            replacement = make_image(match)
+            result = replace(match, replacement)
+            recompute = True
+        else:
+            pass
+    
+    return result
+
+    # problems: replaces 0 or 1 images
+    # i dont think my replacement logic works like this
+
+# make a second version that relies on a one-time use and just keeps going
+# until the result has completed
+
+# or make a simple version that only matches images through an re
+   
 def select_re(html):
     """
 
