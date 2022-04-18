@@ -23,6 +23,7 @@ import re
 
 # 2) Port.
 import alt_html
+import exceptions
 
 import html_elements.element as element
 import html_elements.image as image
@@ -72,57 +73,6 @@ def check_startend(string):
 
     return result
 
-def make_element(data, default_processor=element.Element):
-    """
-
-    make_element() -> Element
-
-    Function constructs a class on the basis of data. 
-    """
-    name = data.get(NAME)
-    
-    processor = default_processor
-    if name in PROCESSORS:
-        processor = PROCESSORS[name]
-
-    result = processor(data)
-
-    return result
-
-def make_image(span, page):
-    """
-
-    -> image
-    
-    """
-    result = Image(span)
-    url = result.get_source()
-    
-    ref = page.um.get_ref(url)
-    result.link.set_ref(ref)
-
-    return result
-    
-def parse_string(string):
-    """
-
-    -> Match
-
-    Function returns an re.Match that contains groups that correspond to parts
-    of the string. You can use that match to manipulate the string, such as by
-    turning it into data or an object.
-    """
-    re = select_re(string)
-    iterable = re.finditer(string)
-    matches = list(iterable)
-
-    if len(matches) != 1:
-        c = "May be losing data"
-        raise exceptions.OperationError(c)
-
-    match = matches[0]
-    return match
-
 def extract_data(match):
     """
 
@@ -147,11 +97,80 @@ def extract_data(match):
     return result
     # Can add the underscore here so I don't have to do annoying stuff in apply_match()
     # logic. Then apply_match() becomes apply_data()<--------------------------------------------------------------------
+    
+def get_span(string, target):
+    """
+
+    get_span() -> tuple
+
+    Function finds the target in the string.
+    """
+    start = string.find(target)
+    if start == -1:
+        c = "Not found"
+        raise exceptions.OperationError(c)
+    else:
+        end = start + len(target)
+
+    result = (start, end)
+    return result
+
+def make_element(data, default_processor=element.Element):
+    """
+
+    make_element() -> Element
+
+    Function constructs a class on the basis of data. 
+    """
+    name = data.get(NAME)
+    
+    processor = default_processor
+    if name in PROCESSORS:
+        processor = PROCESSORS[name]
+
+    result = processor(data)
+
+    return result
+    
+def parse_string(string):
+    """
+
+    parse_string() -> Match
+
+    Function returns an re.Match that contains groups that correspond to parts
+    of the string. You can use that match to manipulate the string, such as by
+    turning it into data or an object.
+    """
+    re = select_re(string)
+    iterable = re.finditer(string)
+    matches = list(iterable)
+
+    if len(matches) != 1:
+        c = "May be losing data"
+        raise exceptions.OperationError(c)
+
+    match = matches[0]
+    return match
+
+def replace(string, target, replacement):
+    """
+
+    replace() -> str
+
+    Function replaces the target in the string
+    """
+    start, end = get_span(string, target)
+
+    prefix = string[:start]
+    suffix = string[end:]
+    result = prefix + replacement + suffix
+
+    return result
 
 def replace_images(html, trace=True, um=None):
     """
 
-    -> str
+    replace_images() -> str
 
     Function finds and replaces images on the page.
     """
@@ -171,7 +190,7 @@ def replace_images(html, trace=True, um=None):
                 print(replacement)
                 print("\n\n")
                 
-            improved = replace2(result, original, replacement)
+            improved = replace(result, original, replacement)
             result = improved
         else:
             if trace:
@@ -179,51 +198,18 @@ def replace_images(html, trace=True, um=None):
 
     return result
 
-    # When I refactor, I should do this through type detection? Or
-    # or potentially turn the view function into multiple copies. Figure
-    # out what to do with all the objects I make.
-
-    # pass in the um to track links and refs. 
-
-def get_span(string, target):
-    """
-    -> tuple
-
-    Function finds the target in the string.
-    """
-    start = string.find(target)
-    if start == -1:
-        c = "Not found"
-        raise exceptions.OperationError(c)
-    else:
-        end = start + len(target)
-
-    result = (start, end)
-    return result
-
-def replace2(string, target, replacement):
-    """
-    -> str
-
-    Function replaces the target in the string
-    """
-    start, end = get_span(string, target)
-
-    prefix = string[:start]
-    suffix = string[end:]
-    result = prefix + replacement + suffix
-
-    return result
-
-# make a second version that relies on a one-time use and just keeps going
-# until the result has completed
-
-# or make a simple version that only matches images through an re
+    # Figure out what to do with all the objects I make <-----------------------------------------------------
+    # Potentially, I could make an object catalog. Catalog could be keyed by the
+    # text of the object. If I match the text, then i can get the object. This
+    # catalog would be the cache.
+    #
+    # I could also key it by span, but the thing I should remember is if I do
+    # that, the span should be with respect to the original.
    
 def select_re(html):
     """
 
-    -> re
+    select_re() -> re
 
     Function returns the re that is most likely to process the html.
     """
@@ -264,12 +250,6 @@ def view2(string, um=None):
 
     return result
 
-# Refactor:
-# - web_page should have a catalog of all the objects.
-# - all objects should have an id
-# - should one object contain other objects? may be. think about that. 
-
-
 # Testing
 
 def _run_test1(links):
@@ -307,12 +287,14 @@ def _run_test(links):
 ##    _run_test()
 ## cannot use this
     
-    
 # Tests:
 # 1) check that images in links look right
 # 2) check that I can replace all images in the html
 
-# not necessary to have alt_html references here.
+# not necessary to have alt_html references here. though the way I have built
+# this module, it is.
+
+
 
 
         
