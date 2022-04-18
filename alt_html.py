@@ -49,17 +49,31 @@ TABLE = "table"
 
 # 4) Functions
 def construct_end(element):
+    """
+
+    construct_end() -> str
+
+    Function returns a tag that closes the element in HTML.
+    """
     result = ARROW_LEFT + SLASH + element + ARROW_RIGHT
     return result
 
 def construct_start(element):
+    """
+
+    construct_start() -> str
+
+    Function returns the start of a tag that opens the element. The result omits
+    the closing arrow for the tag to allow you to match the output against
+    strings of html.
+    """
     result = ARROW_LEFT + element
     return result
 
 def detect_tokens(string):
     """
 
-    -> list
+    detect_tokens() -> list
 
     Returns a list of tokens in the string, where the string follows the
     convention for assigning values in HTML (ie, 'key1="value1" key2="value2"').
@@ -96,15 +110,22 @@ def detect_tokens(string):
                     # can move the append and token reset to the start op
                     
     return tokens
+    # Use the re logic instead.
 
 def do_nothing(element):
+    """
+
+    do_nothing() -> obj
+
+    Function returns the input without changes.
+    """
     result = element
     return result
 
 def extract_content(element):
     """
 
-    -> content, start, end
+    extract_content() -> content, start, end
     
     Removes one layer of tag, returns the inside 
     """
@@ -117,8 +138,10 @@ def extract_content(element):
 def extract_html(string):
     """
 
-    -> string
-    
+    extract_html() -> string
+
+    Function pulls out the contents between <html> and </html>. You may get
+    problems if you input a string that lacks one or both of these elements.
     """
     html_start = HTML_START
     html_end = HTML_END
@@ -131,9 +154,11 @@ def extract_html(string):
 
 def extract_name(string):
     """
-    -> string, string
 
-    Expects a tag without arrows
+    extract_name() -> string, string
+
+    Function takes the contents of a tag without arrows and pulls out the value
+    of the first argument. 
     """
     wip = string
     name = wip
@@ -149,13 +174,11 @@ def extract_name(string):
         remainder = wip[start:]
 
     return (name, remainder)
-    # should work on <br> and <td>, and so forth.
-    # consider skipping the first slash
 
 def find_first(string):
     """
 
-    -> string, string
+    find_first() -> string, string
 
     Function returns a tuple of the tag and the remainder. 
     """
@@ -176,7 +199,7 @@ def find_first(string):
 def find_last(string):
     """
 
-    -> string, string
+    find_last() -> string, string
 
     Function returns the remainder and the last tag. 
     """
@@ -191,20 +214,10 @@ def find_last(string):
 
     return remainder, tag
 
-    # to do:
-    ## 1) strip arrows - done
-    ## 2) strip quotes - done
-    ## 3) do something with comments, either take them as is, or replace. <--------------------------------------------
-        ## for comments, I want to take them out before I break the escapes
-        ## that is, while the new lines are still in
-        ## cause then I can take any comments that are in a line?
-        
-    ## 4) add logic to detect if this is a single tag or an open / closed pair.
-
 def parse_attributes(string, strip_quotes=True):
     """
 
-    -> dict
+    parse_attributes() -> dict
 
     Function returns a map of names to values.
     """
@@ -219,6 +232,8 @@ def parse_attributes(string, strip_quotes=True):
         result[attr] = value
         
     return result
+
+## <-------------------------------------------------------------------------------- remove this routine?
 
 def parse_attributes2(string, strip_quotes=True):
     """
@@ -247,37 +262,6 @@ def parse_attributes2(string, strip_quotes=True):
         result[key] = value
 
     return result
-
-def parse_comment(comment):
-    result = dict()
-    key = comment[:1]
-    value = comment[1:]
-    result[key] = value
-    return result
-
-def parse_element(string, clean=True):
-    """
-
-    -> element
-
-    Function expects to receive a string that starts with "<x" and ends with
-    "/x>".
-    """
-    result = browser.element.Element()
-    wip = string
-    if clean:
-        wip = references.clean_string(wip)
-        # this removes all line breaks, meaning that if the element contains a
-        # lot of information, I cannot then view the formatted results, so I
-        # should do this carefully. E.g., in tables. 
-
-    
-    # get the start, end, and contents
-    # store them
-    # parse the attributes in the start, store them
-    # do something to the data? probably not
-
-    # Will need to rework to handle images and </br> things?
 
 def parse_tag(tag):
     """
@@ -316,7 +300,7 @@ def remove_arrows(string, remove_slash=False):
 def remove_elements(string, start, end=ARROW_RIGHT, replace=False):
     """
 
-    -> (string, list)
+    remove_elements() -> (string, list)
     
     Function removes elements between start and end from the string. You get
     back a tuple of (0) the string without the elements and (1) a list of
@@ -378,6 +362,13 @@ def remove_elements(string, start, end=ARROW_RIGHT, replace=False):
     return result
 
 def remove_quotes(string):
+    """
+
+    remove_quotes() -> string
+
+    Function takes the input and strips starting and ending quotation marks. You
+    can use this to clean the values of attributes in a string of HTML.
+    """
     result = string
     if result.startswith(QUOTATION):
         result = result[1:]
@@ -388,20 +379,25 @@ def remove_quotes(string):
     return result
 
 def remove_tag(string, tag):
+    """
+
+    remove_tag() -> tuple
+
+    Function extracts elements that start and end with the tag from the string.
+    You get back a cleaned string and a list of elements.
+    """
     start_tag = construct_start(tag)
     end_tag = construct_end(tag)
     result = remove_elements(string, start_tag, end_tag)
     return result
-
-# render all the images cleanly
-    
+  
 # Refactoring
 def e_find(string, regex):
     """
 
-    -> iterable
+    e_find() -> iterable
 
-    Function returns an iterable from re that returns spans. 
+    Function returns an iterable from re that returns matches. 
     """
     result = regex.finditer(string)
     return result
@@ -461,8 +457,10 @@ def find_links(string):
 def replace_links(string, um=None):
     """
 
-    -> string
+    replace_links() -> 3-tuple()
 
+    Function returns the string, url manager ("um"), and a dictionary of refs
+    to Links.
     """
 
     matches = find_links(string)
@@ -513,11 +511,22 @@ def replace_links(string, um=None):
     return updated, um, link_objects
 
 # could make this into a view object
+# really, what this should do is take a web_page object. The web_page object
+# should have raw text and then views. The web_page should also include a url
+# manager and a cache of some sort.
+#
+# then a function like this would modify the web_page view and other pieces of
+# state, and return the webpage itself.
+#
+# I can see an argument for why the web_page can pull from the html_elements
+# package, namely that I build the webpage from those elements. If so, the
+# web_page can sit above the elements.
+# <----------------------------------------------------------------------------------------------------
 
 def make_link(span, trace=False):
     """
 
-    -> Link
+    make_link() -> Link
 
     Function returns a link object.
     """
@@ -526,6 +535,8 @@ def make_link(span, trace=False):
         raise exceptions.OperationError(c, span)
     
     result = html_elements.link.Link()
+    # <----------------------------------------------------------------------------------------- I should modify Link to run
+    # on the data packages I build. 
 
     raw_attrs = span.group("attrs")
     attrs = parse_attributes2(raw_attrs)
@@ -541,7 +552,7 @@ def make_link(span, trace=False):
     caption = ""
     wip = data.strip()
     wip = references.clean_string(wip)
-##    caption = html_browser.view2(wip)
+##    caption = html_browser.get_view(wip)
 ##    # <--------------------------------------------------------------------------------------- What I really need to do is
 ##    # figure out the element nesting. So here data is an element. 
 
@@ -571,7 +582,7 @@ def make_link(span, trace=False):
 def check_element(string):
     """
 
-    -> match or None
+    check_element() -> match or None
 
     Function identifies whether the string starts with an element of html. If
     so, it returns the first element in the form of a match object.
@@ -583,24 +594,12 @@ def check_element(string):
         result = next(matches)
 
     return result
-        
-    # run the element against data
-    # strip whitespace
-    # if data starts with "<", get the name
-    # otherwise, do nothing
+    # Do I ever use this? #<--------------------------------------------------------------------------------------
 
 # ---- 
 
 # when to clean? last?
 # run matches on cleaned?
-
-# for each match
-#   clean it
-#   parse it: get the caption, get the link
-#   assign the link a ref
-#   replace the match with the pretty view
-#   problems: sometimes the data is a tag; i don't have the storage worked out
-#   for links, I could use a link object.
 
 # later: review
 # add link._data: placeholder for what's inside the link
@@ -624,9 +623,10 @@ def check_element(string):
 def replace(string, span, replacement):
     """
 
-    -> string
+    replace() -> string
 
-    Function returns a string where the span has been replaced with the replacement.
+    Function returns a string where the span has been replaced with the
+    replacement.
     """
     prefix = string[:span[0]]
     suffix = string[span[1]:]
@@ -665,56 +665,6 @@ def e_replace(matches, handler=do_nothing, i=0, data=dict()):
         result += addition
 
     return result, data
-
-
-    # I could also:
-        # precompute replacements and zip them with the matches
-        # that also would require a handler function and a counter.
-    
-    # go through the iterable
-    # for span in iterable
-    #   match = span.group()
-    #   image = render_image(match)
-    #   template = blah
-    #   replacement = template % counter
-    #   string = replace(string, start, end, replacement)
-    # The issue is that the locations change once I execute the replacement
-    # To mitigate that, I can:
-    #   # adjust the position as i go
-    #   # execute the replacement one at a time
-    #   # compute the location on each iteration through string.find(match)
-    #   # do some kind of a modified iteration, though that's like (2)
-
-    # how will this look for tags then:
-    #   find a tag
-    #   replace the tag
-    #   repeat
-
-    # what about paragraphs and breaks
-    #   same
-    #   what's different:
-    #       the replacement
-
-    # so the idea of a replacement function actually makes sense
-    # but if i want to find all, I should keep a copy, and copy into that.
-    # so as i iterate, i keep track of the last offset. then, I can find all
-    # at first.
-    #
-
-
-
-# can and probably should refactor this to generate coordinates, then do with
-# those as i wish. almost like a tag type, coordinates. 
-
-# turn break tags into something
-
-# misc:
-# 1) I should generalize the process for extracting tags: tag <x, and so on. 
-# 2) I should handle <br /> tags and replace them with newlines. I should do
-# this after I remove all the whitespace.
-
-# what I really want to do is get rid of all the tabs and new lines, probably,
-# and rely only on the html formatting: pars, breaks, etc.
 
 # Tests
 p = "ubs_body.pkl"
@@ -787,46 +737,13 @@ def _run_test4(elements, trace=True):
         result.append(item)
 
     return result
+    #< ---------------------------------------------------------------------------------------- consider removing this test?
 
 def _run_test5(string):
     link_start = construct_start(LINK)
     link_end = construct_end(LINK)
     result = remove_elements(string, link_start, link_end, replace=True)
     return result
-
-# figure out how to deal with links
-# as i parse a string:
-# find all instances of links
-# replace with "-Text- (Link: AA)"
-# this requires me to keep track of positions?
-# and to modify the extraction logic to deliver those positions
-# I also need a second piece of state called "links", that's a dictionary that
-# I pass in. It should key by ref to support things like "-here-, -here-, and
-# -here-"
-
-# how do i implement:
-# when I pass in a link element and a links object, I should add the link to the
-# links object
-
-# so I'd have something like parse_links(html) that finds the links and parses
-# them, as well as an add_link() that delivers a substring?
-
-# question: what to do about links that are embedded, such as with images?
-
-# plan: start with a basic element
-# make a pretty thing out of it
-# deliver the string and the url
-# let the client fill in the string with the right ref, such as RR
-
-# then make the parse_links routine if you can. that should go through
-# and substitute any links in the whole thing with a clean format?
-
-# really, at that point, i need to make the comprehensive rendering.
-# what's my most basic comprehensive rendering:
-# new lines for br and p (and a tab)
-# parse links and images
-# ignore everything else, meaning just drill down to data and show that
-# raw.
 
 def _run_test6(html):
     links = e_find(html, re_link5)
@@ -880,11 +797,6 @@ def run_test_something(string):
     # printing and doing something else.
     pass
 
-def _run_testx():
-    pass
-##  Pull out all images. Return a string with images replaced by some sort of a
-##  placeholder for images.
-
 # next:
 # - better table analysis: for each item that's in a table, get the contents.
 # -- will require me to parse rows.
@@ -920,7 +832,6 @@ def _run_test(string):
     print("Links: \n%s\n\n" % result[1])
     
     links = _run_test6(ubs_body)
-    
     
 if __name__ == "__main__":
     _run_test(ubs_body)
