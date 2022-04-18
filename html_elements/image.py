@@ -114,9 +114,6 @@ class Image:
         src = attrs.get(SOURCE)
         self.set_source(src)
 
-# so now I need to keep track of the refs across the page
-# page.um.
-
 
         
 

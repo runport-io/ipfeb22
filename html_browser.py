@@ -95,8 +95,6 @@ def extract_data(match):
     result.update(wip)
 
     return result
-    # Can add the underscore here so I don't have to do annoying stuff in apply_match()
-    # logic. Then apply_match() becomes apply_data()<--------------------------------------------------------------------
     
 def get_span(string, target):
     """
@@ -250,6 +248,27 @@ def view2(string, um=None):
 
     return result
 
+def set_ref(obj, url_manager):
+    """
+
+    set_ref() -> tuple
+
+    Function records the url associated with the object in the url_manager and
+    sets the object reference accordingly.
+    """  
+    url = None
+    if "link" in obj.__dict__:
+        url = obj.link.get_url()
+    elif:
+        url = obj.get_url()
+
+    if url:
+        ref = um.get_ref(url)
+        obj.link.set_ref(ref)
+
+    result = obj, url_manager
+    return result
+    
 # Testing
 
 def _run_test1(links):
