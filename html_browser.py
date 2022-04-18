@@ -113,6 +113,40 @@ def get_span(string, target):
     result = (start, end)
     return result
 
+def get_view(string, um=None):
+    """
+
+    get_view() -> string
+
+    Function returns a version of the input that Port. optimized for a human
+    reader in command line.
+    """
+    result = string
+
+    if check_element(string):
+        match = parse_string(string)
+        data = extract_data(match)
+        obj = make_element(data)
+
+        if um:
+            obj, um = set_ref(obj, um)
+##            
+##            url = None
+##            try:
+##                url = obj.link.get_url()
+##            except AttributeError:
+##                pass
+##            
+##            if url:
+##                ref = um.get_ref(url)
+##                obj.link.set_ref(ref)
+##        # I can generalize this to a set_ref(obj, um)
+                
+        result = obj.view()
+        # consider changing this?
+        
+    return result
+
 def make_element(data, default_processor=element.Element):
     """
 
@@ -182,7 +216,7 @@ def replace_images(html, trace=True, um=None):
             
         if match.group(NAME) == IMAGE:
             original = match.group()
-            replacement = view2(original, um)
+            replacement = get_view(original, um)
             if trace:
                 print("replacing")
                 print(replacement)
@@ -217,37 +251,6 @@ def select_re(html):
         
     return result
 
-def view2(string, um=None):
-    """
-
-    -> string
-
-    Function returns a version of the input that Port. optimized for a human
-    reader in command line.
-    """
-    result = string
-
-    if check_element(string):
-        match = parse_string(string)
-        data = extract_data(match)
-        obj = make_element(data)
-
-        if um:
-            url = None
-            try:
-                url = obj.link.get_url()
-            except AttributeError:
-                pass
-            
-            if url:
-                ref = um.get_ref(url)
-                obj.link.set_ref(ref)
-        # I can generalize this to a set_ref(obj, um)
-                
-        result = obj.view()
-
-    return result
-
 def set_ref(obj, url_manager):
     """
 
@@ -259,11 +262,11 @@ def set_ref(obj, url_manager):
     url = None
     if "link" in obj.__dict__:
         url = obj.link.get_url()
-    elif:
+    else:
         url = obj.get_url()
 
     if url:
-        ref = um.get_ref(url)
+        ref = url_manager.get_ref(url)
         obj.link.set_ref(ref)
 
     result = obj, url_manager
@@ -271,20 +274,7 @@ def set_ref(obj, url_manager):
     
 # Testing
 
-def _run_test1(links):
-    """
-
-    -> None
-
-    Test checks whether flow works and if links with embedded images print in
-    the way their class intends. 
-    """    
-    for link in links:
-        data = link.get_data()
-        view = view2(data)
-        print(view)
-
-def _run_test2(trace=True):
+def _run_test1(trace=True):
     import url_manager
     go_blue = url_manager.UrlManager()
     no_pics = replace_images(alt_html.ubs_body, trace=trace, um=go_blue)
@@ -299,20 +289,12 @@ def _run_test2(trace=True):
     if trace:
         print(result[0])        
 
-def _run_test(links):
-    _run_test1(links)
+def _run_test():
+    _run_test1()
 
-## if __name__ == "__main__":
-##    _run_test()
-## cannot use this
+if __name__ == "__main__":
+    _run_test()
     
-# Tests:
-# 1) check that images in links look right
-# 2) check that I can replace all images in the html
-
-# not necessary to have alt_html references here. though the way I have built
-# this module, it is.
-
 
 
 
