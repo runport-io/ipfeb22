@@ -458,7 +458,7 @@ def find_links(string):
     result = e_find(string, re_link5)
     return result
 
-def replace_links(string):
+def replace_links(string, um=None):
     """
 
     -> string
@@ -466,8 +466,9 @@ def replace_links(string):
     """
 
     matches = find_links(string)
-    
-    um = url_manager.UrlManager()
+
+    if not um:
+        um = url_manager.UrlManager()
     
     updated = string
     chars_deleted = 0
@@ -540,21 +541,21 @@ def make_link(span, trace=False):
     caption = ""
     wip = data.strip()
     wip = references.clean_string(wip)
-    caption = html_browser.view2(wip)
-    # <--------------------------------------------------------------------------------------- What I really need to do is
-    # figure out the element nesting. So here data is an element. 
+##    caption = html_browser.view2(wip)
+##    # <--------------------------------------------------------------------------------------- What I really need to do is
+##    # figure out the element nesting. So here data is an element. 
 
-##    if wip.startswith(ARROW_LEFT):
-##        pass
-##        # do nothing for now, next check if image
-##        
-##    else:
-##        if trace:
-##            print(span)
-##            print(wip, "\n")
-##            
-##        caption = references.clean_string(data)
-##        # I want to clean the original, I believe.
+    if wip.startswith(ARROW_LEFT):
+        pass
+        # do nothing for now, next check if image
+        
+    else:
+        if trace:
+            print(span)
+            print(wip, "\n")
+            
+        caption = references.clean_string(data)
+        # I want to clean the original, I believe.
 
     result.set_caption(caption)
     
