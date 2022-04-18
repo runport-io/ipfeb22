@@ -285,6 +285,21 @@ def _run_test1(links):
         view = view2(data)
         print(view)
 
+def _run_test2(trace=True):
+    import url_manager
+    go_blue = url_manager.UrlManager()
+    no_pics = replace_images(alt_html.ubs_body, trace=trace, um=go_blue)
+    print(len(alt_html.ubs_body))
+    print(len(no_pics))
+    
+    if trace:
+        print(no_pics)
+
+    result = alt_html.replace_links(no_pics, go_blue)
+    print(len(result[0]))
+    if trace:
+        print(result[0])        
+
 def _run_test(links):
     _run_test1(links)
 
