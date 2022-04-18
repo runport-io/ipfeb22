@@ -148,7 +148,7 @@ def extract_data(match):
     # Can add the underscore here so I don't have to do annoying stuff in apply_match()
     # logic. Then apply_match() becomes apply_data()<--------------------------------------------------------------------
 
-def replace_images(html, trace=True):
+def replace_images(html, trace=True, um=None):
     """
 
     -> str
@@ -165,7 +165,7 @@ def replace_images(html, trace=True):
             
         if match.group(NAME) == IMAGE:
             original = match.group()
-            replacement = view2(original)
+            replacement = view2(original, um)
             if trace:
                 print("replacing")
                 print(replacement)
@@ -213,36 +213,7 @@ def replace2(string, target, replacement):
     suffix = string[end:]
     result = prefix + replacement + suffix
 
-    return result    
-    
-def replace_pictures(html):
-    """
-
-    -> string
-
-    Function walks the html and replaces any image tag with its string
-    representation.
-    """
-    result = html
-    matches = re_element2.finditer(html)
-    recompute = False
-    
-    for match in matches:
-        if recompute:
-            matches = re_element2.finditer(result)
-            recompute = False
-            
-        if match.group("name") == IMAGE:
-            replacement = make_image(match)
-            result = replace(match, replacement)
-            recompute = True
-        else:
-            pass
-    
     return result
-
-    # problems: replaces 0 or 1 images
-    # i dont think my replacement logic works like this
 
 # make a second version that relies on a one-time use and just keeps going
 # until the result has completed
@@ -262,7 +233,7 @@ def select_re(html):
         
     return result
 
-def view2(string):
+def view2(string, um=None):
     """
 
     -> string
@@ -276,6 +247,19 @@ def view2(string):
         match = parse_string(string)
         data = extract_data(match)
         obj = make_element(data)
+
+        if um:
+            url = None
+            try:
+                url = obj.link.get_url()
+            except AttributeError:
+                pass
+            
+            if url:
+                ref = um.get_ref(url)
+                obj.link.set_ref(ref)
+        # I can generalize this to a set_ref(obj, um)
+                
         result = obj.view()
 
     return result

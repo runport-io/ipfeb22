@@ -65,6 +65,16 @@ class Image:
         result = self.link.get_url()
         return result
 
+    def get_url(self):
+        """
+
+        get_url() -> str
+
+        Method returns the url from the instance's link.         
+        """
+        result = self.link.get_url()
+        return result
+
     def set_alt(self, alt):
         self._alt = alt
 
