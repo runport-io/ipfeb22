@@ -5,119 +5,35 @@ import urllib
 import urllib.request
 
 # 3) Constants
-EVERYTHING_ENDPOINT = "https://newsapi.org/v2/everything"
+EVERYTHING_ENDPOINT = "https://newsapi.org/v2/everything?"
 CHAR_LIMIT = 500
-PREFIX_QUERY = "?q="
-PREFIX_KEY = "&apiKey="
-QUERY_SEP = ","
+KEY_LENGTH = 32
+
+PARAMETER_QUERY = "q"
+PARAMETER_KEY = "apiKey"
+
+HEADER_KEY = "X-Api-Key"
+QUERY_SEP = " OR "
 
 # 4) Functions
 def chunk_watchlist(watchlist):
     """
 
-    -> list
+    chunk_watchlist() -> list
 
     Function breaks up the watchlist into a list of chunks that can each be
     submitted as a request.
     """
     result = list()
+
+    limit = get_limit()
     
     remainder = watchlist
     while remainder:
-        chunk, remainder = make_chunk(remainder)
+        chunk, remainder = get_chunk(remainder, char_limit=limit)
         result.append(chunk)
         
     return result
-    # Can I get the WL here? #<--------------- no, replace with brands.
-
-def compose_request(chunk, key, put_key_in_url=True):
-    """
-    -> request
-
-    
-    """
-    url = ""
-    values = dict()
-    
-    if put_key_in_url:
-        url = compose_url_with_key(chunk, key)
-    else:
-        url = compose_url_without_key(chunk)
-        values["X-Api-Key"] = key
-        # <-------------------------------------------- move to constant
-
-    data = urllib.parse.urlencode(values)
-    data = data.encode("ascii")
-    #<--------------- data should be in bytes?
-    
-    req = urllib.request.Request(url, data)
-    return req
-    # pull out the encoding of the headers
-
-def compose_url_with_key(chunk, key, endpoint=EVERYTHING_ENDPOINT, sep=QUERY_SEP):
-    """
-
-    -> string
-
-    """
-    result = endpoint + PREFIX_QUERY
-    
-    query = sep.join(chunk)
-    result = result + query
-
-    result = result + PREFIX_KEY + key
-    return result
-
-    # should do some URL encoding here <---------------------------------------------------- !! or
-    # at the level of chunking. turn that routine into compose_query(chunk, encode=True) -> str
-
-def get_response(req):
-    """
-    -> response
-    
-    """
-    response = urllib.request.urlopen(req)
-    return respose
-
-def make_chunk(brands, char_limit=CHAR_LIMIT, sep=QUERY_SEP):
-    """
-
-    make_chunk() -> chunk, remainder
-
-    Function returns a list where the total length of items is no more than
-    "length". You should use a flat container for "brands."
-    """
-    chunk = list()
-    wip = sorted(brands)
-
-    separators = len(chunk) * len(sep)
-    chars_left = char_limit - separators
-    
-    for i in range(len(wip)):
-        length_of_next_brand = len(wip[0])
-        if chars_left >= length_of_next_brand:
-            brand = wip.pop(0)
-            chunk.append(brand)
-
-            chars_left = chars_left - (length_of_next_brand + len(sep))
-            
-        else:
-            break
-            # stop when full or close to it
-            # saves cycles, but can shift over to smarter routine
-
-    result = chunk, wip
-    return result
-
-# known issues:
-# - pop from an empty list [done]
-# - if brand is longer than remainder
-
-
-# I could refactor this into something that if there is like 5 characters left
-# looks through the brands to see if there is a brand that has that length or
-# less, to make the most out of the bandwidth
-# <-------------------------------------------------------------------------------------------------------------
 
 def count_chars(brands, sep=QUERY_SEP):
     """
@@ -129,6 +45,137 @@ def count_chars(brands, sep=QUERY_SEP):
     result = len(make_string(brands, sep=sep))
     return result
 
+def get_chunk(brands, char_limit=CHAR_LIMIT, sep=QUERY_SEP, trace=True):
+    """
+
+    get_chunk() -> chunk, remainder
+
+    Function returns a list where the total length of items is no more than
+    "length". You should use a flat container for "brands."
+    """
+    chunk = list()
+    wip = sorted(brands)
+
+    chars_left = char_limit
+    
+    for i in range(len(wip)):
+
+        next_brand = wip[0]
+        next_brand_as_url = urllib.parse.quote(next_brand)
+        # I check whether this fits in the url before taking it out of wip
+        
+        length_of_next_brand = len(next_brand_as_url)
+        if chars_left >= length_of_next_brand:
+            wip.pop(0)
+            chunk.append(next_brand_as_url)
+            chars_left = chars_left - (length_of_next_brand + len(sep))
+            
+        else:
+            if trace:
+                print(chars_left)
+            break
+            # stop when full or close to it
+            # saves cycles, but can shift over to smarter routine
+
+    result = chunk, wip
+    return result
+
+# known issues:
+# - pop from an empty list [done]
+# - if brand is longer than remainder [skip]
+# - formatting of brands that include chars and whitespace [done]
+
+
+# I could refactor this into something that if there is like 5 characters left
+# looks through the brands to see if there is a brand that has that length or
+# less, to make the most out of the bandwidth
+# <-------------------------------------------------------------------------------------------------------------
+
+# smarter routine could sort the items by length. Then pick one or more.
+
+def get_limit(char_limit=CHAR_LIMIT):
+    """
+
+    -> int
+
+    Function computes the limit for a the query portion of a url. 
+    """
+    prefix = get_prefix()
+    base_query = get_query()
+    # I use this to figure out how much space the scaffolding takes
+    result = char_limit - len(prefix) - len(base_query)
+    return result
+
+def get_params(q="",key=None):
+    """
+
+    -> list()
+    
+    """
+    if key is None:
+        key = KEY_LENGTH * "K"
+        
+    result = [(PARAMETER_QUERY, q),
+              (PARAMETER_KEY, key)]
+
+    return result
+
+def get_prefix(endpoint=EVERYTHING_ENDPOINT):
+    """
+
+    -> string
+
+    Function returns the base of the url.
+    """
+    result = endpoint
+    return result
+
+def get_query(params=None):
+    """
+
+    -> string
+
+    Params is supposed to be a list of tuples of parameter, value. 
+    """
+    if not params:
+        params = get_params()
+        # I always have at least these
+        
+    result = urllib.parse.urlencode(params, safe=QUERY_SEP)
+    return result
+
+def get_response(req):
+    """
+    -> response
+    
+    """
+    response = urllib.request.urlopen(req)
+    return response
+
+def make_request(chunk, key, put_key_in_url=True):
+    """
+
+    -> request
+
+    
+    """
+    url = ""
+    values = dict()
+    
+    if put_key_in_url:
+        url = make_url_with_key(chunk, key)
+    else:
+        url = make_url_without_key(chunk)
+        values[HEADER_KEY] = key
+
+    data = urllib.parse.urlencode(values)
+    data = data.encode("ascii")
+    #<--------------- data should be in bytes?
+    # this should be its own function
+    
+    req = urllib.request.Request(url, data)
+    return req
+
 def make_string(brands, sep=QUERY_SEP):
     """
 
@@ -138,7 +185,21 @@ def make_string(brands, sep=QUERY_SEP):
     """
     result = sep.join(brands)
     return result
+
+def make_url_with_key(chunk, key, endpoint=EVERYTHING_ENDPOINT, sep=QUERY_SEP):
+    """
+
+    -> string
+
+    """
+    q = sep.join(chunk)
     
+    params = get_params(q, key)
+    query = get_query(params)
+    
+    result = endpoint + query
+    return result
+
 def parse_response(response):
     """
     -> dict
@@ -149,19 +210,15 @@ def parse_response(response):
     return result
 
 # Testing
-def run_test1():
-    # chunk watchlist
+def run_test1(watchlist):
     result = chunk_watchlist(watchlist)
     return result
-    # sort of done
 
-def run_test2(chunk, trace=False):
-    # compose url
-    url = compose_url(chunk)
+def run_test2(chunk, key, trace=False):
+    url = make_url_with_key(chunk, key)
     if trace:
         print(url)
     return url
-    # sort of done
 
 def run_test3():
     # get data
@@ -254,10 +311,8 @@ w = ["foodprocessing.com",
      "AI consulting firm BNH",
      "Business Talent Group",
      "YotPo",
-     "Chanie Apfelbaum",
      "Chatham House",
      "UK Ministry of Defense",
-     "Egon Zehnder",
      "Technology Officer Practice Group",
      "RSM US LLP",
      "Notre Dame’s International Security Center",
@@ -303,5 +358,9 @@ w = ["foodprocessing.com",
      "Halo Trust",
      "Bolt.com"
      ]
-    
+
+w2 = ["Twitter",
+      "SpaceX",
+      "Blue Origin",
+      "Blackstone"]
 
