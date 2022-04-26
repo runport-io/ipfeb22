@@ -160,20 +160,17 @@ def make_request(chunk, key, put_key_in_url=True):
     
     """
     url = ""
-    values = dict()
-    
+        
     if put_key_in_url:
         url = make_url_with_key(chunk, key)
+        req = urllib.request.Request(url)
     else:
         url = make_url_without_key(chunk)
-        values[HEADER_KEY] = key
-
-    data = urllib.parse.urlencode(values)
-    data = data.encode("ascii")
-    #<--------------- data should be in bytes?
-    # this should be its own function
-    
-    req = urllib.request.Request(url, data)
+        headers = dict()
+        headers[HEADER_KEY] = key
+        # Can send headers as plain text.
+        req = urllib.request.Request(url, headers=values)
+        
     return req
 
 def make_string(brands, sep=QUERY_SEP):
