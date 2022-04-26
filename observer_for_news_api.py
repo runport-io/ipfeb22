@@ -158,18 +158,16 @@ def make_request(chunk, key, put_key_in_url=True):
     -> request
 
     
-    """
-    url = ""
-        
+    """        
     if put_key_in_url:
         url = make_url_with_key(chunk, key)
         req = urllib.request.Request(url)
     else:
-        url = make_url_without_key(chunk)
+        url = make_url(chunk)
         headers = dict()
         headers[HEADER_KEY] = key
         # Can send headers as plain text.
-        req = urllib.request.Request(url, headers=values)
+        req = urllib.request.Request(url, headers=headers)
         
     return req
 
@@ -197,6 +195,19 @@ def make_url_with_key(chunk, key, endpoint=EVERYTHING_ENDPOINT, sep=QUERY_SEP):
     result = endpoint + query
     return result
 
+def make_url(chunk, endpoint=EVERYTHING_ENDPOINT, sep=QUERY_SEP):
+    """
+
+    -> string
+    """
+    q = sep.join(chunk)
+    params = [(PARAMETER_QUERY, q)]
+    query = get_query(params)
+    result = endpoint + query
+    return result
+
+    # The joining should take place somewhere <-------------------------------------------------------
+    
 def parse_response(response):
     """
     -> dict
