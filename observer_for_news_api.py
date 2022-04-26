@@ -1,8 +1,31 @@
+# Copyright Port. Prerogative Club ("the Club")
+#
+# 
+# This file is part of Port. 2.0. ("Port.")
+#
+# Port. is free software: you can redistribute it and/or modify it under the
+# terms of the GNU General Public License as published by the Free Software
+# Foundation, either version 3 of the License, or (at your option) any later
+# version.
+#
+# Port. is distributed in the hope that it will be useful, but WITHOUT ANY
+# WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
+# A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License along with
+# Port. If not, see <https://www.gnu.org/licenses/>.
+#
+# Questions? Contact hi@runport.io.
+
 # Imports
 # 1) Built-ins
 import json
 import urllib
+import urllib.error
 import urllib.request
+
+# 2) Port.
+# N/A
 
 # 3) Constants
 EVERYTHING_ENDPOINT = "https://newsapi.org/v2/everything?"
@@ -11,6 +34,8 @@ KEY_LENGTH = 32
 
 PARAMETER_QUERY = "q"
 PARAMETER_KEY = "apiKey"
+
+NEWSAPI_KEY_FOR_ARTICLES = "articles"
 
 HEADER_KEY = "X-Api-Key"
 QUERY_SEP = " OR "
@@ -45,6 +70,17 @@ def count_chars(brands, sep=QUERY_SEP):
     result = len(make_string(brands, sep=sep))
     return result
 
+def get_articles(data):
+    """
+
+    get_articles() -> list
+
+    Function extracts articles from the data NewsAPI sends in its response to a
+    query. 
+    """
+    result = data[NEWSAPI_KEY_FOR_ARTICLES]
+    return result
+
 def get_chunk(brands, char_limit=CHAR_LIMIT, sep=QUERY_SEP, trace=True):
     """
 
@@ -57,6 +93,7 @@ def get_chunk(brands, char_limit=CHAR_LIMIT, sep=QUERY_SEP, trace=True):
     wip = sorted(brands)
 
     chars_left = char_limit
+    length_of_separator = len(sep)
     
     for i in range(len(wip)):
 
@@ -65,10 +102,22 @@ def get_chunk(brands, char_limit=CHAR_LIMIT, sep=QUERY_SEP, trace=True):
         # I check whether this fits in the url before taking it out of wip
         
         length_of_next_brand = len(next_brand_as_url)
+        
         if chars_left >= length_of_next_brand:
             wip.pop(0)
             chunk.append(next_brand_as_url)
-            chars_left = chars_left - (length_of_next_brand + len(sep))
+            chars_left = chars_left - (length_of_next_brand +
+                                       length_of_separator)
+            
+            # This logic sometimes will generate a negative chars_left, if the
+            # characters left prior to when I add the last brand are long enough
+            # to fit the brand, but not long enough to include the separator
+            # ("sep").
+            #
+            #   I view this result as appropriate, since the last brand
+            # does not include the separator, but to change the outcome, you can
+            # change the condition for adding the brand to chars_left >=
+            # (length_of_next_brand + len_of_sepatator)
             
         else:
             if trace:
@@ -93,24 +142,30 @@ def get_chunk(brands, char_limit=CHAR_LIMIT, sep=QUERY_SEP, trace=True):
 
 # smarter routine could sort the items by length. Then pick one or more.
 
-def get_limit(char_limit=CHAR_LIMIT):
+def get_limit(char_limit=CHAR_LIMIT, count_everything=False):
     """
 
-    -> int
+    get_limit() -> int
 
-    Function computes the limit for a the query portion of a url. 
+    Function computes the limit of characters for a the query portion of a url.
+    If you specify "count everything", the function will subtract the length of
+    the endpoint and authentication parts of the URL from the result.
     """
-    prefix = get_prefix()
-    base_query = get_query()
-    # I use this to figure out how much space the scaffolding takes
-    result = char_limit - len(prefix) - len(base_query)
+    result = char_limit
+    if count_everything:
+        prefix = get_prefix()
+        base_query = get_query()
+        # I use this to figure out how much space the scaffolding takes
+        result = char_limit - len(prefix) - len(base_query)
     return result
 
 def get_params(q="",key=None):
     """
 
-    -> list()
-    
+    get_params() -> list()
+
+    Function delivers a list of tuples that includes the name of the parameter
+    and the value. Function pulls names from globals.     
     """
     if key is None:
         key = KEY_LENGTH * "K"
@@ -123,7 +178,7 @@ def get_params(q="",key=None):
 def get_prefix(endpoint=EVERYTHING_ENDPOINT):
     """
 
-    -> string
+    get_prefix() -> string
 
     Function returns the base of the url.
     """
@@ -133,9 +188,10 @@ def get_prefix(endpoint=EVERYTHING_ENDPOINT):
 def get_query(params=None):
     """
 
-    -> string
+    get_query() -> string
 
-    Params is supposed to be a list of tuples of parameter, value. 
+    Function composes a query in HTTP format based on the parameters. You should
+    pass in a list of tuples of (parameter name, value) as "params".
     """
     if not params:
         params = get_params()
@@ -144,20 +200,44 @@ def get_query(params=None):
     result = urllib.parse.urlencode(params, safe=QUERY_SEP)
     return result
 
-def get_response(req):
+def get_response(req, catch_errors=False):
     """
-    -> response
-    
+
+    get_response() -> response
+
+    Function uses the request to return a response. If you turn off error
+    catching, function will raise exceptions on failure to connect and other
+    URL-specific problems, otherwise, it will print the exception and do nothing.
     """
-    response = urllib.request.urlopen(req)
+    try:
+        response = urllib.request.urlopen(req)
+        
+    except urllib.error.URLError as e:
+        if not catch_errors:
+            raise e
+        else:
+            if hasattr(e, "reason"):
+                print("We failed to reach a sever.")
+                print("Reason: ", e.reason)
+            elif hasattr(e, "code"):
+                print("The server couldn't fulfill the request.")
+                print("Error code: ", e.code)
+                # Only HTTPErrors have a "code" attribute. An HTTPError descends
+                # from a URLError.
+
+        # I am using the error handling logic Michael Foord recommends here:
+        # Error handling from https://docs.python.org/3.8/howto/urllib2.html#id1
+        # Thank you.
+        
     return response
+    
 
-def make_request(chunk, key, put_key_in_url=True):
+def make_request(chunk, key, put_key_in_url=False):
     """
 
-    -> request
+    make_request() -> urllib.request.Request
 
-    
+    Function creates an HTTP request. 
     """        
     if put_key_in_url:
         url = make_url_with_key(chunk, key)
@@ -181,11 +261,29 @@ def make_string(brands, sep=QUERY_SEP):
     result = sep.join(brands)
     return result
 
+def make_url(chunk, endpoint=EVERYTHING_ENDPOINT, sep=QUERY_SEP):
+    """
+
+    make_url() -> string
+
+    Function makes a URL for the NewsAPI endpoint that contains the data you
+    specify. 
+    """
+    q = sep.join(chunk)
+    params = [(PARAMETER_QUERY, q)]
+    query = get_query(params)
+    result = endpoint + query
+    return result
+
+    # The joining should take place somewhere else<-------------------------------------------------------
+    
 def make_url_with_key(chunk, key, endpoint=EVERYTHING_ENDPOINT, sep=QUERY_SEP):
     """
 
-    -> string
+    make_url_with_key() -> string
 
+    Function makes a URL for NewsAPI that includes an ApiKey parameter. You
+    should not use this routine if you want to maintain security.
     """
     q = sep.join(chunk)
     
@@ -194,23 +292,13 @@ def make_url_with_key(chunk, key, endpoint=EVERYTHING_ENDPOINT, sep=QUERY_SEP):
     
     result = endpoint + query
     return result
-
-def make_url(chunk, endpoint=EVERYTHING_ENDPOINT, sep=QUERY_SEP):
-    """
-
-    -> string
-    """
-    q = sep.join(chunk)
-    params = [(PARAMETER_QUERY, q)]
-    query = get_query(params)
-    result = endpoint + query
-    return result
-
-    # The joining should take place somewhere <-------------------------------------------------------
     
 def parse_response(response):
     """
-    -> dict
+
+    parse_response() -> dict
+
+    Function takes an HTTP response and turns it into a Python object.
     """
     binary_content = response.read()
     content = binary_content.decode()
@@ -228,13 +316,9 @@ def run_test2(chunk, key, trace=False):
         print(url)
     return url
 
-def run_test3():
-    # get data
-    result = get_response(query)
-    # this should be in python already? or in json? if json means i don't waste
-    # cycles
+def run_test3(request):
+    result = get_response(request)
     return result
-    # sort of done
 
 def run_test4():
     # parse response
