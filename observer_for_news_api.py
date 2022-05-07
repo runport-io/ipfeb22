@@ -20,6 +20,7 @@
 # Imports
 # 1) Built-ins
 import json
+import math
 import urllib
 import urllib.error
 import urllib.request
@@ -32,10 +33,21 @@ EVERYTHING_ENDPOINT = "https://newsapi.org/v2/everything?"
 CHAR_LIMIT = 500
 KEY_LENGTH = 32
 
-PARAMETER_QUERY = "q"
 PARAMETER_KEY = "apiKey"
+PARAMETER_QUERY = "q"
+PARAMETER_SORTBY = "sortBy"
+PARAMETER_PAGESIZE = "pageSize"
+PARAMETER_PAGE="page"
+
+# sorting
+NEWSAPI_SORT_BY_PUBLISHED_AT = "publishedAt"
+NEWSAPI_SORT_BY_POPULARITY = "popularity"
+NEWSAPI_SORT_BY_RELEVANCY = "relevancy"
+
+VALUE_MAX_PER_PAGE = 100
 
 NEWSAPI_KEY_FOR_ARTICLES = "articles"
+NEWSAPI_KEY_RESULT_COUNT = "totalResults"
 
 HEADER_KEY = "X-Api-Key"
 QUERY_SEP = " OR "
@@ -80,6 +92,79 @@ def get_articles(data):
     """
     result = data[NEWSAPI_KEY_FOR_ARTICLES]
     return result
+
+def get_number_of_results(data):
+    """
+
+    get_number_of_results() -> int
+
+    Function pulls out the number of results from the data in a NewsAPI response.
+    """
+    result = data[NEWSAPI_KEY_RESULT_COUNT]
+    return result
+
+def get_number_of_calls(results, page_size=VALUE_MAX_PER_PAGE):
+    """
+
+    get_number_of_calls() -> int
+
+    Function computes the number of calls it would take to get all of the
+    results, if each response contains at most the page_size results. Result
+    is the quotient of results over page_size, rounded up to the nearest
+    integer.
+    """
+    result = results / page_size
+    result = math.ceil(result)
+    result = int(result)
+    return result
+
+def get_budget_for_batch(data):
+    """
+
+    get_budget_for_batch() -> int
+
+    Function returns the number of calls to NewsAPI necessary to retrieve all
+    results.
+    """
+    number_of_results = get_number_of_results(data)
+    result = get_number_of_calls(number_of_results)
+    return result
+
+def get_responses_for_request(req, max_pages=10):
+    """
+
+    get_responses_for_request() -> list
+
+    Function collects up to a maximum number of pages for the request.
+    """
+    result = list()
+    
+    first_response = get_response(req)
+    result.append(first_response)
+    
+    first_data = parse_response(first_response)
+    result.append(first_data)
+    
+    budget = get_budget_for_batch(first_data)
+    cap = min(budget, max_pages)
+
+    # start at second page
+    for i in range(2, cap):
+        req = make_request(page=i)
+        # need to make sure this supports pagination, or that i can modify
+        # the url
+        response = get_response(req)
+        result.append(response)
+
+    return result   
+
+def get_budget_for_batches():
+    pass
+    # should run on data objects. ideally, my implementation should make the
+    # batches, get the first response for each, compute the budget, and then
+    # get all.
+
+#< add the date restrictions? add the page counter?
 
 def get_chunk(brands, char_limit=CHAR_LIMIT, sep=QUERY_SEP, trace=True):
     """
@@ -203,12 +288,14 @@ def get_query(params=None):
 def get_response(req, catch_errors=False):
     """
 
-    get_response() -> response
+    get_response() -> response or None
 
     Function uses the request to return a response. If you turn off error
     catching, function will raise exceptions on failure to connect and other
     URL-specific problems, otherwise, it will print the exception and do nothing.
     """
+    response = None
+    
     try:
         response = urllib.request.urlopen(req)
         
@@ -230,8 +317,9 @@ def get_response(req, catch_errors=False):
         # Thank you.
         
     return response
+    # should refactor this into wrapping and not.
     
-def make_request(chunk, key, put_key_in_url=False):
+def make_request(chunk, key, put_key_in_url=False, page=1):
     """
 
     make_request() -> urllib.request.Request
@@ -242,13 +330,27 @@ def make_request(chunk, key, put_key_in_url=False):
         url = make_url_with_key(chunk, key)
         req = urllib.request.Request(url)
     else:
-        url = make_url(chunk)
+        url = make_url(chunk, page=page)
         headers = dict()
         headers[HEADER_KEY] = key
         # Can send headers as plain text.
         req = urllib.request.Request(url, headers=headers)
         
     return req
+
+def make_requests(chunk, key, page_start, page_end=10):
+    """
+
+    make_requests() -> list of requests
+
+    Function makes a list of requests. You can use this to deal with pagination.
+    """
+    result = list()
+    for i in range(page_start, page_end):
+        req = make_request(chunk, key, page=i)
+        result.append(req)
+
+    return result
 
 def make_string(brands, sep=QUERY_SEP):
     """
@@ -260,7 +362,8 @@ def make_string(brands, sep=QUERY_SEP):
     result = sep.join(brands)
     return result
 
-def make_url(chunk, endpoint=EVERYTHING_ENDPOINT, sep=QUERY_SEP):
+def make_url(chunk, endpoint=EVERYTHING_ENDPOINT, sep=QUERY_SEP, page=1,
+             sort_by=NEWSAPI_SORT_BY_PUBLISHED_AT):
     """
 
     make_url() -> string
@@ -269,7 +372,16 @@ def make_url(chunk, endpoint=EVERYTHING_ENDPOINT, sep=QUERY_SEP):
     specify. 
     """
     q = sep.join(chunk)
-    params = [(PARAMETER_QUERY, q)]
+    # params = [(PARAMETER_QUERY, q)]
+    params = [(PARAMETER_QUERY, q),
+              (PARAMETER_SORTBY, sort_by),
+              (PARAMETER_PAGESIZE, VALUE_MAX_PER_PAGE),
+              (PARAMETER_PAGE, page)]
+
+    # could try sorting by popularity or relevancy?
+    # <----------------------------------------------------------------------------- test sort by popularity vs recency
+    # picks up 74% new data (36 out of 100 results overlap with first query of 100 articles).
+    
     query = get_query(params)
     result = endpoint + query
     return result
