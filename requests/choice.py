@@ -29,91 +29,168 @@
 
 # 4) Functions
 class Choice:
+    """
+
+    Class supports choosing items from a menu of options. You can specify one or
+    more results.
+    """
+    
+    SEP = ","
     
     def __init__(self, default=None, options=list()):
-        self._value = default
-        # self._value = list()
-        # if default:
-        #   self._value.append(default)
-        
+        self._value = list()
+        if default:
+            self._value.append(default)
+            
         self._default = default
         self._options = options
         self._cache = list()
-        self._max = 1
+        self._limit = 1
 
-    def get_max(self):
+    def get_default(self):
+        """
+
+        get_default() -> obj
+
+        Method returns the value for the default selection.         
+        """
+        return self._default
+    
+    def get_dict(self, encode=True):
+        """
+
+        get_dict() -> dict
+
+        Method returns the name:value pair for the parameter. If you specify
+        that encode is True, the method will encode URL entities in the value.
+        """        
+        name, value = self.get_tuple(encode=encode)
+        return {name:value}
+
+    def get_limit(self):
+        """
+
+        get_limit() -> int
+
+        Method returns the maximum permitted number of selections. By default,
+        this is 1. 
+        """
         return self._max
 
-    def set_max(self, num):
-        self._max = num
+    def get_name(self):
+        """
+
+        get_name() -> str
+
+        Method returns the name of the parameter.
+        """
+        return self._name
+
+    def get_options(self):
+        """
+
+        get_options() -> list
+
+        Method returns the list of choices you can make for the instance. 
+        """
+        return self._options
+
+    def get_tuple(self, encode=True):
+        """
+
+        get_tuple() -> tuple
+
+        Method returns the tuple of the name and value of the parameter. If you
+        turn on encoding, method will pass both to urllib.parse.urlencode first. 
+        """
+        name = self.get_name()
+        items = self.get_value()
+        value = self.SEP.join(items)
+        
+        if encode:
+            value = urllib.parse.urlencode(value, safe=self.SEP)
+            name = urllib.parse.urlencode(name)
+
+        result = (name, value)
+        return result
 
     def get_value(self):
-        return self._value or self._default
+        """
 
-    def select(self, *choices):
+        get_value() -> list
+
+        Method returns the value for the instance.
+        """
+        if not self._value:
+            self._value.append(self._default)
+            
+        return self._value
+
+    def reset(self):
+        """
+
+        reset() -> None
+
+        Method removes items from the instance.        
+        """
+        self._value.clear()
+
+    def select(self, *choices, force=False):
+        """
+
+        select() -> None
+
+        Method resets the value of the instance and then adds choices to the
+        value, up to the limit specified for the instance. If force is True, you
+        can add choices that do not match the options, otherwise method will
+        throw an exception. 
+        """
         self.reset()
-        limit = self.get_max()
+        limit = self.get_limit()
         
         for c in choices[:limit]:
-            if c in self._options:
+            if force or (c in self._options):
                 self._value.append(c)
             else:
                 raise Exception
 
-    def get_name(self):
-        return self._name
+    def set_default(self, value, check=False):
+        """
+
+        set_default() -> None
+
+        Method sets the default selection for the instance. If you set check to
+        True, method will append the value to options if it is not there.
+        """
+        if check:
+            if not value in self._options:
+                self._options.append(value)
+                
+        self._default = value
+
+    def set_limit(self, num):
+        """
+
+        set_limit() -> None
+
+        Method sets the maximum number of entries for the instance. 
+        """
+        self._limit = num
 
     def set_name(self, name):
+        """
+
+        set_name() -> None
+
+        Method sets the name for the parameter.
+        """
         self._name = name
-
-    def get_default(self):
-        return self._default
-
-    def set_default(self, value):
-        self._default = value
-        # <------------------------------------------------ do i care if this is in options?
-
-    def get_options(self):
-        return self._options
-
+        
     def set_options(self, options):
+        """
+
+        set_options() -> None
+
+        Method sets the menu for the instance. 
+        """
         self._options = options
-    
-    def reset(self):
-        self._value.clear()
-    
-    def toggle(self):
-        """
-
-        Method sets value to the first item in options, puts existing 
-        """
-
-        old = self.get_value()
-        
-        if not self._cache:
-            i = self._options.find(old)
-            if i != -1:
-                cache = self._options.copy()
-                cache.pop(i)
-            else:
-                # If I forced a value that isn't on the menu, then I could have
-                # a -1 result
-                cache = self._options.copy()
-                
-            self._cache = cache
-            
-        new = self._cache.pop(0)
-        self._cache.append(old)
-        
-        self.set_value(new)
-        return new
-
-    def get_params(self):
-        name = self.get_name()
-        choices = self.get_choices()
-        value = self.SEP.join(choices)
-        
-        result = {name:value}
-        return result
-
-        #< ---------------------------------------------------------------- encode?
