@@ -30,51 +30,49 @@
 # 4) Functions
 class Everything:
 
-    PARAMS = []
+    LANGUAGES = ["ar", "de", "en", "es", "fr", "he", "it", "nl", "no", "pt",
+                 "ru", "sv", "ud", "zh"]
+    
+                # From NewsAPI.org, as of May 10, 2022.
+                # See https://newsapi.org/docs/endpoints/everything
+
+    SEARCH_IN = ["title", "description", "content"]
+    SORT_BY = ["relevancy", "popularity", "publishedAT"]
     
     def __init__(self):
-        self.endpoint = None
-        self.q = Query(name="q")
+        self.endpoint = "https://newsapi.org/v2/everything?"
+
+        self.date_to = Date(name="dateTO")
+        self.date_from = Date(name="dateFROM")
         
+        self.domains = Domains()
+
+        self.language = Choice(name="language")
+        self.language.set_options(self.LANGUAGES)
+       
         self.page = Number(name="page")
         self.page.set_floor(1)
         
         self.page_size = Number(name="pageSize")
         self.page_size.set_ceiling(100)
         # per docs
-        
-        self.date_to = Date(name="dateTO")
-        self.date_from = Date(name="dateFROM")
-        
-        self.sources = Choice(name="SOURCES")
-        self.sources.set_max(20)
-        # something about handling the options here?
-        # what if the options are not defined? <-----------------------------------------------------------
-    
-        self.domains = Domains()
-        
-        self.language = Choice(name="language")
-        self.language.set_options(LANGUAGES)
-        # add "ru" if include_all is TRUE
+
+        self.q = Query(name="q")
+
+        self.search_in = Choice(name="searchIn")'
+        self.search_in.set_choices(self.SEARCH_IN)
         
         self.sort = Choice(name="sortBy")
-        self.sort.set_choices()
-        # add options
-                
-        self.search_in = Choice(name="searchIn", value=None,
-                                choice=["title", "description", "content"])
-        self.headers = dict()
+        self.sort.set_choices(self.SORT_BY)
+        self.sort.set_default(SORT_BY[2])
+        # I am setting the default to the value the NewsAPI interprets a blank
+        # as
         
-    def get_params(self):
-        # go through each of the attrs, get their params
-        # enrich, return. Each attr should deliver the params as is?
-        # #<-------------------------------- -----------------------where to put the URL encoding? in the param or not?
-        pass
-
-# make sure to handle defaults: e.g., if value is none, return an empty dictionary in Choice
-# could really just make this a memo / container, with no ops
-# easier to build and supplement.
-# harder to save? harder to load? let's not worry about it for now.
+        self.sources = Choice(name="SOURCES")
+        self.sources.set_limit(20)
+        # Not currently using
+        
+        self.headers = dict()
     
 class Handler:
     def get_params(self):
