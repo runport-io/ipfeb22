@@ -30,6 +30,8 @@
 # 4) Functions
 class Everything:
 
+    ENDPOINT = "https://newsapi.org/v2/everything?"
+
     LANGUAGES = ["ar", "de", "en", "es", "fr", "he", "it", "nl", "no", "pt",
                  "ru", "sv", "ud", "zh"]
     
@@ -40,8 +42,7 @@ class Everything:
     SORT_BY = ["relevancy", "popularity", "publishedAT"]
     
     def __init__(self):
-        self.endpoint = "https://newsapi.org/v2/everything?"
-
+        
         self.date_to = Date(name="dateTO")
         self.date_from = Date(name="dateFROM")
         
@@ -65,8 +66,7 @@ class Everything:
         self.sort = Choice(name="sortBy")
         self.sort.set_choices(self.SORT_BY)
         self.sort.set_default(SORT_BY[2])
-        # I am setting the default to the value the NewsAPI interprets a blank
-        # as
+        # I am setting the default to match the NewsAPI docs
         
         self.sources = Choice(name="SOURCES")
         self.sources.set_limit(20)
@@ -75,22 +75,45 @@ class Everything:
         self.headers = dict()
     
 class Handler:
-    def get_params(self):
-        pass
+    AUTH_KEY = ""
     
-    def get_url(self):
-        pass
+    def get_params(self, request):
+        
+        result = dict()
+        for attr_name in request.__dict__:
+            if attr_name[0].islower():
+                attr = getattr(request, attr_name)
+                params = attr.get_dict()
+                result.update(params)
 
-        # get endpoint
-        # get params
-        # glue them together
+        return result
+    
+    def get_endpoint(self, request):
+        result = request.ENDPOINT
+        return result
+    
+    def get_url(self, request):
+        endpoint = self.get_endpoint(request)
+        params = self.get_params(request)
 
-    def get_request(self):
-        pass
+        query = urllib.parse.urlencode(params)
+        # need to get the actual query? or have Query have a get_dict()?
+        
+        result = endpoint + query
+        return result
 
-        # this stuff I thought about moving to handler
-        # so i don't have to repeat myself
+    def get_request(self, request):
+        headers = self.get_headers(request)
+        headers = self.add_security(headers)
+        url = self.get_url(request)
+        
+        result = urllib.request.Request(url, headers=headers)
+        return result
 
+    def add_security(self, headers, key):
+        headers[self.AUTH_KEY] = key
+        return headers
+    
 
 # I could make this:
 #   x = add_core(x)

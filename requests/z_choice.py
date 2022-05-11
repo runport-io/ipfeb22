@@ -67,6 +67,9 @@ class Choice:
         name, value = self.get_tuple(encode=encode)
         return {name:value}
 
+        # this should be pulled out to a core req object
+        
+
     def get_limit(self):
         """
 
@@ -95,10 +98,10 @@ class Choice:
         """
         return self._options
 
-    def get_tuple(self, encode=True):
+    def get_list_of_tuples(self, encode=True):
         """
 
-        get_tuple() -> tuple
+        get_list_of_tuples() -> tuple
 
         Method returns the tuple of the name and value of the parameter. If you
         turn on encoding, method will pass both to urllib.parse.urlencode first. 
