@@ -22,18 +22,20 @@
 #    N/a
 
 # 2) Port.
-#    N/a
+from . import parameter
 
 # 3) Constants
 #    N/a
 
 # 4) Functions
-
-class Query:
+class Query(parameter.Parameter):
 
     SEP = " OR "
     
-    def __init__(self):
+    def __init__(self, name):
+
+        parameter.Parameter.__init__(self, name)
+        
         self._elements = list()
         self._sep = ""
 
@@ -47,13 +49,24 @@ class Query:
         result = self._elements
         return result
 
-    def get_value_as_string(self):
+    def get_separator(self):
+        return self._sep or self.SEP
+
+    def get_value(self):
         """
 
-        get_value_as_string() -> string
+        get_value() -> string
 
         Method joins each of the elements with the separator and returns the
         string. 
         """
-        result = self.SEP.join(self._elements)
+        elements = self.get_elements()
+        sep = self.get_separator()
+        result = sep.join(self._elements)
         return result
+
+    def set_elements(self, elements):
+        self._elements = elements
+
+    def set_separator(self, separator):
+        self._sep = separator
