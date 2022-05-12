@@ -137,19 +137,28 @@ class Choice(parameter.Parameter):
                 c = "The number of selections exceeds the instance limit: %s"
                 c = c % len(selections)
                 raise Exception(c)
+        
+        menu = self.get_menu()
+        self._selections.reset()
+        if menu:
+            for selection in selections:
+                # go one by one
+                if force or (selection in menu):
+                    self._selections.append(selection)
+        else:
+            # menu is empty, anything goes
+            self._selections.extend(selections)
 
-            else:
-                menu = self.get_menu()
-                self._selections.reset()
-                if menu:
-                    for selection in selections:
-                        # go one by one
-                        if force or (selection in menu):
-                            self._selections.append(selection)
-                else:
-                    # menu is empty, anything goes
-                    self._selections.extend(selections)
+    def set_limit(self, limit):
+        """
 
+        set_limit() -> None
+
+        Method sets limit on number of selections the instance can contain.
+        If you want unlimited selections, set the limit to None.
+        """
+        self._limit = limit
+        
     def set_menu(self, *options, reset=True):
         """
 

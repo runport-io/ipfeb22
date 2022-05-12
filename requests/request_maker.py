@@ -23,7 +23,7 @@ import urllib.parse
 import urllib.request
 
 # 2) Port.
-from . import query
+from . import choice
 
 # 3) Constants
 #    N/a
@@ -37,12 +37,20 @@ class RequestMaker:
     """
     
     QUERY_NAME = "q"
+    QUERY_SEP = " OR "
     
     def __init__(self, endpoint, query_name=QUERY_NAME):
         self._endpoint = endpoint
         self._headers = dict()
         
-        self.query = query.Query(name=query_name)
+        self.query = choice.Choice(name=query_name)
+        self.query.set_sep(QUERY_SEP)
+        # Separator per docs at https://newsapi.org/docs/endpoints/everything
+        # If necessary, consider upgrading to dedicated Query object that
+        # supports other operations (NOT, AND, etc.).
+        
+        self.query.set_limit(None)
+        # Permit an unlimited number of elements
 
     def get_endpoint(self):
         """
