@@ -35,17 +35,14 @@ class RequestMaker:
     Class provides an object with methods for managing the contents of an HTTP
     request.
     """
-
-    DEFAULT_SEP = " OR " # <------------------------------------------------------------------ does this make sense?
+    
     QUERY_NAME = "q"
     
     def __init__(self, endpoint, query_name=QUERY_NAME):
         self._endpoint = endpoint
         self._headers = dict()
         
-        self.query = query.Query(name=query_name) #< this is more of a NewsAPI convetion?
-        # < make sure this works
-        #< ------------ also need to make sure all the SEPs work at different levels
+        self.query = query.Query(name=query_name)
 
     def get_endpoint(self):
         """
@@ -91,23 +88,7 @@ class RequestMaker:
 
         return result
 
-    def get_url(self):
-        """
-
-        get_url() -> string
-
-        Method returns a url that includes the parameters the instance defines.
-        """
-        endpoint = self.get_endpoint()
-        params = self.get_params()
-        query = urllib.parse.urlencode(params, safe=DEFAULT_SEP)
-        # What is the default sep? <------------------------------------------------------------
-
-        result = endpoint + query
-        return result
-
-        #<--------------------------------------------------------------------- make a place where I can insert the secur
-     def get_request(self, headers=None):
+    def get_request(self, headers=None):
         """
 
         get_request() -> urllib.request.Request
@@ -121,8 +102,34 @@ class RequestMaker:
         result = urllib.request.Request(url, headers=headers)
         return result
 
-    
-        
+    def get_url(self):
+        """
+
+        get_url() -> string
+
+        Method returns a url that includes the parameters the instance defines.
+        """
+        endpoint = self.get_endpoint()
+        tail = self.get_tail()
+
+        result = endpoint + tail
+        return result
+
+    def get_tail(self, params=None):
+        """
+
+        get_tail() -> string
+
+        Method returns the portion of the URL that contains the query and
+        parameters.
+        """
+        if params is None:
+            params = self.get_params()
+            
+        result = urllib.parse.urlencode(params, safe=self.q.SEP)
+        # Consider expanding the logic to permit more than one safe char
+
+        return result
         
     
         

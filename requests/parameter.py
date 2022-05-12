@@ -36,7 +36,7 @@ class Parameter:
     parameter, but sometimes that's not the case, such as when you want to
     manage two related parameters together. 
     """
-    def __init__(self, name, value, default=None):
+    def __init__(self, name, value=None, default=None):
         self._name = name
         self._value = value
         self._default = default
