@@ -141,7 +141,6 @@ class Parameter:
         name = self.get_name()
         value = self.get_value()
         if encode:
-            name = urllib.parse.urlencode(name)
             value = urllib.parse.urlencode(value)
 
         result = [(name, value)]

@@ -23,6 +23,8 @@
 `
 # 2) Port.
 from . import choice
+from . import date_param
+from . import domains
 from . import request_for_news_api as news_api
 
 # 3) Constants
@@ -38,26 +40,42 @@ class RequestForEverything(news_api.RequestForNewsAPI):
     
     ENDPOINT = "https://newsapi.org/v2/everything?"
 
+    LANGUAGES = ["ar", "de", "en", "es", "fr", "he", "it", "nl", "no", "pt",
+                "ru", "sv", "ud", "zh"]
+    
     SEARCH_IN = ["title", "description", "content"]
 
+    SORT_BY = ["relevancy", "popularity", "publishedAt"]
+
+    NAME_DATE_FROM = "from"
+    NAME_DATE_TO = "to"
+    NAME_LANGUAGE = "language"
     NAME_SEARCH_IN = "searchIn"
-    
+    NAME_SORT_BY = "sortBy"
     
     def __init__(self):
         news_api.RequestForNewsAPI.__init__(self)
         self.set_sendpoint(self.ENDPOINT)
 
-        self.search_in = choice.Choice(name=NAME_SEARCH_IN)
-        self.search_in.set_menu(*SEARCH_IN)
-        self.search_in.set_limit(3)
-        # Permits multiple.
+        
+        self.date_from = date_param.Date(self.NAME_DATE_FROM)
+        self.date_to = date_param.Date(self.NAME_DATE_TO)
 
         self.domains = domains.Domains()
-
-        self.date_from = date
-        self.date_to = date
         
-        self.language = choice
-        self.sort_by = choice
+        self.language = choice.choice(name=self.NAME_LANGUAGE)
+        self.language.set_menu(*self.LANGUAGES)
+        self.language.set_limit(None)
+        # Permit unlimited selections
+        
+        self.search_in = choice.Choice(name=self.NAME_SEARCH_IN)
+        self.search_in.set_menu(*self.SEARCH_IN)
+        self.search_in.set_limit(3)
+        # Permits multiple.
+        
+        self.sort_by = choice.Choice(name=self.NAME_SORT_BY,
+                                     default=self.SORT_BY[2] # Default per docs
+                                     )  
+        self.sort_by.set_menu(*self.SORT_BY)
 
             

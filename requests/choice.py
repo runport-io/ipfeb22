@@ -36,8 +36,8 @@ class Choice(parameter.Parameter):
     """
     SEP = ","
     
-    def __init__(self):
-        parameter.Parameter.__init__(self)
+    def __init__(self, name, value=None, default=None):
+        parameter.Parameter.__init__(self, name, value, default)
 
         self._limit = 1
         self._sep = None

@@ -34,8 +34,8 @@ class Number(parameter.Parameter):
     A parameter that handles numerical values. The class includes functions
     for increasing and decreasing the value.
     """
-    def __init__(self, name):
-        parameter.Parameter.__init__(self, name)
+    def __init__(self, name, value=None, default=None):
+        parameter.Parameter.__init__(self, name, value, default)
 
         self._ceiling = None
         self._floor = None
