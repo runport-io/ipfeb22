@@ -50,7 +50,7 @@ class Parameter:
         """
         return self._default
 
-    def get_dict(self, encode=True, include_blanks=False):
+    def get_dict(self, tuples=[], encode=True, include_blanks=False):
         """
 
         get_dict() -> dict
@@ -60,10 +60,15 @@ class Parameter:
         params that do not have a True value.
         """
         result = dict()
-        tuples = self._get_list_of_tuples(encode=encode)
+        if not tuples:
+            tuples = self._get_list_of_tuples(encode=encode)
+            
         for k, v in tuples:
-            if v:
+            if include_blanks:
                 result[k] = v
+            else:
+                if v:
+                    result[k] = v
                 
         return result
     

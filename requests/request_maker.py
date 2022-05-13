@@ -39,7 +39,7 @@ class RequestMaker:
     QUERY_NAME = "q"
     QUERY_SEP = " OR "
     
-    def __init__(self, endpoint, query_name=QUERY_NAME):
+    def __init__(self, endpoint=None, query_name=QUERY_NAME):
         self._endpoint = endpoint
         self._headers = dict()
         
@@ -75,16 +75,23 @@ class RequestMaker:
             result = result.copy()
         return result
     
-    def get_params(self, encode=True, include_blanks=False):
+    def get_params(self, encode=True, include_blanks=False, check_query=True):
         """
 
         get_params() -> dict()
 
         Method returns a dictionary of name to value for each attribute that
         supports the get_dict() call. If you turn on include_blanks, the result
-        will include parameters whose value tests as False.
+        will include parameters whose value tests as False; if check_query is
+        True, call will throw an exception when the query is empty.
         """
-        result =  dict() 
+        result =  dict()
+        if check_query:
+            q = self.query.get_value()
+            if not q:
+                c = "Empty query!"
+                raise Exception(c)
+        
         for attr_name in self.__dict__:
             if attr_name.startswith("_"):
                 continue
