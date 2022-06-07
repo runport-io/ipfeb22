@@ -49,14 +49,25 @@ class Source:
     """
     def __init__(self, name=None):
         self.number = number.Number()
+        self._author = None
         self._sender = None
+        
         if name:
             self.set_sender(name)
 
+    def get_author(self):
+        """
+
+        get_author() -> string or None
+
+        Method retrieves the author for the instance.
+        """
+        return self._author
+        
     def get_sender(self):
         """
 
-        Source.get_sender() -> string
+        Source.get_sender() -> string or None
         
         Returns contents of the non-public sender attribute on instance. Does
         not verify type of input.
@@ -64,7 +75,15 @@ class Source:
         result = self._sender
         return result
     
-    # sender
+    def set_author(self, string):
+        """
+
+        set_author() -> None
+
+        Method records string on instance.
+        """
+        self._author = string
+        
     def set_sender(self, string, override=False):
         """
 
